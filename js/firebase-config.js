@@ -1,15 +1,17 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+// Firebase Configuration
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBMU2iDhUY4y6L_5f_Tn47wupyT6hcF0PA",
-  authDomain: "feedback-system-477c1.firebaseapp.com",
-  projectId: "feedback-system-477c1",
-  storageBucket: "feedback-system-477c1.firebasestorage.app",
-  messagingSenderId: "768253862075",
-  appId: "1:768253862075:web:d757a34c0528da8a27499e",
-  measurementId: "G-R6STTZCZBQ"
+  apiKey: "AIzaSyDJ7WP7TCT3mZ4WKa20d-b3HSrZ0ZKn0mU",
+  authDomain: "feedbacksys-e3fe0.firebaseapp.com",
+  projectId: "feedbacksys-e3fe0",
+  storageBucket: "feedbacksys-e3fe0.firebasestorage.app",
+  messagingSenderId: "556077863051",
+  appId: "1:556077863051:web:756ce5148c828b3b5e048e",
+  measurementId: "G-P9JZZ3QEFP"
 };
 
 const app = initializeApp(firebaseConfig);
