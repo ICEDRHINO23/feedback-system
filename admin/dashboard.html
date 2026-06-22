@@ -1,1 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
 
+<h1>Admin Dashboard</h1>
+
+<p>Welcome Administrator</p>
+
+<hr>
+
+<button onclick="location.href='exams.html'">
+    Create Exam
+</button>
+
+<button onclick="location.href='questions.html'">
+    Add Questions
+</button>
+
+<button onclick="location.href='results.html'">
+    View Results
+</button>
+
+<button onclick="location.href='students.html'">
+    Students
+</button>
+
+<hr>
+
+<button onclick="logout()">
+    Logout
+</button>
+
+<script>
+function logout(){
+    localStorage.clear();
+    window.location.href="../login.html";
+}
+</script>
+
+</body>
+</html>
