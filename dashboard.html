@@ -1,1 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
+<h1>Student Dashboard</h1>
+
+<p>Welcome to AHPS Online Examination System</p>
+
+<div>
+    <h3>Available Exams</h3>
+
+    <button onclick="startExam()">
+        Start Demo Exam
+    </button>
+</div>
+
+<br>
+
+<button onclick="logout()">
+    Logout
+</button>
+
+<script>
+function startExam(){
+    window.location.href="exam.html";
+}
+
+function logout(){
+    localStorage.clear();
+    window.location.href="login.html";
+}
+</script>
+
+</body>
+</html>
