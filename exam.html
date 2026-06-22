@@ -1,1 +1,112 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Exam</title>
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            padding:20px;
+        }
+
+        #timer{
+            font-size:24px;
+            color:red;
+            font-weight:bold;
+        }
+
+        .question-box{
+            border:1px solid #ddd;
+            padding:20px;
+            border-radius:10px;
+            margin-top:20px;
+        }
+
+        button{
+            padding:10px 20px;
+            margin-top:20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>AHPS Online Examination System</h1>
+
+<div id="timer">
+    30:00
+</div>
+
+<div class="question-box">
+
+    <h3>
+        Q1. What does CPU stand for?
+    </h3>
+
+    <input type="radio" name="q1" value="A">
+    Central Process Unit
+    <br><br>
+
+    <input type="radio" name="q1" value="B">
+    Central Processing Unit
+    <br><br>
+
+    <input type="radio" name="q1" value="C">
+    Computer Processing Unit
+    <br><br>
+
+    <input type="radio" name="q1" value="D">
+    Central Processor Utility
+
+</div>
+
+<button onclick="submitExam()">
+    Submit Exam
+</button>
+
+<script>
+
+let timeLeft = 1800;
+
+const timer = setInterval(() => {
+
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+
+    document.getElementById("timer").innerHTML =
+        `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+    timeLeft--;
+
+    if(timeLeft < 0){
+        clearInterval(timer);
+        submitExam();
+    }
+
+},1000);
+
+function submitExam(){
+
+    let answer =
+        document.querySelector(
+            'input[name="q1"]:checked'
+        );
+
+    let score = 0;
+
+    if(answer && answer.value === "B"){
+        score = 1;
+    }
+
+    localStorage.setItem(
+        "score",
+        score
+    );
+
+    window.location.href =
+        "result.html";
+}
+
+</script>
+
+</body>
+</html>
