@@ -1,1 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Exam</title>
 
+<style>
+
+body{
+    font-family:Arial,sans-serif;
+    background:#f4f6f9;
+    margin:0;
+}
+
+.header{
+    background:#001f5b;
+    color:white;
+    padding:15px;
+    text-align:center;
+}
+
+.container{
+    width:90%;
+    max-width:700px;
+    margin:20px auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+}
+
+input,
+select{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#001f5b;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#003399;
+}
+
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse:collapse;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+
+th{
+    background:#001f5b;
+    color:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Create Exam</h1>
+</div>
+
+<div class="container">
+
+    <input
+        type="text"
+        id="examName"
+        placeholder="Exam Name">
+
+    <input
+        type="text"
+        id="subject"
+        placeholder="Subject">
+
+    <select id="examClass">
+        <option value="">Select Class</option>
+    </select>
+
+    <input
+        type="number"
+        id="duration"
+        placeholder="Duration (Minutes)">
+
+    <input
+        type="number"
+        id="totalMarks"
+        placeholder="Total Marks">
+
+    <input
+        type="date"
+        id="startDate">
+
+    <input
+        type="date"
+        id="endDate">
+
+    <button onclick="createExam()">
+        Create Exam
+    </button>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Exam</th>
+                <th>Subject</th>
+                <th>Class</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+
+        <tbody id="examTable">
+            <tr>
+                <td colspan="4">
+                    Loading Exams...
+                </td>
+            </tr>
+        </tbody>
+
+    </table>
+
+</div>
+
+<script type="module" src="../js/exam.js"></script>
+
+</body>
+</html>
