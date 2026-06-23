@@ -1,3 +1,4 @@
+```javascript
 import { db } from "./firebase-config.js";
 
 import {
@@ -28,35 +29,45 @@ let studentsData = [];
 
 async function loadSettings() {
 
-    const configRef = doc(
-        db,
-        "settings",
-        "config"
-    );
+    try {
 
-    const configSnap =
-        await getDoc(configRef);
+        const configRef =
+            doc(db, "settings", "config");
 
-    if (!configSnap.exists()) return;
+        const configSnap =
+            await getDoc(configRef);
 
-    const settings =
-        configSnap.data();
+        if (!configSnap.exists()) return;
 
-    settings.classes.forEach(cls => {
+        const settings =
+            configSnap.data();
 
-        classFilter.innerHTML +=
-        `<option value="${cls}">
-            ${cls}
-        </option>`;
-    });
+        classFilter.innerHTML =
+            '<option value="">All Classes</option>';
 
-    settings.sections.forEach(sec => {
+        sectionFilter.innerHTML =
+            '<option value="">All Sections</option>';
 
-        sectionFilter.innerHTML +=
-        `<option value="${sec}">
-            ${sec}
-        </option>`;
-    });
+        settings.classes.forEach(cls => {
+
+            classFilter.innerHTML +=
+                `<option value="${cls}">
+                    ${cls}
+                </option>`;
+        });
+
+        settings.sections.forEach(sec => {
+
+            sectionFilter.innerHTML +=
+                `<option value="${sec}">
+                    ${sec}
+                </option>`;
+        });
+
+    } catch(error){
+
+        console.error(error);
+    }
 }
 
 
@@ -64,23 +75,30 @@ async function loadSettings() {
 
 async function loadStudents() {
 
-    const snapshot =
-        await getDocs(
-            collection(db, "students")
-        );
+    try {
 
-    studentsData = [];
+        const snapshot =
+            await getDocs(
+                collection(db, "students")
+            );
 
-    snapshot.forEach(docSnap => {
+        studentsData = [];
 
-        studentsData.push({
-            id: docSnap.id,
-            ...docSnap.data()
+        snapshot.forEach(docSnap => {
+
+            studentsData.push({
+                id: docSnap.id,
+                ...docSnap.data()
+            });
+
         });
 
-    });
+        renderStudents(studentsData);
 
-    renderStudents(studentsData);
+    } catch(error){
+
+        console.error(error);
+    }
 }
 
 
@@ -114,7 +132,7 @@ function renderStudents(data) {
 
             <td>${student.section || ""}</td>
 
-            <td>${student.rollno || ""}</td>
+            <td>${student.rollNo || ""}</td>
 
             <td>${student.status || "active"}</td>
 
@@ -126,9 +144,11 @@ function renderStudents(data) {
                     class="action-btn disable"
                     onclick="toggleStatus('${student.id}')">
 
-                    ${student.status === "inactive"
+                    ${
+                        student.status === "inactive"
                         ? "Enable"
-                        : "Disable"}
+                        : "Disable"
+                    }
 
                 </button>
 
@@ -149,7 +169,7 @@ function renderStudents(data) {
 }
 
 
-// SEARCH + FILTER
+// SEARCH & FILTER
 
 function filterStudents() {
 
@@ -171,7 +191,7 @@ function filterStudents() {
                 .includes(search);
 
             const matchRoll =
-                (student.rollno || "")
+                (student.rollNo || "")
                 .toLowerCase()
                 .includes(search);
 
@@ -199,33 +219,40 @@ function filterStudents() {
 // ENABLE / DISABLE
 
 window.toggleStatus =
-async function(id) {
+async function(id){
 
-    const student =
-        studentsData.find(
-            s => s.id === id
+    try {
+
+        const student =
+            studentsData.find(
+                s => s.id === id
+            );
+
+        const newStatus =
+            student.status === "inactive"
+            ? "active"
+            : "inactive";
+
+        await updateDoc(
+            doc(db, "students", id),
+            {
+                status: newStatus
+            }
         );
 
-    const newStatus =
-        student.status === "inactive"
-        ? "active"
-        : "inactive";
+        loadStudents();
 
-    await updateDoc(
-        doc(db, "students", id),
-        {
-            status: newStatus
-        }
-    );
+    } catch(error){
 
-    loadStudents();
+        console.error(error);
+    }
 };
 
 
-// DELETE
+// DELETE STUDENT
 
 window.deleteStudent =
-async function(id) {
+async function(id){
 
     const confirmDelete =
         confirm(
@@ -235,11 +262,18 @@ async function(id) {
     if (!confirmDelete)
         return;
 
-    await deleteDoc(
-        doc(db, "students", id)
-    );
+    try {
 
-    loadStudents();
+        await deleteDoc(
+            doc(db, "students", id)
+        );
+
+        loadStudents();
+
+    } catch(error){
+
+        console.error(error);
+    }
 };
 
 
@@ -265,3 +299,4 @@ sectionFilter.addEventListener(
 
 loadSettings();
 loadStudents();
+```
