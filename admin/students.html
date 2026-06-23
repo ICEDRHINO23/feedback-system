@@ -1,1 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Student Management</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+}
+
+.header{
+    background:#001f5b;
+    color:white;
+    padding:15px;
+    text-align:center;
+}
+
+.container{
+    width:95%;
+    margin:20px auto;
+}
+
+.controls{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+input,
+select{
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+table th{
+    background:#001f5b;
+    color:white;
+    padding:12px;
+}
+
+table td{
+    padding:10px;
+    border:1px solid #ddd;
+    text-align:center;
+}
+
+.action-btn{
+    padding:6px 12px;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+    color:white;
+}
+
+.edit{
+    background:#28a745;
+}
+
+.disable{
+    background:#ff9800;
+}
+
+.delete{
+    background:#dc3545;
+}
+
+.back-btn{
+    display:inline-block;
+    margin-bottom:15px;
+    background:#001f5b;
+    color:white;
+    padding:10px 15px;
+    text-decoration:none;
+    border-radius:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Student Management</h1>
+</div>
+
+<div class="container">
+
+    <a href="dashboard.html" class="back-btn">
+        ← Back to Dashboard
+    </a>
+
+    <div class="controls">
+
+        <input
+            type="text"
+            id="searchBox"
+            placeholder="Search Student">
+
+        <select id="classFilter">
+            <option value="">All Classes</option>
+        </select>
+
+        <select id="sectionFilter">
+            <option value="">All Sections</option>
+        </select>
+
+    </div>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Roll No</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody id="studentTable">
+
+            <tr>
+                <td colspan="7">
+                    Loading Students...
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<script type="module" src="../js/students.js"></script>
+
+</body>
+</html>
