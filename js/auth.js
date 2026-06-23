@@ -48,9 +48,7 @@ window.login = async function () {
                 const admin =
                     adminSnap.docs[0].data();
 
-                if (
-                    admin.password === password
-                ) {
+                if (admin.password === password) {
 
                     localStorage.setItem(
                         "role",
@@ -103,42 +101,63 @@ window.login = async function () {
             return;
         }
 
-        const studentQuery = query(
-            collection(db, "students"),
-            where("class", "==", studentClass),
-            where("section", "==", section),
-            where("rollNo", "==", rollNo)
+        console.log("Searching Student...");
+        console.log("Class:", studentClass);
+        console.log("Section:", section);
+        console.log("Roll No:", rollNo);
+
+        // =========================
+        // DEBUG MODE
+        // =========================
+
+        const snapshot = await getDocs(
+            collection(db, "students")
         );
 
-        const snapshot =
-            await getDocs(studentQuery);
+        console.log(
+            "Total Students:",
+            snapshot.size
+        );
 
-        if (snapshot.empty) {
+        let foundStudent = null;
+        let foundDocId = null;
+
+        snapshot.forEach((studentDoc) => {
+
+            const student =
+                studentDoc.data();
+
+            console.log(student);
+
+            if (
+                String(student.class) === String(studentClass) &&
+                String(student.section) === String(section) &&
+                String(student.rollNo) === String(rollNo)
+            ) {
+
+                foundStudent = student;
+                foundDocId = studentDoc.id;
+            }
+        });
+
+        if (!foundStudent) {
 
             alert("Student not found");
-            return;
 
+            return;
         }
 
-        const student =
-            snapshot.docs[0].data();
-
-        // Password Check
-
         if (
-            student.password !== password
+            foundStudent.password !== password
         ) {
 
             alert("Invalid Password");
-            return;
 
+            return;
         }
 
-        // Status Check
-
         if (
-            student.status &&
-            student.status !== "active"
+            foundStudent.status !== "active"
         ) {
 
             alert(
@@ -148,45 +167,33 @@ window.login = async function () {
             return;
         }
 
-        // Expiry Check
+        const today = new Date();
 
-        if (student.accountExpiry) {
+        const expiryDate =
+            new Date(
+                foundStudent.accountExpiry
+            );
 
-            const today =
-                new Date();
+        if (today > expiryDate) {
 
-            const expiryDate =
-                new Date(
-                    student.accountExpiry
-                );
+            alert(
+                "Academic Year Expired"
+            );
 
-            if (
-                today > expiryDate
-            ) {
-
-                alert(
-                    "Academic Year Expired. Contact Administrator."
-                );
-
-                return;
-            }
+            return;
         }
-
-        // Update Last Login
 
         await updateDoc(
             doc(
                 db,
                 "students",
-                snapshot.docs[0].id
+                foundDocId
             ),
             {
                 lastlogin:
-                    new Date().toLocaleString()
+                    new Date().toISOString()
             }
         );
-
-        // Save Session
 
         localStorage.setItem(
             "role",
@@ -195,32 +202,30 @@ window.login = async function () {
 
         localStorage.setItem(
             "studentName",
-            student.name || ""
+            foundStudent.name
         );
 
         localStorage.setItem(
             "studentClass",
-            student.class || ""
+            foundStudent.class
         );
 
         localStorage.setItem(
             "studentSection",
-            student.section || ""
+            foundStudent.section
         );
 
         localStorage.setItem(
             "rollNo",
-            student.rollNo || ""
+            foundStudent.rollNo
         );
 
         localStorage.setItem(
             "academicYear",
-            student.academicyear || ""
+            foundStudent.academicyear
         );
 
-        alert(
-            "Login Successful"
-        );
+        alert("Login Successful");
 
         window.location.href =
             "dashboard.html";
@@ -228,10 +233,13 @@ window.login = async function () {
     }
     catch (error) {
 
-        console.error(error);
+        console.error(
+            "LOGIN ERROR:",
+            error
+        );
 
         alert(
-            "Login Failed"
+            "Login Failed. Check Console."
         );
     }
 };
