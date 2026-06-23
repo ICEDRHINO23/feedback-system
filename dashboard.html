@@ -1,38 +1,207 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Dashboard</title>
-    <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Student Dashboard</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+}
+
+.header{
+    background:#001f5b;
+    color:white;
+    padding:20px;
+    text-align:center;
+}
+
+.header h1{
+    margin-bottom:5px;
+}
+
+.container{
+    width:95%;
+    max-width:1200px;
+    margin:20px auto;
+}
+
+.welcome{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.exam-title{
+    font-size:24px;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+#examList{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:20px;
+}
+
+.exam-card{
+    background:white;
+    border-radius:10px;
+    padding:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.exam-card h3{
+    color:#001f5b;
+    margin-bottom:10px;
+}
+
+.exam-card p{
+    margin-bottom:8px;
+}
+
+.start-btn{
+    background:#001f5b;
+    color:white;
+    border:none;
+    padding:10px 15px;
+    border-radius:5px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.start-btn:hover{
+    background:#003399;
+}
+
+.logout{
+    margin-top:20px;
+    background:red;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.footer{
+    text-align:center;
+    margin-top:30px;
+    color:#666;
+}
+
+</style>
 </head>
+
 <body>
 
-<h1>Student Dashboard</h1>
+<div class="header">
 
-<p>Welcome to AHPS Online Examination System</p>
+    <h1>
+        AHPS Online Examination System
+    </h1>
 
-<div>
-    <h3>Available Exams</h3>
+    <p>
+        Student Dashboard
+    </p>
 
-    <button onclick="startExam()">
-        Start Demo Exam
-    </button>
 </div>
 
-<br>
+<div class="container">
 
-<button onclick="logout()">
-    Logout
-</button>
+    <div class="welcome">
+
+        <h2>
+            Welcome,
+            <span id="studentName">
+                Student
+            </span>
+        </h2>
+
+        <p>
+            Class:
+            <span id="studentClass"></span>
+            -
+            <span id="studentSection"></span>
+        </p>
+
+    </div>
+
+    <div class="exam-title">
+        Available Exams
+    </div>
+
+    <div id="examList">
+
+        Loading Exams...
+
+    </div>
+
+    <button
+        class="logout"
+        onclick="logout()">
+        Logout
+    </button>
+
+</div>
+
+<div class="footer">
+
+    © 2026 Academic Heights Public School
+
+</div>
 
 <script>
-function startExam(){
-    window.location.href="exam.html";
-}
+
+document.getElementById(
+"studentName"
+).innerText =
+localStorage.getItem(
+"studentName"
+) || "Student";
+
+document.getElementById(
+"studentClass"
+).innerText =
+localStorage.getItem(
+"studentClass"
+) || "";
+
+document.getElementById(
+"studentSection"
+).innerText =
+localStorage.getItem(
+"studentSection"
+) || "";
 
 function logout(){
-    localStorage.clear();
-    window.location.href="login.html";
+
+localStorage.clear();
+
+window.location.href =
+"login.html";
+
 }
+
+</script>
+
+<script type="module"
+src="js/student-dashboard.js">
 </script>
 
 </body>
