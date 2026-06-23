@@ -1,4 +1,3 @@
-
 import { db } from "./firebase-config.js";
 
 import {
@@ -6,23 +5,17 @@ import {
     getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-export async function loadClasses(selectId){
+export async function loadClasses(selectId) {
 
-    const select =
-        document.getElementById(selectId);
+    const select = document.getElementById(selectId);
 
-    if(!select) return;
+    const snap = await getDoc(
+        doc(db, "settings", "config")
+    );
 
-    const configRef =
-        doc(db,"settings","config");
+    if (!snap.exists()) return;
 
-    const configSnap =
-        await getDoc(configRef);
-
-    if(!configSnap.exists()) return;
-
-    const classes =
-        configSnap.data().classes || [];
+    const classes = snap.data().classes || [];
 
     select.innerHTML =
         '<option value="">Select Class</option>';
@@ -30,29 +23,22 @@ export async function loadClasses(selectId){
     classes.forEach(cls => {
 
         select.innerHTML +=
-        `<option value="${cls}">
-            ${cls}
-        </option>`;
+            `<option value="${cls}">${cls}</option>`;
+
     });
 }
 
-export async function loadSections(selectId){
+export async function loadSections(selectId) {
 
-    const select =
-        document.getElementById(selectId);
+    const select = document.getElementById(selectId);
 
-    if(!select) return;
+    const snap = await getDoc(
+        doc(db, "settings", "config")
+    );
 
-    const configRef =
-        doc(db,"settings","config");
+    if (!snap.exists()) return;
 
-    const configSnap =
-        await getDoc(configRef);
-
-    if(!configSnap.exists()) return;
-
-    const sections =
-        configSnap.data().sections || [];
+    const sections = snap.data().sections || [];
 
     select.innerHTML =
         '<option value="">Select Section</option>';
@@ -60,22 +46,7 @@ export async function loadSections(selectId){
     sections.forEach(sec => {
 
         select.innerHTML +=
-        `<option value="${sec}">
-            ${sec}
-        </option>`;
+            `<option value="${sec}">${sec}</option>`;
+
     });
-}
-
-export async function getSettings(){
-
-    const configRef =
-        doc(db,"settings","config");
-
-    const configSnap =
-        await getDoc(configRef);
-
-    if(!configSnap.exists())
-        return null;
-
-    return configSnap.data();
 }
