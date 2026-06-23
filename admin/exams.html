@@ -7,10 +7,15 @@
 
 <style>
 
-body{
-    font-family:Arial,sans-serif;
-    background:#f4f6f9;
+*{
     margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f6f9;
 }
 
 .header{
@@ -22,11 +27,27 @@ body{
 
 .container{
     width:90%;
-    max-width:700px;
+    max-width:900px;
     margin:20px auto;
     background:white;
     padding:20px;
     border-radius:10px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+.back-btn{
+    display:inline-block;
+    margin-bottom:15px;
+    background:#001f5b;
+    color:white;
+    padding:10px 15px;
+    text-decoration:none;
+    border-radius:5px;
+    font-weight:bold;
+}
+
+.back-btn:hover{
+    background:#003399;
 }
 
 input,
@@ -58,7 +79,8 @@ table{
     border-collapse:collapse;
 }
 
-th,td{
+th,
+td{
     border:1px solid #ddd;
     padding:10px;
     text-align:center;
@@ -67,6 +89,16 @@ th,td{
 th{
     background:#001f5b;
     color:white;
+}
+
+.delete-btn{
+    background:#dc3545;
+    width:auto;
+    padding:8px 12px;
+}
+
+.delete-btn:hover{
+    background:#b52a37;
 }
 
 </style>
@@ -79,6 +111,10 @@ th{
 </div>
 
 <div class="container">
+
+    <a href="dashboard.html" class="back-btn">
+        ← Back to Dashboard
+    </a>
 
     <input
         type="text"
@@ -124,15 +160,18 @@ th{
                 <th>Subject</th>
                 <th>Class</th>
                 <th>Duration</th>
+                <th>Action</th>
             </tr>
         </thead>
 
         <tbody id="examTable">
+
             <tr>
-                <td colspan="4">
+                <td colspan="5">
                     Loading Exams...
                 </td>
             </tr>
+
         </tbody>
 
     </table>
