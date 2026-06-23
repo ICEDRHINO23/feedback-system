@@ -8,7 +8,7 @@ import {
 async function loadStudents() {
 
     const tbody =
-        document.getElementById("studentsTableBody");
+        document.getElementById("studentsTable");
 
     try {
 
