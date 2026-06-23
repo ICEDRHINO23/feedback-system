@@ -5,12 +5,12 @@ import {
     getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-async function loadExams(){
+async function loadExams() {
 
     const examList =
         document.getElementById("examList");
 
-    try{
+    try {
 
         const studentClass =
             localStorage.getItem(
@@ -19,26 +19,27 @@ async function loadExams(){
 
         const snapshot =
             await getDocs(
-                collection(db,"exams")
+                collection(db, "exams")
             );
 
         examList.innerHTML = "";
 
         let found = false;
 
-        snapshot.forEach(doc=>{
+        snapshot.forEach(doc => {
 
             const exam =
                 doc.data();
 
-            if(
+            if (
                 exam.class ===
                 studentClass
-            ){
+            ) {
 
                 found = true;
 
                 examList.innerHTML += `
+
                 <div class="exam-card">
 
                     <h3>
@@ -56,32 +57,43 @@ async function loadExams(){
                         Minutes
                     </p>
 
+                    <p>
+                        Total Marks:
+                        ${exam.totalMarks}
+                    </p>
+
                     <button
-                    onclick="startExam()">
+                    onclick="startExam('${doc.id}')">
                     Start Exam
                     </button>
 
                 </div>
+
                 `;
             }
         });
 
-        if(!found){
+        if (!found) {
 
             examList.innerHTML =
-            "No Exams Available";
+                "<p>No Exams Available</p>";
         }
 
-    }catch(error){
+    } catch (error) {
 
         console.error(error);
 
         examList.innerHTML =
-        "Unable to Load Exams";
+            "<p>Unable To Load Exams</p>";
     }
 }
 
-window.startExam = function(){
+window.startExam = function (examId) {
+
+    localStorage.setItem(
+        "currentExamId",
+        examId
+    );
 
     window.location.href =
         "exam.html";
