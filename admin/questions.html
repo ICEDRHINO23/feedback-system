@@ -1,1 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Question Bank</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f4f6f9;
+}
+
+.header{
+background:#001f5b;
+color:white;
+padding:15px;
+text-align:center;
+}
+
+.container{
+width:95%;
+max-width:1200px;
+margin:20px auto;
+background:white;
+padding:20px;
+border-radius:10px;
+}
+
+input,
+select,
+textarea{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+textarea{
+height:120px;
+resize:none;
+}
+
+button{
+background:#001f5b;
+color:white;
+border:none;
+padding:12px;
+cursor:pointer;
+border-radius:5px;
+}
+
+button:hover{
+background:#003399;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th{
+background:#001f5b;
+color:white;
+padding:10px;
+}
+
+td{
+padding:10px;
+border:1px solid #ddd;
+text-align:center;
+}
+
+.delete-btn{
+background:red;
+}
+
+.back-btn{
+display:inline-block;
+margin-bottom:15px;
+background:#001f5b;
+color:white;
+padding:10px 15px;
+text-decoration:none;
+border-radius:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h1>Question Bank</h1>
+</div>
+
+<div class="container">
+
+<a href="dashboard.html" class="back-btn">
+← Back to Dashboard
+</a>
+
+<select id="examSelect">
+<option value="">Select Exam</option>
+</select>
+
+<textarea
+id="question"
+placeholder="Enter Question">
+</textarea>
+
+<input
+type="text"
+id="optionA"
+placeholder="Option A">
+
+<input
+type="text"
+id="optionB"
+placeholder="Option B">
+
+<input
+type="text"
+id="optionC"
+placeholder="Option C">
+
+<input
+type="text"
+id="optionD"
+placeholder="Option D">
+
+<select id="answer">
+<option value="">Correct Answer</option>
+<option>A</option>
+<option>B</option>
+<option>C</option>
+<option>D</option>
+</select>
+
+<input
+type="number"
+id="marks"
+placeholder="Marks">
+
+<button onclick="saveQuestion()">
+Save Question
+</button>
+
+<table>
+
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+<th>Marks</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="questionTable">
+<tr>
+<td colspan="4">
+Loading Questions...
+</td>
+</tr>
+</tbody>
+
+</table>
+
+</div>
+
+<script type="module" src="../js/questions.js"></script>
+
+</body>
+</html>
