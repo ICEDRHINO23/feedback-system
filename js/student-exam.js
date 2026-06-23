@@ -1,9 +1,9 @@
-
 import { db } from "./firebase-config.js";
 
 import {
-collection,
-getDocs
+    collection,
+    getDocs,
+    addDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let questions = [];
@@ -14,46 +14,48 @@ window.previousQuestion = previousQuestion;
 window.nextQuestion = nextQuestion;
 window.submitExam = submitExam;
 
-async function loadQuestions(){
+async function loadQuestions() {
 
-const snapshot = await getDocs(
-collection(db,"questions")
-);
+    const snapshot = await getDocs(
+        collection(db, "questions")
+    );
 
-snapshot.forEach(doc=>{
+    snapshot.forEach(doc => {
 
-questions.push({
-id:doc.id,
-...doc.data()
-});
+        questions.push({
+            id: doc.id,
+            ...doc.data()
+        });
 
-});
+    });
 
-if(questions.length===0){
+    if (questions.length === 0) {
 
-document.getElementById(
-"questionText"
-).innerHTML="No Questions Found";
+        document.getElementById(
+            "questionText"
+        ).innerHTML = "No Questions Found";
 
-return;
+        return;
+    }
+
+    showQuestion();
 }
 
-showQuestion();
-}
+function showQuestion() {
 
-function showQuestion(){
+    let q = questions[currentQuestion];
 
-let q = questions[currentQuestion];
+    document.getElementById(
+        "questionText"
+    ).innerHTML =
+        (currentQuestion + 1) +
+        ". " +
+        q.question;
 
-document.getElementById(
-"questionText"
-).innerHTML=
-(currentQuestion+1)+". "+q.question;
+    let optionsDiv =
+        document.getElementById("options");
 
-let optionsDiv =
-document.getElementById("options");
-
-optionsDiv.innerHTML=`
+    optionsDiv.innerHTML = `
 <button class="option"
 onclick="saveAnswer('A')">
 A. ${q.optionA}
@@ -76,42 +78,127 @@ D. ${q.optionD}
 `;
 }
 
-window.saveAnswer=function(answer){
+window.saveAnswer = function(answer) {
 
-answers[currentQuestion]=answer;
+    answers[currentQuestion] = answer;
 
-alert("Answer Saved");
+    alert("Answer Saved");
+};
+
+function nextQuestion() {
+
+    if (
+        currentQuestion <
+        questions.length - 1
+    ) {
+
+        currentQuestion++;
+        showQuestion();
+    }
 }
 
-function nextQuestion(){
+function previousQuestion() {
 
-if(currentQuestion<
-questions.length-1){
+    if (currentQuestion > 0) {
 
-currentQuestion++;
-
-showQuestion();
-}
+        currentQuestion--;
+        showQuestion();
+    }
 }
 
-function previousQuestion(){
+async function submitExam() {
 
-if(currentQuestion>0){
+    let score = 0;
+    let totalMarks = 0;
+    let correctAnswers = 0;
 
-currentQuestion--;
+    questions.forEach((q, index) => {
 
-showQuestion();
-}
-}
+        totalMarks += Number(
+            q.marks || 1
+        );
 
-function submitExam(){
+        if (
+            answers[index] === q.answer
+        ) {
 
-alert(
-"Exam Submitted Successfully"
-);
+            score += Number(
+                q.marks || 1
+            );
 
-window.location.href=
-"dashboard.html";
+            correctAnswers++;
+        }
+
+    });
+
+    const percentage =
+        (
+            score /
+            totalMarks
+        ) * 100;
+
+    try {
+
+        await addDoc(
+            collection(db, "results"),
+            {
+                studentName:
+                    localStorage.getItem(
+                        "studentName"
+                    ) || "",
+
+                studentClass:
+                    localStorage.getItem(
+                        "studentClass"
+                    ) || "",
+
+                section:
+                    localStorage.getItem(
+                        "studentSection"
+                    ) || "",
+
+                score: score,
+
+                totalMarks:
+                    totalMarks,
+
+                correctAnswers:
+                    correctAnswers,
+
+                totalQuestions:
+                    questions.length,
+
+                percentage:
+                    percentage.toFixed(2),
+
+                submittedAt:
+                    new Date()
+                        .toISOString()
+            }
+        );
+
+        alert(
+            "Exam Submitted!\n\n" +
+            "Score: " +
+            score +
+            "/" +
+            totalMarks +
+            "\nPercentage: " +
+            percentage.toFixed(2) +
+            "%"
+        );
+
+        window.location.href =
+            "result.html";
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Failed to save result"
+        );
+    }
 }
 
 loadQuestions();
