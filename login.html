@@ -1,20 +1,278 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AHPS Online Examination System</title>
-    <link rel="stylesheet" href="css/login.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AHPS Online Examination System</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#1e3a8a,#2563eb);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.container{
+    background:white;
+    width:420px;
+    padding:35px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,.2);
+}
+
+.logo{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.logo h1{
+    color:#1e3a8a;
+    font-size:28px;
+}
+
+.logo p{
+    color:#666;
+    margin-top:5px;
+}
+
+.tabs{
+    display:flex;
+    margin-bottom:20px;
+}
+
+.tab{
+    flex:1;
+    padding:12px;
+    border:none;
+    cursor:pointer;
+    background:#e5e7eb;
+    font-weight:bold;
+}
+
+.tab.active{
+    background:#1e3a8a;
+    color:white;
+}
+
+.form-group{
+    margin-bottom:15px;
+}
+
+label{
+    display:block;
+    margin-bottom:5px;
+    font-weight:600;
+}
+
+input,
+select{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+.btn{
+    width:100%;
+    padding:12px;
+    background:#1e3a8a;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.btn:hover{
+    background:#14296b;
+}
+
+#studentLogin{
+    display:block;
+}
+
+#adminLogin{
+    display:none;
+}
+
+.footer{
+    text-align:center;
+    margin-top:20px;
+    color:#777;
+    font-size:14px;
+}
+
+</style>
 </head>
 <body>
 
-<div class="login-container">
-    <h1>Academic Heights Public School</h1>
-    <h2>Online Examination Portal</h2>
+<div class="container">
 
-    <input type="text" id="admissionNo" placeholder="Admission Number">
-    <input type="password" id="password" placeholder="Password">
+    <div class="logo">
+        <h1>AHPS Online Examination System</h1>
+        <p>Academic Year 2026-27</p>
+    </div>
 
-    <button onclick="login()">Login</button>
+    <div class="tabs">
+        <button
+            class="tab active"
+            onclick="showStudent()">
+            Student Login
+        </button>
+
+        <button
+            class="tab"
+            onclick="showAdmin()">
+            Admin Login
+        </button>
+    </div>
+
+    <!-- STUDENT LOGIN -->
+
+    <div id="studentLogin">
+
+        <div class="form-group">
+            <label>Class</label>
+
+            <select id="studentClass">
+                <option value="">Select Class</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Section</label>
+
+            <select id="section">
+                <option value="">Select Section</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Roll Number</label>
+
+            <input
+                type="text"
+                id="rollNo"
+                placeholder="Enter Roll Number">
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Enter Password">
+        </div>
+
+        <button
+            class="btn"
+            onclick="login()">
+            Login
+        </button>
+
+    </div>
+
+    <!-- ADMIN LOGIN -->
+
+    <div id="adminLogin">
+
+        <div class="form-group">
+            <label>Username</label>
+
+            <input
+                type="text"
+                id="admissionNo"
+                placeholder="Enter Username">
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+
+            <input
+                type="password"
+                id="adminPassword"
+                placeholder="Enter Password">
+        </div>
+
+        <button
+            class="btn"
+            onclick="login()">
+            Login
+        </button>
+
+    </div>
+
+    <div class="footer">
+        Academic Heights Public School
+    </div>
+
 </div>
+
+<script>
+
+function showStudent(){
+
+    document.getElementById(
+        "studentLogin"
+    ).style.display="block";
+
+    document.getElementById(
+        "adminLogin"
+    ).style.display="none";
+
+    document.querySelectorAll(".tab")[0]
+        .classList.add("active");
+
+    document.querySelectorAll(".tab")[1]
+        .classList.remove("active");
+}
+
+function showAdmin(){
+
+    document.getElementById(
+        "studentLogin"
+    ).style.display="none";
+
+    document.getElementById(
+        "adminLogin"
+    ).style.display="block";
+
+    document.querySelectorAll(".tab")[1]
+        .classList.add("active");
+
+    document.querySelectorAll(".tab")[0]
+        .classList.remove("active");
+}
+
+</script>
 
 <script type="module" src="js/auth.js"></script>
 
