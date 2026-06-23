@@ -26,14 +26,30 @@ window.login = async function () {
     try {
 
         // Admin Login
-        if (
-            admissionNo === "admin" &&
-            password === "admin123"
-        ) {
-            localStorage.setItem("role", "admin");
-            window.location.href = "admin/dashboard.html";
-            return;
-        }
+       const adminsRef = collection(db, "admins");
+
+const adminQuery = query(
+    adminsRef,
+    where("username", "==", admissionNo)
+);
+
+const adminSnap = await getDocs(adminQuery);
+
+if (!adminSnap.empty) {
+
+    const admin = adminSnap.docs[0].data();
+
+    if (admin.password === password) {
+
+        localStorage.setItem("role", "admin");
+        localStorage.setItem("adminName", admissionNo);
+
+        window.location.href =
+            "admin/dashboard.html";
+
+        return;
+    }
+}
 
         // Student Login
         const studentsRef = collection(db, "students");
