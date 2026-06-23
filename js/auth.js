@@ -1,77 +1,201 @@
 import { db } from "./firebase-config.js";
+
 import {
     collection,
     query,
     where,
-    getDocs
+    getDocs,
+    doc,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 window.login = async function () {
 
-    const admissionNo = document
-        .getElementById("admissionNo")
-        .value
-        .trim();
-
-    const password = document
-        .getElementById("password")
-        .value
-        .trim();
-
-    if (!admissionNo || !password) {
-        alert("Please enter login details");
-        return;
-    }
-
     try {
 
-        // Admin Login
-       const adminsRef = collection(db, "admins");
+        // -------------------------
+        // ADMIN LOGIN
+        // -------------------------
 
-const adminQuery = query(
-    adminsRef,
-    where("username", "==", admissionNo)
-);
+        const adminUser =
+            document.getElementById("admissionNo");
 
-const adminSnap = await getDocs(adminQuery);
+        const adminPass =
+            document.getElementById("adminPassword");
 
-if (!adminSnap.empty) {
+        if (
+            adminUser &&
+            adminPass &&
+            adminUser.value.trim() !== ""
+        ) {
 
-    const admin = adminSnap.docs[0].data();
+            const username =
+                adminUser.value.trim();
 
-    if (admin.password === password) {
+            const password =
+                adminPass.value.trim();
 
-        localStorage.setItem("role", "admin");
-        localStorage.setItem("adminName", admissionNo);
+            const adminsRef =
+                collection(db, "admins");
 
-        window.location.href =
-            "admin/dashboard.html";
+            const adminQuery = query(
+                adminsRef,
+                where("username", "==", username)
+            );
 
-        return;
-    }
-}
+            const adminSnap =
+                await getDocs(adminQuery);
 
-        // Student Login
-        const studentsRef = collection(db, "students");
+            if (!adminSnap.empty) {
+
+                const admin =
+                    adminSnap.docs[0].data();
+
+                if (
+                    admin.password === password
+                ) {
+
+                    localStorage.setItem(
+                        "role",
+                        "admin"
+                    );
+
+                    localStorage.setItem(
+                        "adminName",
+                        username
+                    );
+
+                    window.location.href =
+                        "admin/dashboard.html";
+
+                    return;
+                }
+            }
+
+            alert("Invalid Admin Login");
+            return;
+        }
+
+        // -------------------------
+        // STUDENT LOGIN
+        // -------------------------
+
+        const studentClass =
+            document.getElementById("studentClass")
+            .value;
+
+        const section =
+            document.getElementById("section")
+            .value;
+
+        const rollNo =
+            document.getElementById("rollNo")
+            .value.trim();
+
+        const password =
+            document.getElementById("password")
+            .value.trim();
+
+        if (
+            !studentClass ||
+            !section ||
+            !rollNo ||
+            !password
+        ) {
+
+            alert(
+                "Please fill all login details"
+            );
+
+            return;
+        }
+
+        const studentsRef =
+            collection(db, "students");
 
         const q = query(
             studentsRef,
-            where("admissionNo", "==", admissionNo)
+            where("class", "==", studentClass),
+            where("section", "==", section),
+            where("rollno", "==", rollNo)
         );
 
-        const snapshot = await getDocs(q);
+        const snapshot =
+            await getDocs(q);
 
         if (snapshot.empty) {
+
             alert("Student not found");
+
             return;
         }
 
-        const student = snapshot.docs[0].data();
+        const student =
+            snapshot.docs[0].data();
 
-        if (student.password !== password) {
-            alert("Invalid password");
+        if (
+            student.password !== password
+        ) {
+
+            alert("Invalid Password");
+
             return;
         }
+
+        // Account Status Check
+
+        if (
+            student.status !== "active"
+        ) {
+
+            alert(
+                "Account Disabled. Contact Administrator."
+            );
+
+            return;
+        }
+
+        // Academic Year Expiry Check
+
+        const today =
+            new Date();
+
+        const expiryDate =
+            new Date(
+                student.accountexpiry
+            );
+
+        if (
+            today > expiryDate
+        ) {
+
+            alert(
+                "Academic Year Expired. Contact Administrator."
+            );
+
+            return;
+        }
+
+        // Update Last Login
+
+        await updateDoc(
+            doc(
+                db,
+                "students",
+                snapshot.docs[0].id
+            ),
+            {
+                lastlogin:
+                    new Date().toISOString()
+            }
+        );
+
+        // Session Storage
+
+        localStorage.setItem(
+            "role",
+            "student"
+        );
 
         localStorage.setItem(
             "studentName",
@@ -79,19 +203,35 @@ if (!adminSnap.empty) {
         );
 
         localStorage.setItem(
-            "admissionNo",
-            student.admissionNo
+            "studentClass",
+            student.class
         );
 
         localStorage.setItem(
-            "role",
-            "student"
+            "studentSection",
+            student.section
         );
 
-        window.location.href = "dashboard.html";
+        localStorage.setItem(
+            "rollNo",
+            student.rollno
+        );
 
-    } catch (error) {
+        localStorage.setItem(
+            "academicYear",
+            student.academicyear
+        );
+
+        window.location.href =
+            "dashboard.html";
+
+    }
+    catch (error) {
+
         console.error(error);
-        alert("Login failed");
+
+        alert(
+            "Login Failed"
+        );
     }
 };
