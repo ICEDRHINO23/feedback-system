@@ -2,218 +2,315 @@ import { db } from "./firebase-config.js";
 
 import {
     collection,
-    addDoc,
     getDocs,
-    deleteDoc,
-    doc,
-    getDoc
+    addDoc,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const examTable =
-    document.getElementById("examTable");
+let questions = [];
+let currentQuestion = 0;
+let answers = {};
 
-// Load Classes
-async function loadClasses() {
+window.previousQuestion = previousQuestion;
+window.nextQuestion = nextQuestion;
+window.submitExam = submitExam;
+window.saveAnswer = saveAnswer;
+
+async function loadQuestions() {
 
     try {
 
-        const configRef =
-            doc(db, "settings", "config");
-
-        const configSnap =
-            await getDoc(configRef);
-
-        if (!configSnap.exists())
-            return;
-
-        const classes =
-            configSnap.data().classes || [];
-
-        const classSelect =
-            document.getElementById("examClass");
-
-        classSelect.innerHTML =
-            '<option value="">Select Class</option>';
-
-        classes.forEach(cls => {
-
-            classSelect.innerHTML += `
-            <option value="${cls}">
-                ${cls}
-            </option>
-            `;
-        });
-
-    } catch(error){
-
-        console.error(error);
-    }
-}
-
-// Create Exam
-window.createExam =
-async function(){
-
-    const examName =
-        document.getElementById("examName").value.trim();
-
-    const subject =
-        document.getElementById("subject").value.trim();
-
-    const examClass =
-        document.getElementById("examClass").value;
-
-    const duration =
-        document.getElementById("duration").value;
-
-    const totalMarks =
-        document.getElementById("totalMarks").value;
-
-    const startDate =
-        document.getElementById("startDate").value;
-
-    const endDate =
-        document.getElementById("endDate").value;
-
-    if(
-        !examName ||
-        !subject ||
-        !examClass ||
-        !duration ||
-        !totalMarks ||
-        !startDate ||
-        !endDate
-    ){
-        alert("Fill all fields");
-        return;
-    }
-
-    try{
-
-        await addDoc(
-            collection(db,"exams"),
-            {
-                examName,
-                subject,
-                class: examClass,
-                duration,
-                totalMarks,
-                startDate,
-                endDate,
-                createdAt:
-                    new Date().toISOString()
-            }
-        );
-
-        alert("Exam Created Successfully");
-
-        document.getElementById("examName").value="";
-        document.getElementById("subject").value="";
-        document.getElementById("duration").value="";
-        document.getElementById("totalMarks").value="";
-        document.getElementById("startDate").value="";
-        document.getElementById("endDate").value="";
-
-        loadExams();
-
-    }catch(error){
-
-        console.error(error);
-
-        alert("Unable to Create Exam");
-    }
-};
-
-// Load Exams
-async function loadExams(){
-
-    try{
-
-        const snapshot =
-            await getDocs(
-                collection(db,"exams")
+        const examId =
+            localStorage.getItem(
+                "currentExamId"
             );
 
-        examTable.innerHTML = "";
+        if (!examId) {
 
-        if(snapshot.empty){
+            document.getElementById(
+                "questionText"
+            ).innerHTML =
+                "No Exam Selected";
 
-            examTable.innerHTML = `
-            <tr>
-                <td colspan="6">
-                    No Exams Found
-                </td>
-            </tr>
-            `;
             return;
         }
 
-        snapshot.forEach(examDoc=>{
+        const q = query(
+            collection(db, "questions"),
+            where("examId", "==", examId)
+        );
 
-            const exam =
-                examDoc.data();
+        const snapshot =
+            await getDocs(q);
 
-            examTable.innerHTML += `
-            <tr>
+        questions = [];
 
-                <td>${exam.examName}</td>
+        snapshot.forEach(doc => {
 
-                <td>${exam.subject}</td>
+            questions.push({
+                id: doc.id,
+                ...doc.data()
+            });
 
-                <td>${exam.class}</td>
-
-                <td>${exam.duration} Min</td>
-
-                <td>${exam.totalMarks}</td>
-
-                <td>
-                    <button
-                    class="delete-btn"
-                    onclick="deleteExam('${examDoc.id}')">
-                    Delete
-                    </button>
-                </td>
-
-            </tr>
-            `;
         });
 
-    }catch(error){
+        if (questions.length === 0) {
+
+            document.getElementById(
+                "questionText"
+            ).innerHTML =
+                "No Questions Found For This Exam";
+
+            document.getElementById(
+                "options"
+            ).innerHTML = "";
+
+            return;
+        }
+
+        showQuestion();
+
+    } catch (error) {
 
         console.error(error);
 
-        examTable.innerHTML = `
-        <tr>
-            <td colspan="6">
-                Error Loading Exams
-            </td>
-        </tr>
-        `;
+        document.getElementById(
+            "questionText"
+        ).innerHTML =
+            "Unable To Load Questions";
     }
 }
 
-// Delete Exam
-window.deleteExam =
-async function(id){
+function showQuestion() {
 
-    if(!confirm("Delete this exam?"))
-        return;
+    let q = questions[currentQuestion];
 
-    try{
+    document.getElementById(
+        "questionText"
+    ).innerHTML =
+        "Q" +
+        (currentQuestion + 1) +
+        ". " +
+        q.question;
 
-        await deleteDoc(
-            doc(db,"exams",id)
+    const optionsDiv =
+        document.getElementById(
+            "options"
         );
 
-        loadExams();
+    optionsDiv.innerHTML = `
 
-    }catch(error){
+    <button class="option"
+    onclick="saveAnswer('A')">
+    A. ${q.optionA}
+    </button>
+
+    <button class="option"
+    onclick="saveAnswer('B')">
+    B. ${q.optionB}
+    </button>
+
+    <button class="option"
+    onclick="saveAnswer('C')">
+    C. ${q.optionC}
+    </button>
+
+    <button class="option"
+    onclick="saveAnswer('D')">
+    D. ${q.optionD}
+    </button>
+
+    `;
+
+    if (answers[currentQuestion]) {
+
+        const buttons =
+            document.querySelectorAll(
+                ".option"
+            );
+
+        buttons.forEach(btn => {
+
+            if (
+                btn.innerText.startsWith(
+                    answers[currentQuestion]
+                )
+            ) {
+
+                btn.style.background =
+                    "#28a745";
+
+                btn.style.color =
+                    "#fff";
+            }
+
+        });
+    }
+}
+
+function saveAnswer(answer) {
+
+    answers[currentQuestion] =
+        answer;
+
+    const buttons =
+        document.querySelectorAll(
+            ".option"
+        );
+
+    buttons.forEach(btn => {
+
+        btn.style.background = "";
+        btn.style.color = "";
+
+        if (
+            btn.innerText.startsWith(
+                answer
+            )
+        ) {
+
+            btn.style.background =
+                "#28a745";
+
+            btn.style.color =
+                "#fff";
+        }
+    });
+}
+
+function nextQuestion() {
+
+    if (
+        currentQuestion <
+        questions.length - 1
+    ) {
+
+        currentQuestion++;
+
+        showQuestion();
+    }
+}
+
+function previousQuestion() {
+
+    if (
+        currentQuestion > 0
+    ) {
+
+        currentQuestion--;
+
+        showQuestion();
+    }
+}
+
+async function submitExam() {
+
+    let score = 0;
+    let totalMarks = 0;
+    let correctAnswers = 0;
+
+    questions.forEach((q, index) => {
+
+        const marks =
+            Number(q.marks || 1);
+
+        totalMarks += marks;
+
+        if (
+            answers[index] === q.answer
+        ) {
+
+            score += marks;
+            correctAnswers++;
+        }
+
+    });
+
+    const percentage =
+        (
+            (score / totalMarks) * 100
+        ).toFixed(2);
+
+    try {
+
+        const examId =
+            localStorage.getItem(
+                "currentExamId"
+            );
+
+        await addDoc(
+            collection(db, "results"),
+            {
+
+                examId: examId,
+
+                studentName:
+                    localStorage.getItem(
+                        "studentName"
+                    ) || "",
+
+                class:
+                    localStorage.getItem(
+                        "studentClass"
+                    ) || "",
+
+                section:
+                    localStorage.getItem(
+                        "studentSection"
+                    ) || "",
+
+                rollNo:
+                    localStorage.getItem(
+                        "rollNo"
+                    ) || "",
+
+                score: score,
+
+                totalMarks:
+                    totalMarks,
+
+                correctAnswers:
+                    correctAnswers,
+
+                totalQuestions:
+                    questions.length,
+
+                percentage:
+                    percentage,
+
+                date:
+                    new Date()
+                    .toLocaleDateString(),
+
+                submittedAt:
+                    new Date()
+                    .toISOString()
+            }
+        );
+
+        alert(
+            "Exam Submitted Successfully!\n\n" +
+            "Score: " +
+            score +
+            "/" +
+            totalMarks +
+            "\nPercentage: " +
+            percentage +
+            "%"
+        );
+
+        window.location.href =
+            "result.html";
+
+    } catch (error) {
 
         console.error(error);
 
-        alert("Unable to Delete Exam");
+        alert(
+            "Failed To Save Result"
+        );
     }
-};
+}
 
-loadClasses();
-loadExams();
+loadQuestions();
