@@ -1,4 +1,3 @@
-
 import { db } from "./firebase-config.js";
 
 import {
@@ -10,7 +9,7 @@ async function loadDashboardStats() {
 
     try {
 
-        // Students
+        // Total Students
 
         const studentsSnap =
             await getDocs(
@@ -22,29 +21,55 @@ async function loadDashboardStats() {
         ).innerText =
             studentsSnap.size;
 
-        // Exams
+        // Total Exams
 
-        const examsSnap =
-            await getDocs(
-                collection(db, "exams")
-            );
+        let examCount = 0;
+
+        try {
+
+            const examsSnap =
+                await getDocs(
+                    collection(db, "exams")
+                );
+
+            examCount =
+                examsSnap.size;
+
+        } catch (e) {
+
+            examCount = 0;
+
+        }
 
         document.getElementById(
             "examCount"
         ).innerText =
-            examsSnap.size;
+            examCount;
 
-        // Results
+        // Total Results
 
-        const resultsSnap =
-            await getDocs(
-                collection(db, "results")
-            );
+        let resultCount = 0;
+
+        try {
+
+            const resultsSnap =
+                await getDocs(
+                    collection(db, "results")
+                );
+
+            resultCount =
+                resultsSnap.size;
+
+        } catch (e) {
+
+            resultCount = 0;
+
+        }
 
         document.getElementById(
             "resultCount"
         ).innerText =
-            resultsSnap.size;
+            resultCount;
 
     }
     catch(error){
