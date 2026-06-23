@@ -1,1 +1,128 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Start Exam</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f9;
+margin:0;
+}
+
+.header{
+background:#001f5b;
+color:white;
+padding:15px;
+text-align:center;
+}
+
+.container{
+width:90%;
+max-width:900px;
+margin:20px auto;
+background:white;
+padding:20px;
+border-radius:10px;
+}
+
+.question{
+font-size:22px;
+margin-bottom:20px;
+}
+
+.option{
+display:block;
+width:100%;
+padding:15px;
+margin:10px 0;
+background:#f1f1f1;
+border:none;
+border-radius:5px;
+cursor:pointer;
+text-align:left;
+}
+
+.option:hover{
+background:#dbeafe;
+}
+
+.nav{
+margin-top:20px;
+display:flex;
+justify-content:space-between;
+}
+
+button{
+padding:12px 20px;
+background:#001f5b;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+.timer{
+font-size:22px;
+font-weight:bold;
+color:red;
+text-align:right;
+margin-bottom:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h1>Online Examination</h1>
+</div>
+
+<div class="container">
+
+<div class="timer" id="timer">
+00:00
+</div>
+
+<h2 id="examTitle">
+Loading Exam...
+</h2>
+
+<div id="questionArea">
+
+<div class="question" id="questionText">
+Loading...
+</div>
+
+<div id="options"></div>
+
+</div>
+
+<div class="nav">
+
+<button onclick="previousQuestion()">
+Previous
+</button>
+
+<button onclick="nextQuestion()">
+Next
+</button>
+
+<button onclick="submitExam()">
+Submit Exam
+</button>
+
+</div>
+
+</div>
+
+<script type="module" src="js/student-exam.js"></script>
+
+</body>
+</html>
