@@ -7,13 +7,19 @@ import {
 
 export async function loadClasses(selectId) {
 
+    console.log("Loading Classes...");
+
     const select = document.getElementById(selectId);
 
     const snap = await getDoc(
         doc(db, "settings", "config")
     );
 
+    console.log("Document Exists:", snap.exists());
+
     if (!snap.exists()) return;
+
+    console.log("Data:", snap.data());
 
     const classes = snap.data().classes || [];
 
@@ -21,10 +27,8 @@ export async function loadClasses(selectId) {
         '<option value="">Select Class</option>';
 
     classes.forEach(cls => {
-
         select.innerHTML +=
             `<option value="${cls}">${cls}</option>`;
-
     });
 }
 
@@ -44,9 +48,7 @@ export async function loadSections(selectId) {
         '<option value="">Select Section</option>';
 
     sections.forEach(sec => {
-
         select.innerHTML +=
             `<option value="${sec}">${sec}</option>`;
-
     });
 }
