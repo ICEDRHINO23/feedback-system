@@ -13,9 +13,9 @@ window.login = async function () {
 
     try {
 
-        // -------------------------
+        // =========================
         // ADMIN LOGIN
-        // -------------------------
+        // =========================
 
         const adminUser =
             document.getElementById("admissionNo");
@@ -35,11 +35,8 @@ window.login = async function () {
             const password =
                 adminPass.value.trim();
 
-            const adminsRef =
-                collection(db, "admins");
-
             const adminQuery = query(
-                adminsRef,
+                collection(db, "admins"),
                 where("username", "==", username)
             );
 
@@ -76,25 +73,21 @@ window.login = async function () {
             return;
         }
 
-        // -------------------------
+        // =========================
         // STUDENT LOGIN
-        // -------------------------
+        // =========================
 
         const studentClass =
-            document.getElementById("studentClass")
-            .value;
+            document.getElementById("studentClass").value;
 
         const section =
-            document.getElementById("section")
-            .value;
+            document.getElementById("section").value;
 
         const rollNo =
-            document.getElementById("rollNo")
-            .value.trim();
+            document.getElementById("rollNo").value.trim();
 
         const password =
-            document.getElementById("password")
-            .value.trim();
+            document.getElementById("password").value.trim();
 
         if (
             !studentClass ||
@@ -110,41 +103,41 @@ window.login = async function () {
             return;
         }
 
-        const studentsRef =
-            collection(db, "students");
-
-        const q = query(
-            studentsRef,
+        const studentQuery = query(
+            collection(db, "students"),
             where("class", "==", studentClass),
             where("section", "==", section),
-            where("rollno", "==", rollNo)
+            where("rollNo", "==", rollNo)
         );
 
         const snapshot =
-            await getDocs(q);
+            await getDocs(studentQuery);
 
         if (snapshot.empty) {
 
             alert("Student not found");
-
             return;
+
         }
 
         const student =
             snapshot.docs[0].data();
+
+        // Password Check
 
         if (
             student.password !== password
         ) {
 
             alert("Invalid Password");
-
             return;
+
         }
 
-        // Account Status Check
+        // Status Check
 
         if (
+            student.status &&
             student.status !== "active"
         ) {
 
@@ -155,25 +148,28 @@ window.login = async function () {
             return;
         }
 
-        // Academic Year Expiry Check
+        // Expiry Check
 
-        const today =
-            new Date();
+        if (student.accountExpiry) {
 
-        const expiryDate =
-            new Date(
-                student.accountexpiry
-            );
+            const today =
+                new Date();
 
-        if (
-            today > expiryDate
-        ) {
+            const expiryDate =
+                new Date(
+                    student.accountExpiry
+                );
 
-            alert(
-                "Academic Year Expired. Contact Administrator."
-            );
+            if (
+                today > expiryDate
+            ) {
 
-            return;
+                alert(
+                    "Academic Year Expired. Contact Administrator."
+                );
+
+                return;
+            }
         }
 
         // Update Last Login
@@ -186,11 +182,11 @@ window.login = async function () {
             ),
             {
                 lastlogin:
-                    new Date().toISOString()
+                    new Date().toLocaleString()
             }
         );
 
-        // Session Storage
+        // Save Session
 
         localStorage.setItem(
             "role",
@@ -199,27 +195,31 @@ window.login = async function () {
 
         localStorage.setItem(
             "studentName",
-            student.name
+            student.name || ""
         );
 
         localStorage.setItem(
             "studentClass",
-            student.class
+            student.class || ""
         );
 
         localStorage.setItem(
             "studentSection",
-            student.section
+            student.section || ""
         );
 
         localStorage.setItem(
             "rollNo",
-            student.rollno
+            student.rollNo || ""
         );
 
         localStorage.setItem(
             "academicYear",
-            student.academicyear
+            student.academicyear || ""
+        );
+
+        alert(
+            "Login Successful"
         );
 
         window.location.href =
