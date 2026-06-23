@@ -6,7 +6,8 @@
 
 <title>AHPS Online Examination System</title>
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
 
@@ -14,81 +15,85 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:Segoe UI, sans-serif;
+    font-family:Arial,sans-serif;
 }
 
 body{
-    background:#f4f7fc;
+    background:#f4f6f9;
 }
 
 .header{
     background:#1e3a8a;
     color:white;
-    padding:20px;
     text-align:center;
+    padding:25px;
 }
 
 .header h1{
-    font-size:30px;
+    font-size:42px;
+}
+
+.header p{
+    font-size:18px;
+    margin-top:8px;
 }
 
 .container{
     width:95%;
-    margin:auto;
-    padding:20px;
+    margin:25px auto;
 }
 
-.cards{
+.stats{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
     gap:20px;
-    margin-top:20px;
+    margin-bottom:30px;
 }
 
 .card{
     background:white;
-    padding:25px;
     border-radius:15px;
-    box-shadow:0 4px 12px rgba(0,0,0,.1);
+    padding:30px;
     text-align:center;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
 }
 
 .card i{
-    font-size:40px;
+    font-size:50px;
     color:#1e3a8a;
-    margin-bottom:10px;
-}
-
-.card h2{
-    font-size:28px;
-    color:#333;
-}
-
-.card p{
-    color:#777;
-}
-
-.actions{
-    margin-top:30px;
-}
-
-.actions h2{
     margin-bottom:15px;
 }
 
-.action-grid{
+.card h2{
+    font-size:48px;
+    color:#111;
+}
+
+.card p{
+    font-size:26px;
+    color:#555;
+}
+
+.quick-title{
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+.actions{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-    gap:15px;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
 }
 
 .action-btn{
     background:#1e3a8a;
     color:white;
     text-decoration:none;
-    padding:15px;
     text-align:center;
-    border-radius:10px;
+    padding:25px;
+    border-radius:12px;
+    font-size:24px;
     transition:.3s;
 }
 
@@ -96,28 +101,47 @@ body{
     background:#14296b;
 }
 
-.logout{
-    margin-top:30px;
-    background:#dc2626;
-    color:white;
-    border:none;
-    padding:12px 25px;
-    border-radius:8px;
-    cursor:pointer;
+.action-btn i{
+    display:block;
+    font-size:35px;
+    margin-bottom:10px;
 }
 
-.logout:hover{
-    background:#b91c1c;
+.bottom{
+    margin-top:30px;
+}
+
+.logout{
+    background:red;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.settings{
+    background:#444;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    margin-left:10px;
 }
 
 .footer{
-    margin-top:40px;
     text-align:center;
-    color:#666;
+    margin-top:40px;
+    color:#444;
+    font-size:22px;
 }
 
 </style>
 </head>
+
 <body>
 
 <div class="header">
@@ -127,7 +151,7 @@ body{
 
 <div class="container">
 
-    <div class="cards">
+    <div class="stats">
 
         <div class="card">
             <i class="fas fa-user-graduate"></i>
@@ -142,55 +166,63 @@ body{
         </div>
 
         <div class="card">
-            <i class="fas fa-chart-bar"></i>
+            <i class="fas fa-chart-line"></i>
             <h2 id="resultCount">0</h2>
             <p>Results</p>
         </div>
 
         <div class="card">
-            <i class="fas fa-check-circle"></i>
+            <i class="fas fa-circle-check"></i>
             <h2>Live</h2>
             <p>System Status</p>
         </div>
 
     </div>
 
+    <div class="quick-title">
+        Quick Actions
+    </div>
+
     <div class="actions">
 
-        <h2>Quick Actions</h2>
+        <a href="exams.html" class="action-btn">
+            <i class="fas fa-plus"></i>
+            Create Exam
+        </a>
 
-        <div class="action-grid">
+        <a href="questions.html" class="action-btn">
+            <i class="fas fa-question-circle"></i>
+            Question Bank
+        </a>
 
-            <a href="exams.html" class="action-btn">
-                <i class="fas fa-plus"></i><br><br>
-                Create Exam
-            </a>
+        <a href="students.html" class="action-btn">
+            <i class="fas fa-users"></i>
+            Students
+        </a>
 
-            <a href="questions.html" class="action-btn">
-                <i class="fas fa-question-circle"></i><br><br>
-                Question Bank
-            </a>
-
-            <a href="students.html" class="action-btn">
-                <i class="fas fa-users"></i><br><br>
-                Students
-            </a>
-
-            <a href="results.html" class="action-btn">
-                <i class="fas fa-chart-line"></i><br><br>
-                Results
-            </a>
-
-        </div>
+        <a href="results.html" class="action-btn">
+            <i class="fas fa-chart-line"></i>
+            Results
+        </a>
 
     </div>
 
-    <button class="logout" onclick="logout()">
-        Logout
-    </button>
-    <button onclick="location.href='settings.html'">
-    Settings
-    </button>
+    <div class="bottom">
+
+        <button
+            class="logout"
+            onclick="logout()">
+            Logout
+        </button>
+
+        <button
+            class="settings"
+            onclick="location.href='settings.html'">
+            Settings
+        </button>
+
+    </div>
+
     <div class="footer">
         © 2026 Academic Heights Public School
     </div>
@@ -200,15 +232,16 @@ body{
 <script>
 
 function logout(){
+
     localStorage.clear();
-    window.location.href="../login.html";
+
+    window.location.href =
+        "../login.html";
 }
 
-document.getElementById("studentCount").innerText = localStorage.getItem("studentCount") || 0;
-document.getElementById("examCount").innerText = localStorage.getItem("examCount") || 0;
-document.getElementById("resultCount").innerText = localStorage.getItem("resultCount") || 0;
-
 </script>
+
+<script type="module" src="../js/dashboard.js"></script>
 
 </body>
 </html>
