@@ -1,3 +1,4 @@
+alert("students.js loaded");
 import { db } from "./firebase-config.js";
 
 import {
