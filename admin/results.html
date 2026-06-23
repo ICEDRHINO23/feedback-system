@@ -1,1 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Results Management</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f4f6f9;
+}
+
+.header{
+background:#001f5b;
+color:white;
+padding:15px;
+text-align:center;
+}
+
+.container{
+width:95%;
+margin:20px auto;
+}
+
+.back-btn{
+display:inline-block;
+background:#001f5b;
+color:white;
+padding:10px 15px;
+text-decoration:none;
+border-radius:5px;
+margin-bottom:15px;
+}
+
+.controls{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:20px;
+}
+
+input,
+select{
+padding:10px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+table{
+width:100%;
+background:white;
+border-collapse:collapse;
+}
+
+th{
+background:#001f5b;
+color:white;
+padding:12px;
+}
+
+td{
+padding:10px;
+border:1px solid #ddd;
+text-align:center;
+}
+
+.delete-btn{
+background:red;
+color:white;
+border:none;
+padding:6px 10px;
+cursor:pointer;
+border-radius:4px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+<h1>Results Management</h1>
+</div>
+
+<div class="container">
+
+<a href="dashboard.html" class="back-btn">
+← Back to Dashboard
+</a>
+
+<div class="controls">
+
+<input
+type="text"
+id="searchBox"
+placeholder="Search Student">
+
+<select id="classFilter">
+<option value="">All Classes</option>
+</select>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Student</th>
+<th>Class</th>
+<th>Score</th>
+<th>Total Marks</th>
+<th>Percentage</th>
+<th>Date</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="resultTable">
+
+<tr>
+<td colspan="7">
+Loading Results...
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<script type="module" src="../js/results.js"></script>
+
+</body>
+</html>
