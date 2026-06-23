@@ -12,11 +12,11 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:'Segoe UI',sans-serif;
+    font-family:Arial,sans-serif;
 }
 
 body{
-    background:linear-gradient(135deg,#1e3a8a,#2563eb);
+    background:linear-gradient(135deg,#001f5b,#003399);
     min-height:100vh;
     display:flex;
     justify-content:center;
@@ -24,11 +24,11 @@ body{
 }
 
 .container{
-    background:white;
-    width:420px;
-    padding:35px;
+    background:#fff;
+    width:450px;
+    padding:30px;
     border-radius:15px;
-    box-shadow:0 10px 25px rgba(0,0,0,.2);
+    box-shadow:0 10px 20px rgba(0,0,0,.2);
 }
 
 .logo{
@@ -37,13 +37,13 @@ body{
 }
 
 .logo h1{
-    color:#1e3a8a;
-    font-size:28px;
+    color:#001f5b;
+    font-size:32px;
 }
 
 .logo p{
-    color:#666;
-    margin-top:5px;
+    margin-top:10px;
+    color:#444;
 }
 
 .tabs{
@@ -56,12 +56,12 @@ body{
     padding:12px;
     border:none;
     cursor:pointer;
-    background:#e5e7eb;
+    background:#d9d9d9;
     font-weight:bold;
 }
 
 .tab.active{
-    background:#1e3a8a;
+    background:#001f5b;
     color:white;
 }
 
@@ -72,7 +72,7 @@ body{
 label{
     display:block;
     margin-bottom:5px;
-    font-weight:600;
+    font-weight:bold;
 }
 
 input,
@@ -80,22 +80,22 @@ select{
     width:100%;
     padding:12px;
     border:1px solid #ccc;
-    border-radius:8px;
+    border-radius:5px;
 }
 
 .btn{
     width:100%;
     padding:12px;
-    background:#1e3a8a;
-    color:white;
     border:none;
-    border-radius:8px;
-    cursor:pointer;
+    border-radius:5px;
+    background:#001f5b;
+    color:white;
     font-size:16px;
+    cursor:pointer;
 }
 
 .btn:hover{
-    background:#14296b;
+    background:#003399;
 }
 
 #studentLogin{
@@ -107,14 +107,29 @@ select{
 }
 
 .footer{
-    text-align:center;
     margin-top:20px;
-    color:#777;
-    font-size:14px;
+    text-align:center;
+    color:#444;
+}
+
+.create-account{
+    text-align:center;
+    margin-top:15px;
+}
+
+.create-account a{
+    text-decoration:none;
+    color:#001f5b;
+    font-weight:bold;
+}
+
+.create-account a:hover{
+    text-decoration:underline;
 }
 
 </style>
 </head>
+
 <body>
 
 <div class="container">
@@ -125,17 +140,21 @@ select{
     </div>
 
     <div class="tabs">
+
         <button
             class="tab active"
+            id="studentTab"
             onclick="showStudent()">
             Student Login
         </button>
 
         <button
             class="tab"
+            id="adminTab"
             onclick="showAdmin()">
             Admin Login
         </button>
+
     </div>
 
     <!-- STUDENT LOGIN -->
@@ -147,18 +166,7 @@ select{
 
             <select id="studentClass">
                 <option value="">Select Class</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
                 <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
             </select>
         </div>
 
@@ -169,8 +177,6 @@ select{
                 <option value="">Select Section</option>
                 <option value="A">A</option>
                 <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
             </select>
         </div>
 
@@ -197,6 +203,13 @@ select{
             onclick="login()">
             Login
         </button>
+
+        <div class="create-account">
+            New Student?
+            <a href="register.html">
+                Create Account
+            </a>
+        </div>
 
     </div>
 
@@ -240,35 +253,31 @@ select{
 
 function showStudent(){
 
-    document.getElementById(
-        "studentLogin"
-    ).style.display="block";
+    document.getElementById("studentLogin")
+        .style.display = "block";
 
-    document.getElementById(
-        "adminLogin"
-    ).style.display="none";
+    document.getElementById("adminLogin")
+        .style.display = "none";
 
-    document.querySelectorAll(".tab")[0]
+    document.getElementById("studentTab")
         .classList.add("active");
 
-    document.querySelectorAll(".tab")[1]
+    document.getElementById("adminTab")
         .classList.remove("active");
 }
 
 function showAdmin(){
 
-    document.getElementById(
-        "studentLogin"
-    ).style.display="none";
+    document.getElementById("studentLogin")
+        .style.display = "none";
 
-    document.getElementById(
-        "adminLogin"
-    ).style.display="block";
+    document.getElementById("adminLogin")
+        .style.display = "block";
 
-    document.querySelectorAll(".tab")[1]
+    document.getElementById("adminTab")
         .classList.add("active");
 
-    document.querySelectorAll(".tab")[0]
+    document.getElementById("studentTab")
         .classList.remove("active");
 }
 
