@@ -21,13 +21,13 @@ body{
 .header{
     background:#001f5b;
     color:white;
-    padding:15px;
+    padding:20px;
     text-align:center;
 }
 
 .container{
     width:90%;
-    max-width:900px;
+    max-width:1000px;
     margin:20px auto;
     background:white;
     padding:20px;
@@ -37,7 +37,7 @@ body{
 
 .back-btn{
     display:inline-block;
-    margin-bottom:15px;
+    margin-bottom:20px;
     background:#001f5b;
     color:white;
     padding:10px 15px;
@@ -53,13 +53,13 @@ body{
 input,
 select{
     width:100%;
-    padding:10px;
+    padding:12px;
     margin:10px 0;
     border:1px solid #ccc;
     border-radius:5px;
 }
 
-button{
+.create-btn{
     width:100%;
     padding:12px;
     background:#001f5b;
@@ -67,9 +67,10 @@ button{
     border:none;
     border-radius:5px;
     cursor:pointer;
+    font-size:16px;
 }
 
-button:hover{
+.create-btn:hover{
     background:#003399;
 }
 
@@ -82,7 +83,7 @@ table{
 th,
 td{
     border:1px solid #ddd;
-    padding:10px;
+    padding:12px;
     text-align:center;
 }
 
@@ -92,13 +93,16 @@ th{
 }
 
 .delete-btn{
-    background:#dc3545;
-    width:auto;
+    background:red;
+    color:white;
+    border:none;
     padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
 }
 
 .delete-btn:hover{
-    background:#b52a37;
+    background:darkred;
 }
 
 </style>
@@ -148,7 +152,9 @@ th{
         type="date"
         id="endDate">
 
-    <button onclick="createExam()">
+    <button
+        class="create-btn"
+        onclick="createExam()">
         Create Exam
     </button>
 
@@ -156,10 +162,11 @@ th{
 
         <thead>
             <tr>
-                <th>Exam</th>
+                <th>Exam Name</th>
                 <th>Subject</th>
                 <th>Class</th>
                 <th>Duration</th>
+                <th>Total Marks</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -167,7 +174,7 @@ th{
         <tbody id="examTable">
 
             <tr>
-                <td colspan="5">
+                <td colspan="6">
                     Loading Exams...
                 </td>
             </tr>
@@ -178,7 +185,8 @@ th{
 
 </div>
 
-<script type="module" src="../js/exam.js"></script>
+<!-- IMPORTANT -->
+<script type="module" src="../js/exams.js"></script>
 
 </body>
 </html>
