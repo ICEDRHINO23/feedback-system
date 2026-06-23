@@ -7,13 +7,18 @@ import {
 
 async function loadStudents() {
 
-    const tbody =
-        document.getElementById("studentsTable");
+    const tbody = document.getElementById("studentTable");
+
+    if (!tbody) {
+        console.error("studentTable not found");
+        return;
+    }
 
     try {
 
-        const snapshot =
-            await getDocs(collection(db, "students"));
+        const snapshot = await getDocs(
+            collection(db, "students")
+        );
 
         tbody.innerHTML = "";
 
@@ -24,13 +29,15 @@ async function loadStudents() {
                 <td colspan="7">
                     No Students Found
                 </td>
-            </tr>`;
+            </tr>
+            `;
+
             return;
         }
 
-        snapshot.forEach(doc => {
+        snapshot.forEach((studentDoc) => {
 
-            const student = doc.data();
+            const student = studentDoc.data();
 
             tbody.innerHTML += `
             <tr>
@@ -40,20 +47,27 @@ async function loadStudents() {
                 <td>${student.rollNo || ""}</td>
                 <td>${student.status || "active"}</td>
                 <td>${student.lastlogin || "-"}</td>
-                <td>Active</td>
-            </tr>`;
+                <td>
+                    <button class="action-btn disable">
+                        Active
+                    </button>
+                </td>
+            </tr>
+            `;
+
         });
 
-    } catch(error) {
+    } catch (error) {
 
-        console.error(error);
+        console.error("Error Loading Students:", error);
 
         tbody.innerHTML = `
         <tr>
             <td colspan="7">
                 Error Loading Students
             </td>
-        </tr>`;
+        </tr>
+        `;
     }
 }
 
