@@ -1,251 +1,269 @@
 import { db } from "./firebase-config.js";
 
 import {
-collection,
-getDocs,
-deleteDoc,
-doc
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    collection,
+    getDocs,
+    deleteDoc,
+    doc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let allResults = [];
 
-async function loadResults(){
+async function loadResults() {
 
-const tbody =
-document.getElementById(
-"resultTable"
-);
+    const tbody =
+        document.getElementById(
+            "resultTable"
+        );
 
-try{
+    try {
 
-const snapshot =
-await getDocs(
-collection(db,"results")
-);
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "results"
+                )
+            );
 
-tbody.innerHTML="";
-allResults=[];
+        tbody.innerHTML = "";
+        allResults = [];
 
-if(snapshot.empty){
+        if (snapshot.empty) {
 
-tbody.innerHTML=`
-<tr>
-<td colspan="7">
-No Results Found
-</td>
-</tr>
-`;
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="8">
+                    No Results Found
+                </td>
+            </tr>
+            `;
 
-return;
+            return;
+        }
+
+        snapshot.forEach(resultDoc => {
+
+            const result = {
+                id: resultDoc.id,
+                ...resultDoc.data()
+            };
+
+            allResults.push(result);
+
+        });
+
+        renderResults(allResults);
+
+        loadClassFilter();
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        tbody.innerHTML = `
+        <tr>
+            <td colspan="8">
+                Error Loading Results
+            </td>
+        </tr>
+        `;
+
+    }
 }
 
-snapshot.forEach(resultDoc=>{
+function renderResults(results) {
 
-const result={
-id:resultDoc.id,
-...resultDoc.data()
-};
+    const tbody =
+        document.getElementById(
+            "resultTable"
+        );
 
-allResults.push(result);
+    tbody.innerHTML = "";
 
-});
+    results.forEach(result => {
 
-renderResults(allResults);
+        tbody.innerHTML += `
 
-loadClassFilter();
+        <tr>
 
-}catch(error){
+            <td>
+                ${result.studentName || ""}
+            </td>
 
-console.error(error);
+            <td>
+                ${result.class ||
+                  result.studentClass ||
+                  ""}
+            </td>
 
-tbody.innerHTML=`
-<tr>
-<td colspan="7">
-Error Loading Results
-</td>
-</tr>
-`;
+            <td>
+                ${result.section || ""}
+            </td>
 
-}
+            <td>
+                ${result.score || 0}
+            </td>
 
-}
+            <td>
+                ${result.totalMarks || 0}
+            </td>
 
-function renderResults(results){
+            <td>
+                ${result.percentage || 0}%
+            </td>
 
-const tbody =
-document.getElementById(
-"resultTable"
-);
+            <td>
+                ${result.date || ""}
+            </td>
 
-tbody.innerHTML="";
+            <td>
 
-results.forEach(result=>{
+                <button
+                    class="delete-btn"
+                    onclick="deleteResult('${result.id}')">
 
-tbody.innerHTML += `
+                    Delete
 
-<tr>
+                </button>
 
-<td>
-${result.studentName || ""}
-</td>
+            </td>
 
-<td>
-${result.studentClass || ""}
-</td>
+        </tr>
 
-<td>
-${result.score || 0}
-</td>
+        `;
 
-<td>
-${result.totalMarks || 0}
-</td>
-
-<td>
-${result.percentage || 0}%
-</td>
-
-<td>
-${result.submittedAt || ""}
-</td>
-
-<td>
-
-<button
-class="delete-btn"
-onclick="deleteResult('${result.id}')">
-
-Delete
-
-</button>
-
-</td>
-
-</tr>
-
-`;
-
-});
+    });
 
 }
 
-function loadClassFilter(){
+function loadClassFilter() {
 
-const filter =
-document.getElementById(
-"classFilter"
-);
+    const filter =
+        document.getElementById(
+            "classFilter"
+        );
 
-const classes =
-[
-...new Set(
-allResults.map(
-r=>r.studentClass
-)
-)
-];
+    filter.innerHTML =
+        '<option value="">All Classes</option>';
 
-classes.forEach(cls=>{
+    const classes =
+        [...new Set(
+            allResults.map(
+                r =>
+                r.class ||
+                r.studentClass
+            )
+        )];
 
-filter.innerHTML += `
-<option value="${cls}">
-${cls}
-</option>
-`;
+    classes.forEach(cls => {
 
-});
+        if (!cls) return;
+
+        filter.innerHTML += `
+        <option value="${cls}">
+            ${cls}
+        </option>
+        `;
+
+    });
 
 }
 
 window.deleteResult =
-async function(id){
+async function(id) {
 
-if(
-!confirm(
-"Delete Result?"
-)
-)
-return;
+    if (
+        !confirm(
+            "Delete Result?"
+        )
+    ) return;
 
-try{
+    try {
 
-await deleteDoc(
-doc(
-db,
-"results",
-id
-)
-);
+        await deleteDoc(
+            doc(
+                db,
+                "results",
+                id
+            )
+        );
 
-loadResults();
+        loadResults();
 
-}catch(error){
+    }
+    catch (error) {
 
-console.error(error);
+        console.error(error);
 
-alert(
-"Unable to Delete"
-);
-}
+        alert(
+            "Unable to Delete Result"
+        );
+
+    }
 
 };
 
 document
 .getElementById(
-"searchBox"
+    "searchBox"
 )
 .addEventListener(
-"input",
-filterResults
+    "input",
+    filterResults
 );
 
 document
 .getElementById(
-"classFilter"
+    "classFilter"
 )
 .addEventListener(
-"change",
-filterResults
+    "change",
+    filterResults
 );
 
-function filterResults(){
+function filterResults() {
 
-const search =
-document
-.getElementById(
-"searchBox"
-)
-.value
-.toLowerCase();
+    const search =
+        document
+        .getElementById(
+            "searchBox"
+        )
+        .value
+        .toLowerCase();
 
-const selectedClass =
-document
-.getElementById(
-"classFilter"
-)
-.value;
+    const selectedClass =
+        document
+        .getElementById(
+            "classFilter"
+        )
+        .value;
 
-const filtered =
-allResults.filter(result=>{
+    const filtered =
+        allResults.filter(result => {
 
-const nameMatch =
-(result.studentName || "")
-.toLowerCase()
-.includes(search);
+            const nameMatch =
+                (
+                    result.studentName ||
+                    ""
+                )
+                .toLowerCase()
+                .includes(search);
 
-const classMatch =
-selectedClass === "" ||
-result.studentClass === selectedClass;
+            const classMatch =
+                selectedClass === "" ||
+                result.class === selectedClass ||
+                result.studentClass === selectedClass;
 
-return (
-nameMatch &&
-classMatch
-);
+            return (
+                nameMatch &&
+                classMatch
+            );
 
-});
+        });
 
-renderResults(filtered);
+    renderResults(filtered);
 
 }
 
