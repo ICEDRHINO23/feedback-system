@@ -1,1 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Registration - AHPS</title>
 
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#1e3a8a;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.container{
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    width:400px;
+}
+
+h2{
+    text-align:center;
+    color:#1e3a8a;
+}
+
+input,select{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#1e3a8a;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#14296b;
+}
+
+a{
+    display:block;
+    text-align:center;
+    margin-top:10px;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h2>Student Registration</h2>
+
+<input type="text" id="name" placeholder="Student Name">
+
+<select id="studentClass">
+    <option value="">Select Class</option>
+    <option value="10">10</option>
+</select>
+
+<select id="section">
+    <option value="">Select Section</option>
+    <option value="A">A</option>
+    <option value="B">B</option>
+</select>
+
+<input type="text" id="rollNo" placeholder="Roll Number">
+
+<input type="password" id="password" placeholder="Password">
+
+<input type="password" id="confirmPassword" placeholder="Confirm Password">
+
+<button onclick="registerStudent()">
+    Create Account
+</button>
+
+<a href="login.html">Back to Login</a>
+
+</div>
+
+<script type="module" src="js/register.js"></script>
+
+</body>
+</html>
