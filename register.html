@@ -33,6 +33,7 @@ input,select{
     margin:8px 0;
     border:1px solid #ccc;
     border-radius:5px;
+    box-sizing:border-box;
 }
 
 button{
@@ -66,14 +67,11 @@ a{
 <input type="text" id="name" placeholder="Student Name">
 
 <select id="studentClass">
-    <option value="">Select Class</option>
-    <option value="10">10</option>
+    <option value="">Loading Classes...</option>
 </select>
 
 <select id="section">
-    <option value="">Select Section</option>
-    <option value="A">A</option>
-    <option value="B">B</option>
+    <option value="">Loading Sections...</option>
 </select>
 
 <input type="text" id="rollNo" placeholder="Roll Number">
