@@ -1,9 +1,11 @@
-
 import { db } from "./firebase-config.js";
 
 import {
     collection,
-    getDocs
+    getDocs,
+    doc,
+    updateDoc,
+    deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 async function loadStudents() {
@@ -48,11 +50,32 @@ async function loadStudents() {
                 <td>${student.rollNo || ""}</td>
                 <td>${student.status || "active"}</td>
                 <td>${student.lastlogin || "-"}</td>
+
                 <td>
-                    <button class="action-btn disable">
-                        Active
+
+                    <button
+                        class="action-btn disable"
+                        onclick="toggleStudentStatus(
+                            '${studentDoc.id}',
+                            '${student.status || "active"}'
+                        )">
+
+                        ${student.status || "active"}
+
                     </button>
+
+                    <button
+                        class="action-btn delete"
+                        onclick="deleteStudent(
+                            '${studentDoc.id}'
+                        )">
+
+                        Delete
+
+                    </button>
+
                 </td>
+
             </tr>
             `;
 
@@ -60,7 +83,10 @@ async function loadStudents() {
 
     } catch (error) {
 
-        console.error("Error Loading Students:", error);
+        console.error(
+            "Error Loading Students:",
+            error
+        );
 
         tbody.innerHTML = `
         <tr>
@@ -71,5 +97,78 @@ async function loadStudents() {
         `;
     }
 }
+
+
+// Enable / Disable Student
+
+window.toggleStudentStatus =
+async function(id, currentStatus){
+
+    try{
+
+        const newStatus =
+            currentStatus === "active"
+            ? "disabled"
+            : "active";
+
+        await updateDoc(
+            doc(db, "students", id),
+            {
+                status: newStatus
+            }
+        );
+
+        alert(
+            "Student status updated"
+        );
+
+        loadStudents();
+
+    }catch(error){
+
+        console.error(error);
+
+        alert(
+            "Unable to update status"
+        );
+    }
+};
+
+
+// Delete Student
+
+window.deleteStudent =
+async function(id){
+
+    const confirmDelete =
+        confirm(
+            "Delete this student?"
+        );
+
+    if(!confirmDelete)
+        return;
+
+    try{
+
+        await deleteDoc(
+            doc(db, "students", id)
+        );
+
+        alert(
+            "Student deleted"
+        );
+
+        loadStudents();
+
+    }catch(error){
+
+        console.error(error);
+
+        alert(
+            "Unable to delete student"
+        );
+    }
+};
+
 
 loadStudents();
