@@ -1,10 +1,11 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Create Assessment</title>
+<title>Assessment Management</title>
 
 <style>
 
@@ -22,18 +23,22 @@ body{
 .header{
     background:#001f5b;
     color:white;
-    padding:20px;
     text-align:center;
+    padding:20px;
 }
 
 .container{
-    width:90%;
+    width:95%;
     max-width:1200px;
     margin:20px auto;
+}
+
+.card{
     background:white;
     padding:20px;
     border-radius:10px;
-    box-shadow:0 3px 10px rgba(0,0,0,.1);
+    box-shadow:0 2px 10px rgba(0,0,0,.1);
+    margin-bottom:20px;
 }
 
 .back-btn{
@@ -41,10 +46,9 @@ body{
     margin-bottom:20px;
     background:#001f5b;
     color:white;
-    padding:10px 15px;
     text-decoration:none;
+    padding:10px 15px;
     border-radius:5px;
-    font-weight:bold;
 }
 
 .back-btn:hover{
@@ -63,10 +67,10 @@ select{
 .create-btn{
     width:100%;
     padding:12px;
-    background:#001f5b;
-    color:white;
     border:none;
     border-radius:5px;
+    background:#001f5b;
+    color:white;
     cursor:pointer;
     font-size:16px;
 }
@@ -77,20 +81,20 @@ select{
 
 table{
     width:100%;
-    margin-top:20px;
     border-collapse:collapse;
-}
-
-th,
-td{
-    border:1px solid #ddd;
-    padding:12px;
-    text-align:center;
+    margin-top:20px;
 }
 
 th{
     background:#001f5b;
     color:white;
+    padding:12px;
+}
+
+td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
 }
 
 .delete-btn{
@@ -104,21 +108,6 @@ th{
 
 .delete-btn:hover{
     background:darkred;
-}
-
-.status-student{
-    color:green;
-    font-weight:bold;
-}
-
-.status-teacher{
-    color:orange;
-    font-weight:bold;
-}
-
-.status-both{
-    color:blue;
-    font-weight:bold;
 }
 
 </style>
@@ -136,124 +125,113 @@ th{
         ← Back To Dashboard
     </a>
 
-    <input
-        type="text"
-        id="examName"
-        placeholder="Assessment Name">
+    <div class="card">
 
-    <input
-        type="text"
-        id="subject"
-        placeholder="Subject">
+        <h2>Create Assessment</h2>
 
-    <select id="targetType">
+        <input
+            type="text"
+            id="examName"
+            placeholder="Assessment Name">
 
-        <option value="student">
-            Students Only
-        </option>
+        <input
+            type="text"
+            id="subject"
+            placeholder="Subject">
 
-        <option value="teacher">
-            Teachers Only
-        </option>
+        <select id="targetType">
 
-        <option value="both">
-            Students & Teachers
-        </option>
+            <option value="">
+                Select Target
+            </option>
 
-    </select>
+            <option value="student">
+                Students
+            </option>
 
-    <select id="examClass">
+            <option value="teacher">
+                Teachers
+            </option>
 
-        <option value="">
-            Select Class
-        </option>
+            <option value="all">
+                Students & Teachers
+            </option>
 
-        <option value="Nursery">Nursery</option>
-        <option value="LKG">LKG</option>
-        <option value="UKG">UKG</option>
+        </select>
 
-        <option value="1">Class 1</option>
-        <option value="2">Class 2</option>
-        <option value="3">Class 3</option>
-        <option value="4">Class 4</option>
-        <option value="5">Class 5</option>
-        <option value="6">Class 6</option>
-        <option value="7">Class 7</option>
-        <option value="8">Class 8</option>
-        <option value="9">Class 9</option>
-        <option value="10">Class 10</option>
-        <option value="11">Class 11</option>
-        <option value="12">Class 12</option>
+        <select id="examClass">
 
-    </select>
+            <option value="">
+                Select Class
+            </option>
 
-    <input
-        type="number"
-        id="duration"
-        placeholder="Duration (Minutes)">
+        </select>
 
-    <input
-        type="number"
-        id="totalMarks"
-        placeholder="Total Marks">
+        <input
+            type="number"
+            id="duration"
+            placeholder="Duration (Minutes)">
 
-    <label>
-        Start Date
-    </label>
+        <input
+            type="number"
+            id="totalMarks"
+            placeholder="Total Marks">
 
-    <input
-        type="date"
-        id="startDate">
+        <input
+            type="date"
+            id="startDate">
 
-    <label>
-        End Date
-    </label>
+        <input
+            type="date"
+            id="endDate">
 
-    <input
-        type="date"
-        id="endDate">
+        <button
+            class="create-btn"
+            onclick="createExam()">
 
-    <button
-        class="create-btn"
-        onclick="createExam()">
+            Create Assessment
 
-        Create Assessment
+        </button>
 
-    </button>
+    </div>
 
-    <table>
+    <div class="card">
 
-        <thead>
+        <h2>Assessment List</h2>
 
-            <tr>
+        <table>
 
-                <th>Assessment</th>
-                <th>Subject</th>
-                <th>Target</th>
-                <th>Class</th>
-                <th>Duration</th>
-                <th>Total Marks</th>
-                <th>Action</th>
+            <thead>
 
-            </tr>
+                <tr>
 
-        </thead>
+                    <th>Name</th>
+                    <th>Subject</th>
+                    <th>Target</th>
+                    <th>Class</th>
+                    <th>Duration</th>
+                    <th>Marks</th>
+                    <th>Action</th>
 
-        <tbody id="examTable">
+                </tr>
 
-            <tr>
+            </thead>
 
-                <td colspan="7">
+            <tbody id="examTable">
 
-                    Loading Assessments...
+                <tr>
 
-                </td>
+                    <td colspan="7">
+                        Loading Assessments...
+                    </td>
 
-            </tr>
+                </tr>
 
-        </tbody>
+            </tbody>
 
-    </table>
+        </table>
+
+    </div>
 
 </div>
 
@@ -261,3 +239,4 @@ th{
 
 </body>
 </html>
+```
