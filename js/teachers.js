@@ -9,141 +9,87 @@ import {
     updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const teacherTable =
-    document.getElementById(
-        "teacherTable"
-    );
+window.addTeacher = addTeacher;
+window.deleteTeacher = deleteTeacher;
+window.resetPassword = resetPassword;
 
-// =========================
-// ADD TEACHER
-// =========================
+async function addTeacher() {
 
-window.addTeacher =
-async function(){
+    const teacherName =
+        document.getElementById("teacherName").value.trim();
 
-    try{
+    const employeeId =
+        document.getElementById("employeeId").value.trim();
 
-        const teacherName =
-            document.getElementById(
-                "teacherName"
-            ).value.trim();
+    const subject =
+        document.getElementById("subject").value.trim();
 
-        const employeeId =
-            document.getElementById(
-                "employeeId"
-            ).value.trim();
+    const status =
+        document.getElementById("status").value;
 
-        const subject =
-            document.getElementById(
-                "subject"
-            ).value.trim();
+    if (
+        !teacherName ||
+        !employeeId ||
+        !subject
+    ) {
+        alert("Fill all fields");
+        return;
+    }
 
-        if(
-            !teacherName ||
-            !employeeId ||
-            !subject
-        ){
-            alert(
-                "Please fill all fields"
-            );
-            return;
-        }
+    try {
 
         const password =
-            "AHPS" +
-            employeeId +
-            "@2026";
+            "AHPS" + employeeId + "@2026";
 
         await addDoc(
-            collection(
-                db,
-                "teachers"
-            ),
+            collection(db, "teachers"),
             {
-                teacherName:
-                    teacherName,
-
-                employeeId:
-                    employeeId,
-
-                subject:
-                    subject,
-
-                password:
-                    password,
-
-                role:
-                    "teacher",
-
-                status:
-                    "active",
-
-                mustChangePassword:
-                    true,
-
+                teacherName,
+                employeeId,
+                subject,
+                status,
+                role: "teacher",
+                password,
                 createdAt:
-                    new Date()
-                    .toISOString()
+                    new Date().toISOString()
             }
         );
 
         alert(
-            "Teacher Added Successfully\n\n" +
-            "Employee ID : " +
-            employeeId +
-            "\nPassword : " +
+            "Teacher Added Successfully\n\nPassword : " +
             password
         );
 
-        document.getElementById(
-            "teacherName"
-        ).value = "";
-
-        document.getElementById(
-            "employeeId"
-        ).value = "";
-
-        document.getElementById(
-            "subject"
-        ).value = "";
+        document.getElementById("teacherName").value = "";
+        document.getElementById("employeeId").value = "";
+        document.getElementById("subject").value = "";
 
         loadTeachers();
 
-    }
-    catch(error){
+    } catch (error) {
 
         console.error(error);
-
-        alert(
-            "Failed To Add Teacher"
-        );
+        alert("Failed To Add Teacher");
     }
-};
+}
 
-// =========================
-// LOAD TEACHERS
-// =========================
+async function loadTeachers() {
 
-async function loadTeachers(){
+    const table =
+        document.getElementById("teacherTable");
 
-    try{
+    try {
 
         const snapshot =
             await getDocs(
-                collection(
-                    db,
-                    "teachers"
-                )
+                collection(db, "teachers")
             );
 
-        teacherTable.innerHTML =
-            "";
+        table.innerHTML = "";
 
-        if(
-            snapshot.empty
-        ){
+        if (snapshot.empty) {
 
-            teacherTable.innerHTML = `
+            table.innerHTML = `
             <tr>
                 <td colspan="6">
                     No Teachers Found
@@ -154,57 +100,37 @@ async function loadTeachers(){
             return;
         }
 
-        snapshot.forEach(
-            teacherDoc => {
+        snapshot.forEach((teacherDoc) => {
 
             const teacher =
                 teacherDoc.data();
 
-            teacherTable.innerHTML += `
+            table.innerHTML += `
 
             <tr>
 
-                <td>
-                    ${teacher.teacherName || ""}
-                </td>
+                <td>${teacher.teacherName}</td>
 
-                <td>
-                    ${teacher.employeeId || ""}
-                </td>
+                <td>${teacher.employeeId}</td>
 
-                <td>
-                    ${teacher.subject || ""}
-                </td>
+                <td>${teacher.subject}</td>
 
-                <td>
-                    ${teacher.status || "active"}
-                </td>
+                <td>${teacher.status}</td>
 
-                <td>
-                    ${teacher.password || ""}
-                </td>
+                <td>${teacher.password}</td>
 
                 <td>
 
                     <button
                     class="reset-btn"
-                    onclick="resetPassword(
-                    '${teacherDoc.id}',
-                    '${teacher.employeeId}'
-                    )">
-
+                    onclick="resetPassword('${teacherDoc.id}','${teacher.employeeId}')">
                     Reset
-
                     </button>
 
                     <button
                     class="delete-btn"
-                    onclick="deleteTeacher(
-                    '${teacherDoc.id}'
-                    )">
-
+                    onclick="deleteTeacher('${teacherDoc.id}')">
                     Delete
-
                     </button>
 
                 </td>
@@ -214,116 +140,73 @@ async function loadTeachers(){
             `;
         });
 
-    }
-    catch(error){
+    } catch (error) {
 
         console.error(error);
 
-        teacherTable.innerHTML = `
+        table.innerHTML = `
         <tr>
             <td colspan="6">
-                Error Loading Teachers
+                Failed To Load Teachers
             </td>
         </tr>
         `;
     }
 }
 
-// =========================
-// DELETE TEACHER
-// =========================
+async function deleteTeacher(id) {
 
-window.deleteTeacher =
-async function(id){
-
-    if(
+    if (
         !confirm(
-            "Delete this teacher?"
+            "Delete Teacher?"
         )
-    ){
+    ) {
         return;
     }
 
-    try{
+    try {
 
         await deleteDoc(
-            doc(
-                db,
-                "teachers",
-                id
-            )
-        );
-
-        alert(
-            "Teacher Deleted"
+            doc(db, "teachers", id)
         );
 
         loadTeachers();
 
-    }
-    catch(error){
+    } catch (error) {
 
         console.error(error);
-
-        alert(
-            "Unable To Delete Teacher"
-        );
     }
-};
+}
 
-// =========================
-// RESET PASSWORD
-// =========================
-
-window.resetPassword =
-async function(
+async function resetPassword(
     id,
     employeeId
-){
+) {
 
-    try{
+    const newPassword =
+        "AHPS" + employeeId + "@2026";
 
-        const newPassword =
-            "AHPS" +
-            employeeId +
-            "@2026";
+    try {
 
         await updateDoc(
-            doc(
-                db,
-                "teachers",
-                id
-            ),
+            doc(db, "teachers", id),
             {
                 password:
-                    newPassword,
-
-                mustChangePassword:
-                    true
+                    newPassword
             }
         );
 
         alert(
-            "Password Reset Successfully\n\n" +
-            "New Password : " +
+            "Password Reset\n\n" +
             newPassword
         );
 
         loadTeachers();
 
-    }
-    catch(error){
+    } catch (error) {
 
         console.error(error);
-
-        alert(
-            "Password Reset Failed"
-        );
     }
-};
-
-// =========================
-// INITIAL LOAD
-// =========================
+}
 
 loadTeachers();
