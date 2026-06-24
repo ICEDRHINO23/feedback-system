@@ -12,18 +12,13 @@ let allResults = [];
 async function loadResults() {
 
     const tbody =
-        document.getElementById(
-            "resultTable"
-        );
+        document.getElementById("resultTable");
 
     try {
 
         const snapshot =
             await getDocs(
-                collection(
-                    db,
-                    "results"
-                )
+                collection(db, "results")
             );
 
         tbody.innerHTML = "";
@@ -42,11 +37,11 @@ async function loadResults() {
             return;
         }
 
-        snapshot.forEach(resultDoc => {
+        snapshot.forEach(docSnap => {
 
             const result = {
-                id: resultDoc.id,
-                ...resultDoc.data()
+                id: docSnap.id,
+                ...docSnap.data()
             };
 
             allResults.push(result);
@@ -54,7 +49,6 @@ async function loadResults() {
         });
 
         renderResults(allResults);
-
         loadClassFilter();
 
     }
@@ -69,37 +63,39 @@ async function loadResults() {
             </td>
         </tr>
         `;
-
     }
 }
 
 function renderResults(results) {
 
     const tbody =
-        document.getElementById(
-            "resultTable"
-        );
+        document.getElementById("resultTable");
 
     tbody.innerHTML = "";
 
     results.forEach(result => {
+
+        const percentage =
+            result.totalMarks > 0
+                ? (
+                    (result.score / result.totalMarks) * 100
+                  ).toFixed(2)
+                : 0;
 
         tbody.innerHTML += `
 
         <tr>
 
             <td>
-                ${result.studentName || ""}
+                ${result.participantName || "-"}
             </td>
 
             <td>
-                ${result.class ||
-                  result.studentClass ||
-                  ""}
+                ${result.studentClass || "-"}
             </td>
 
             <td>
-                ${result.section || ""}
+                ${result.studentSection || "-"}
             </td>
 
             <td>
@@ -111,11 +107,17 @@ function renderResults(results) {
             </td>
 
             <td>
-                ${result.percentage || 0}%
+                ${percentage}%
             </td>
 
             <td>
-                ${result.date || ""}
+                ${
+                    result.submittedAt
+                    ? new Date(
+                        result.submittedAt
+                      ).toLocaleString()
+                    : "-"
+                }
             </td>
 
             <td>
@@ -133,17 +135,15 @@ function renderResults(results) {
         </tr>
 
         `;
-
     });
-
 }
 
 function loadClassFilter() {
 
     const filter =
-        document.getElementById(
-            "classFilter"
-        );
+        document.getElementById("classFilter");
+
+    if (!filter) return;
 
     filter.innerHTML =
         '<option value="">All Classes</option>';
@@ -151,9 +151,7 @@ function loadClassFilter() {
     const classes =
         [...new Set(
             allResults.map(
-                r =>
-                r.class ||
-                r.studentClass
+                r => r.studentClass
             )
         )];
 
@@ -166,19 +164,14 @@ function loadClassFilter() {
             ${cls}
         </option>
         `;
-
     });
-
 }
 
 window.deleteResult =
 async function(id) {
 
-    if (
-        !confirm(
-            "Delete Result?"
-        )
-    ) return;
+    if (!confirm("Delete Result?"))
+        return;
 
     try {
 
@@ -193,51 +186,27 @@ async function(id) {
         loadResults();
 
     }
-    catch (error) {
+    catch(error) {
 
         console.error(error);
 
         alert(
-            "Unable to Delete Result"
+            "Unable To Delete Result"
         );
-
     }
-
 };
-
-document
-.getElementById(
-    "searchBox"
-)
-.addEventListener(
-    "input",
-    filterResults
-);
-
-document
-.getElementById(
-    "classFilter"
-)
-.addEventListener(
-    "change",
-    filterResults
-);
 
 function filterResults() {
 
     const search =
         document
-        .getElementById(
-            "searchBox"
-        )
+        .getElementById("searchBox")
         .value
         .toLowerCase();
 
     const selectedClass =
         document
-        .getElementById(
-            "classFilter"
-        )
+        .getElementById("classFilter")
         .value;
 
     const filtered =
@@ -245,15 +214,13 @@ function filterResults() {
 
             const nameMatch =
                 (
-                    result.studentName ||
-                    ""
+                    result.participantName || ""
                 )
                 .toLowerCase()
                 .includes(search);
 
             const classMatch =
                 selectedClass === "" ||
-                result.class === selectedClass ||
                 result.studentClass === selectedClass;
 
             return (
@@ -264,7 +231,32 @@ function filterResults() {
         });
 
     renderResults(filtered);
+}
 
+const searchBox =
+    document.getElementById(
+        "searchBox"
+    );
+
+if (searchBox) {
+
+    searchBox.addEventListener(
+        "input",
+        filterResults
+    );
+}
+
+const classFilter =
+    document.getElementById(
+        "classFilter"
+    );
+
+if (classFilter) {
+
+    classFilter.addEventListener(
+        "change",
+        filterResults
+    );
 }
 
 loadResults();
