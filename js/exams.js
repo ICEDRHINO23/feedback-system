@@ -2,315 +2,335 @@ import { db } from "./firebase-config.js";
 
 import {
     collection,
-    getDocs,
     addDoc,
-    query,
-    where
+    getDocs,
+    deleteDoc,
+    doc,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-let questions = [];
-let currentQuestion = 0;
-let answers = {};
+const examTable =
+    document.getElementById("examTable");
 
-window.previousQuestion = previousQuestion;
-window.nextQuestion = nextQuestion;
-window.submitExam = submitExam;
-window.saveAnswer = saveAnswer;
+// =====================
+// LOAD CLASSES
+// =====================
 
-async function loadQuestions() {
+async function loadClasses() {
 
     try {
 
-        const examId =
-            localStorage.getItem(
-                "currentExamId"
+        const configRef =
+            doc(db, "settings", "config");
+
+        const configSnap =
+            await getDoc(configRef);
+
+        const classSelect =
+            document.getElementById("examClass");
+
+        classSelect.innerHTML =
+            '<option value="">Select Class</option>';
+
+        if (!configSnap.exists()) {
+
+            console.log(
+                "Config document not found"
             );
 
-        if (!examId) {
-
-            document.getElementById(
-                "questionText"
-            ).innerHTML =
-                "No Exam Selected";
-
             return;
         }
 
-        const q = query(
-            collection(db, "questions"),
-            where("examId", "==", examId)
-        );
+        const classes =
+            configSnap.data().classes || [];
 
-        const snapshot =
-            await getDocs(q);
+        classes.forEach(cls => {
 
-        questions = [];
-
-        snapshot.forEach(doc => {
-
-            questions.push({
-                id: doc.id,
-                ...doc.data()
-            });
+            classSelect.innerHTML += `
+                <option value="${cls}">
+                    ${cls}
+                </option>
+            `;
 
         });
-
-        if (questions.length === 0) {
-
-            document.getElementById(
-                "questionText"
-            ).innerHTML =
-                "No Questions Found For This Exam";
-
-            document.getElementById(
-                "options"
-            ).innerHTML = "";
-
-            return;
-        }
-
-        showQuestion();
 
     } catch (error) {
 
-        console.error(error);
-
-        document.getElementById(
-            "questionText"
-        ).innerHTML =
-            "Unable To Load Questions";
+        console.error(
+            "Load Classes Error:",
+            error
+        );
     }
 }
 
-function showQuestion() {
+// =====================
+// CREATE EXAM
+// =====================
 
-    let q = questions[currentQuestion];
+window.createExam =
+async function () {
 
-    document.getElementById(
-        "questionText"
-    ).innerHTML =
-        "Q" +
-        (currentQuestion + 1) +
-        ". " +
-        q.question;
-
-    const optionsDiv =
+    const examName =
         document.getElementById(
-            "options"
-        );
+            "examName"
+        ).value.trim();
 
-    optionsDiv.innerHTML = `
+    const subject =
+        document.getElementById(
+            "subject"
+        ).value.trim();
 
-    <button class="option"
-    onclick="saveAnswer('A')">
-    A. ${q.optionA}
-    </button>
+    const examClass =
+        document.getElementById(
+            "examClass"
+        ).value;
 
-    <button class="option"
-    onclick="saveAnswer('B')">
-    B. ${q.optionB}
-    </button>
+    const duration =
+        document.getElementById(
+            "duration"
+        ).value;
 
-    <button class="option"
-    onclick="saveAnswer('C')">
-    C. ${q.optionC}
-    </button>
+    const totalMarks =
+        document.getElementById(
+            "totalMarks"
+        ).value;
 
-    <button class="option"
-    onclick="saveAnswer('D')">
-    D. ${q.optionD}
-    </button>
+    const startDate =
+        document.getElementById(
+            "startDate"
+        ).value;
 
-    `;
-
-    if (answers[currentQuestion]) {
-
-        const buttons =
-            document.querySelectorAll(
-                ".option"
-            );
-
-        buttons.forEach(btn => {
-
-            if (
-                btn.innerText.startsWith(
-                    answers[currentQuestion]
-                )
-            ) {
-
-                btn.style.background =
-                    "#28a745";
-
-                btn.style.color =
-                    "#fff";
-            }
-
-        });
-    }
-}
-
-function saveAnswer(answer) {
-
-    answers[currentQuestion] =
-        answer;
-
-    const buttons =
-        document.querySelectorAll(
-            ".option"
-        );
-
-    buttons.forEach(btn => {
-
-        btn.style.background = "";
-        btn.style.color = "";
-
-        if (
-            btn.innerText.startsWith(
-                answer
-            )
-        ) {
-
-            btn.style.background =
-                "#28a745";
-
-            btn.style.color =
-                "#fff";
-        }
-    });
-}
-
-function nextQuestion() {
+    const endDate =
+        document.getElementById(
+            "endDate"
+        ).value;
 
     if (
-        currentQuestion <
-        questions.length - 1
+        !examName ||
+        !subject ||
+        !examClass ||
+        !duration ||
+        !totalMarks ||
+        !startDate ||
+        !endDate
     ) {
 
-        currentQuestion++;
+        alert(
+            "Please fill all fields"
+        );
 
-        showQuestion();
+        return;
     }
-}
-
-function previousQuestion() {
-
-    if (
-        currentQuestion > 0
-    ) {
-
-        currentQuestion--;
-
-        showQuestion();
-    }
-}
-
-async function submitExam() {
-
-    let score = 0;
-    let totalMarks = 0;
-    let correctAnswers = 0;
-
-    questions.forEach((q, index) => {
-
-        const marks =
-            Number(q.marks || 1);
-
-        totalMarks += marks;
-
-        if (
-            answers[index] === q.answer
-        ) {
-
-            score += marks;
-            correctAnswers++;
-        }
-
-    });
-
-    const percentage =
-        (
-            (score / totalMarks) * 100
-        ).toFixed(2);
 
     try {
 
-        const examId =
-            localStorage.getItem(
-                "currentExamId"
-            );
-
         await addDoc(
-            collection(db, "results"),
+            collection(db, "exams"),
             {
 
-                examId: examId,
+                examName:
+                    examName,
 
-                studentName:
-                    localStorage.getItem(
-                        "studentName"
-                    ) || "",
+                subject:
+                    subject,
 
                 class:
-                    localStorage.getItem(
-                        "studentClass"
-                    ) || "",
+                    examClass,
 
-                section:
-                    localStorage.getItem(
-                        "studentSection"
-                    ) || "",
-
-                rollNo:
-                    localStorage.getItem(
-                        "rollNo"
-                    ) || "",
-
-                score: score,
+                duration:
+                    duration,
 
                 totalMarks:
                     totalMarks,
 
-                correctAnswers:
-                    correctAnswers,
+                startDate:
+                    startDate,
 
-                totalQuestions:
-                    questions.length,
+                endDate:
+                    endDate,
 
-                percentage:
-                    percentage,
-
-                date:
-                    new Date()
-                    .toLocaleDateString(),
-
-                submittedAt:
+                createdAt:
                     new Date()
                     .toISOString()
+
             }
         );
 
         alert(
-            "Exam Submitted Successfully!\n\n" +
-            "Score: " +
-            score +
-            "/" +
-            totalMarks +
-            "\nPercentage: " +
-            percentage +
-            "%"
+            "Exam Created Successfully"
         );
 
-        window.location.href =
-            "result.html";
+        document.getElementById(
+            "examName"
+        ).value = "";
+
+        document.getElementById(
+            "subject"
+        ).value = "";
+
+        document.getElementById(
+            "duration"
+        ).value = "";
+
+        document.getElementById(
+            "totalMarks"
+        ).value = "";
+
+        document.getElementById(
+            "startDate"
+        ).value = "";
+
+        document.getElementById(
+            "endDate"
+        ).value = "";
+
+        loadExams();
 
     } catch (error) {
 
         console.error(error);
 
         alert(
-            "Failed To Save Result"
+            "Failed To Create Exam"
         );
+    }
+};
+
+// =====================
+// LOAD EXAMS
+// =====================
+
+async function loadExams() {
+
+    try {
+
+        const snapshot =
+            await getDocs(
+                collection(db, "exams")
+            );
+
+        examTable.innerHTML = "";
+
+        if (snapshot.empty) {
+
+            examTable.innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        No Exams Found
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+        snapshot.forEach(
+            examDoc => {
+
+                const exam =
+                    examDoc.data();
+
+                examTable.innerHTML += `
+
+                <tr>
+
+                    <td>
+                        ${exam.examName || ""}
+                    </td>
+
+                    <td>
+                        ${exam.subject || ""}
+                    </td>
+
+                    <td>
+                        ${exam.class || ""}
+                    </td>
+
+                    <td>
+                        ${exam.duration || ""}
+                        Min
+                    </td>
+
+                    <td>
+                        ${exam.totalMarks || ""}
+                    </td>
+
+                    <td>
+
+                        <button
+                        class="delete-btn"
+                        onclick="deleteExam('${examDoc.id}')">
+
+                        Delete
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+                `;
+
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Load Exams Error:",
+            error
+        );
+
+        examTable.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    Error Loading Exams
+                </td>
+            </tr>
+        `;
     }
 }
 
-loadQuestions();
+// =====================
+// DELETE EXAM
+// =====================
+
+window.deleteExam =
+async function (id) {
+
+    const confirmDelete =
+        confirm(
+            "Delete this exam?"
+        );
+
+    if (!confirmDelete)
+        return;
+
+    try {
+
+        await deleteDoc(
+            doc(
+                db,
+                "exams",
+                id
+            )
+        );
+
+        loadExams();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable To Delete Exam"
+        );
+    }
+};
+
+// =====================
+// INIT
+// =====================
+
+loadClasses();
+loadExams();
