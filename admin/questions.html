@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,6 +34,7 @@ margin:20px auto;
 background:white;
 padding:20px;
 border-radius:10px;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
 }
 
 input,
@@ -85,6 +87,11 @@ text-align:center;
 background:red;
 }
 
+.edit-btn{
+background:orange;
+margin-right:5px;
+}
+
 .back-btn{
 display:inline-block;
 margin-bottom:15px;
@@ -93,6 +100,23 @@ color:white;
 padding:10px 15px;
 text-decoration:none;
 border-radius:5px;
+}
+
+#multipleSection{
+padding:10px;
+background:#f8f8f8;
+border-radius:5px;
+margin-bottom:10px;
+}
+
+#multipleSection label{
+display:block;
+margin-bottom:8px;
+}
+
+#multipleSection input{
+width:auto;
+margin-right:10px;
 }
 
 </style>
@@ -110,14 +134,38 @@ border-radius:5px;
 ← Back to Dashboard
 </a>
 
+<input
+type="hidden"
+id="questionId">
+
 <select id="examSelect">
-<option value="">Select Exam</option>
+<option value="">
+Select Exam
+</option>
+</select>
+
+<select id="questionType">
+
+<option value="mcq">
+Single MCQ
+</option>
+
+<option value="multiple">
+Multiple Answer
+</option>
+
+<option value="sentence">
+Sentence Answer
+</option>
+
 </select>
 
 <textarea
 id="question"
 placeholder="Enter Question">
 </textarea>
+
+<div id="optionSection">
 
 <input
 type="text"
@@ -139,13 +187,79 @@ type="text"
 id="optionD"
 placeholder="Option D">
 
+</div>
+
+<!-- Single MCQ -->
+
+<div id="mcqSection">
+
 <select id="answer">
-<option value="">Correct Answer</option>
-<option>A</option>
-<option>B</option>
-<option>C</option>
-<option>D</option>
+
+<option value="">
+Correct Answer
+</option>
+
+<option value="A">A</option>
+<option value="B">B</option>
+<option value="C">C</option>
+<option value="D">D</option>
+
 </select>
+
+</div>
+
+<!-- Multiple Answer -->
+
+<div
+id="multipleSection"
+style="display:none;">
+
+<h4>
+Select Correct Answers
+</h4>
+
+<label>
+<input
+type="checkbox"
+id="ansA">
+Option A
+</label>
+
+<label>
+<input
+type="checkbox"
+id="ansB">
+Option B
+</label>
+
+<label>
+<input
+type="checkbox"
+id="ansC">
+Option C
+</label>
+
+<label>
+<input
+type="checkbox"
+id="ansD">
+Option D
+</label>
+
+</div>
+
+<!-- Sentence Answer -->
+
+<div
+id="sentenceSection"
+style="display:none;">
+
+<textarea
+id="modelAnswer"
+placeholder="Enter Model Answer">
+</textarea>
+
+</div>
 
 <input
 type="number"
@@ -159,27 +273,110 @@ Save Question
 <table>
 
 <thead>
+
 <tr>
-<th>Question</th>
-<th>Answer</th>
-<th>Marks</th>
-<th>Action</th>
+
+<th>
+Question
+</th>
+
+<th>
+Type
+</th>
+
+<th>
+Answer
+</th>
+
+<th>
+Marks
+</th>
+
+<th>
+Action
+</th>
+
 </tr>
+
 </thead>
 
 <tbody id="questionTable">
+
 <tr>
-<td colspan="4">
+
+<td colspan="5">
+
 Loading Questions...
+
 </td>
+
 </tr>
+
 </tbody>
 
 </table>
 
 </div>
 
-<script type="module" src="../js/questions.js"></script>
+<script>
+
+document
+.getElementById("questionType")
+.addEventListener(
+"change",
+function(){
+
+const type =
+this.value;
+
+document.getElementById(
+"mcqSection"
+).style.display = "none";
+
+document.getElementById(
+"multipleSection"
+).style.display = "none";
+
+document.getElementById(
+"sentenceSection"
+).style.display = "none";
+
+if(type === "mcq"){
+
+document.getElementById(
+"mcqSection"
+).style.display =
+"block";
+
+}
+
+if(type === "multiple"){
+
+document.getElementById(
+"multipleSection"
+).style.display =
+"block";
+
+}
+
+if(type === "sentence"){
+
+document.getElementById(
+"sentenceSection"
+).style.display =
+"block";
+
+}
+
+});
+
+</script>
+
+<script
+type="module"
+src="../js/questions.js">
+</script>
 
 </body>
 </html>
+```
