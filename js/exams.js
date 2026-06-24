@@ -363,4 +363,3 @@ window.deleteExam = async function (examId) {
 
 loadClasses();
 loadExams();
-```
