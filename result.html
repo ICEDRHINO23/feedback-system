@@ -1,28 +1,83 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Exam Result</title>
+<title>Exam Result</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    text-align:center;
+    padding:50px;
+}
+
+.card{
+    max-width:500px;
+    margin:auto;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,.2);
+}
+
+button{
+    padding:12px 25px;
+    background:#001f5b;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+</style>
 </head>
+
 <body>
 
-<h1>Exam Result</h1>
+<div class="card">
 
-<h2 id="score"></h2>
+<h1>Assessment Result</h1>
 
-<button onclick="goHome()">
-    Dashboard
+<h2 id="scoreText">
+Loading...
+</h2>
+
+<br>
+
+<button onclick="goDashboard()">
+Dashboard
 </button>
+
+</div>
 
 <script>
 
-document.getElementById("score")
-.innerHTML =
-"Your Score : " +
-localStorage.getItem("score");
+const score =
+    localStorage.getItem("latestScore") || 0;
 
-function goHome(){
-    window.location.href =
-    "dashboard.html";
+const total =
+    localStorage.getItem("latestTotal") || 0;
+
+document.getElementById(
+    "scoreText"
+).innerHTML =
+    `Your Score : ${score}/${total}`;
+
+function goDashboard(){
+
+    const role =
+        localStorage.getItem("role");
+
+    if(role === "teacher"){
+
+        window.location.href =
+            "teacher-dashboard.html";
+
+    }else{
+
+        window.location.href =
+            "dashboard.html";
+
+    }
 }
 
 </script>
