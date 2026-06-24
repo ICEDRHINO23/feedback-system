@@ -12,9 +12,9 @@ const examId =
 let questions = [];
 let totalDuration = 30;
 
-// =====================================
+// =========================
 // LOAD QUESTIONS
-// =====================================
+// =========================
 
 async function loadQuestions() {
 
@@ -27,7 +27,7 @@ async function loadQuestions() {
 
         container.innerHTML = "";
 
-        // LOAD EXAM DETAILS
+        // Load Exam Details
 
         const examSnapshot =
             await getDocs(
@@ -47,14 +47,12 @@ async function loadQuestions() {
                     Number(
                         exam.duration || 30
                     );
-
             }
-
         });
 
         startTimer();
 
-        // LOAD QUESTIONS
+        // Load Questions
 
         const questionSnapshot =
             await getDocs(
@@ -90,7 +88,8 @@ async function loadQuestions() {
                             type="radio"
                             name="${docSnap.id}"
                             value="A">
-                        ${q.optionA || ""}
+
+                        ${q.optionA}
                     </label>
 
                     <label>
@@ -98,7 +97,8 @@ async function loadQuestions() {
                             type="radio"
                             name="${docSnap.id}"
                             value="B">
-                        ${q.optionB || ""}
+
+                        ${q.optionB}
                     </label>
 
                     <label>
@@ -106,7 +106,8 @@ async function loadQuestions() {
                             type="radio"
                             name="${docSnap.id}"
                             value="C">
-                        ${q.optionC || ""}
+
+                        ${q.optionC}
                     </label>
 
                     <label>
@@ -114,7 +115,8 @@ async function loadQuestions() {
                             type="radio"
                             name="${docSnap.id}"
                             value="D">
-                        ${q.optionD || ""}
+
+                        ${q.optionD}
                     </label>
 
                 </div>
@@ -122,7 +124,6 @@ async function loadQuestions() {
                 `;
 
                 count++;
-
             }
 
         });
@@ -139,37 +140,26 @@ async function loadQuestions() {
                     No Questions Found
                 </h3>
 
-                <p>
-                    This assessment does not contain any questions.
-                </p>
-
             </div>
 
             `;
-
         }
 
     }
     catch (error) {
 
-        console.error(
-            "LOAD QUESTION ERROR:",
-            error
-        );
+        console.error(error);
 
         document.getElementById(
             "questionContainer"
         ).innerHTML =
-
-        "<h3>Error Loading Questions</h3>";
-
+            "<h3>Error Loading Questions</h3>";
     }
-
 }
 
-// =====================================
+// =========================
 // TIMER
-// =====================================
+// =========================
 
 function startTimer() {
 
@@ -194,11 +184,11 @@ function startTimer() {
 
             timer.innerHTML =
 
-            `${minutes}:${
-                seconds < 10
-                ? "0" + seconds
-                : seconds
-            }`;
+                `${minutes}:${
+                    seconds < 10
+                        ? "0" + seconds
+                        : seconds
+                }`;
 
             timeLeft--;
 
@@ -211,20 +201,18 @@ function startTimer() {
                 );
 
                 alert(
-                    "Time Up! Assessment Submitted."
+                    "Time Up! Submitting Assessment..."
                 );
 
                 submitExam();
-
             }
 
         }, 1000);
-
 }
 
-// =====================================
+// =========================
 // SUBMIT EXAM
-// =====================================
+// =========================
 
 window.submitExam =
 async function () {
@@ -255,7 +243,6 @@ async function () {
                     Number(
                         q.marks || 1
                     );
-
             }
 
         });
@@ -269,13 +256,33 @@ async function () {
 
             role === "teacher"
 
-            ? localStorage.getItem(
-                "teacherName"
-              )
+                ? localStorage.getItem(
+                    "teacherName"
+                )
 
-            : localStorage.getItem(
-                "studentName"
-              );
+                : localStorage.getItem(
+                    "studentName"
+                );
+
+        const studentClass =
+            localStorage.getItem(
+                "studentClass"
+            ) || "";
+
+        const studentSection =
+            localStorage.getItem(
+                "studentSection"
+            ) || "";
+
+        const percentage =
+
+            totalMarks > 0
+
+                ? (
+                    (score / totalMarks) * 100
+                ).toFixed(2)
+
+                : 0;
 
         await addDoc(
             collection(
@@ -284,23 +291,28 @@ async function () {
             ),
             {
                 examId,
+
                 role,
+
                 participantName,
+
+                studentClass,
+
+                studentSection,
+
                 score,
+
                 totalMarks,
-                percentage:
-                    totalMarks > 0
-                    ? (
-                        score /
-                        totalMarks *
-                        100
-                    ).toFixed(2)
-                    : 0,
+
+                percentage,
+
                 submittedAt:
                     new Date()
                     .toISOString()
             }
         );
+
+        // Save for Result Page
 
         localStorage.setItem(
             "latestScore",
@@ -312,32 +324,45 @@ async function () {
             totalMarks
         );
 
-        alert(
-            `Assessment Submitted\nScore: ${score}/${totalMarks}`
+        localStorage.setItem(
+            "latestPercentage",
+            percentage
         );
 
-        window.location.href =
-            "result.html";
+        alert(
+            `Assessment Submitted\n\nScore: ${score}/${totalMarks}`
+        );
+
+        // Redirect
+
+        if (
+            role === "teacher"
+        ) {
+
+            window.location.href =
+                "teacher-results.html";
+
+        }
+        else {
+
+            window.location.href =
+                "result.html";
+        }
 
     }
     catch (error) {
 
-        console.error(
-            "SUBMIT ERROR:",
-            error
-        );
+        console.error(error);
 
         alert(
             "Failed To Submit Assessment"
         );
-
     }
-
 };
 
-// =====================================
+// =========================
 // START
-// =====================================
+// =========================
 
 if (!examId) {
 
@@ -352,5 +377,4 @@ if (!examId) {
 else {
 
     loadQuestions();
-
 }
