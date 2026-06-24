@@ -1,3 +1,4 @@
+```javascript
 import { db } from "./firebase-config.js";
 
 import {
@@ -12,9 +13,9 @@ const examId =
 let questions = [];
 let totalDuration = 30;
 
-// =========================
+// ==========================
 // LOAD QUESTIONS
-// =========================
+// ==========================
 
 async function loadQuestions() {
 
@@ -48,6 +49,7 @@ async function loadQuestions() {
                         exam.duration || 30
                     );
             }
+
         });
 
         startTimer();
@@ -75,53 +77,130 @@ async function loadQuestions() {
                     ...q
                 });
 
-                container.innerHTML += `
+                // ==================
+                // MCQ
+                // ==================
 
-                <div class="question-box">
+                if (
+                    !q.questionType ||
+                    q.questionType === "mcq"
+                ) {
 
-                    <h3>
-                        Q${count}. ${q.question}
-                    </h3>
+                    container.innerHTML += `
 
-                    <label>
-                        <input
-                            type="radio"
+                    <div class="question-box">
+
+                        <h3>
+                            Q${count}. ${q.question}
+                        </h3>
+
+                        <label>
+                            <input type="radio"
                             name="${docSnap.id}"
                             value="A">
+                            ${q.optionA}
+                        </label>
 
-                        ${q.optionA}
-                    </label>
-
-                    <label>
-                        <input
-                            type="radio"
+                        <label>
+                            <input type="radio"
                             name="${docSnap.id}"
                             value="B">
+                            ${q.optionB}
+                        </label>
 
-                        ${q.optionB}
-                    </label>
-
-                    <label>
-                        <input
-                            type="radio"
+                        <label>
+                            <input type="radio"
                             name="${docSnap.id}"
                             value="C">
+                            ${q.optionC}
+                        </label>
 
-                        ${q.optionC}
-                    </label>
-
-                    <label>
-                        <input
-                            type="radio"
+                        <label>
+                            <input type="radio"
                             name="${docSnap.id}"
                             value="D">
+                            ${q.optionD}
+                        </label>
 
-                        ${q.optionD}
-                    </label>
+                    </div>
 
-                </div>
+                    `;
+                }
 
-                `;
+                // ==================
+                // MULTIPLE ANSWER
+                // ==================
+
+                if (
+                    q.questionType === "multiple"
+                ) {
+
+                    container.innerHTML += `
+
+                    <div class="question-box">
+
+                        <h3>
+                            Q${count}. ${q.question}
+                        </h3>
+
+                        <label>
+                            <input type="checkbox"
+                            name="${docSnap.id}"
+                            value="A">
+                            ${q.optionA}
+                        </label>
+
+                        <label>
+                            <input type="checkbox"
+                            name="${docSnap.id}"
+                            value="B">
+                            ${q.optionB}
+                        </label>
+
+                        <label>
+                            <input type="checkbox"
+                            name="${docSnap.id}"
+                            value="C">
+                            ${q.optionC}
+                        </label>
+
+                        <label>
+                            <input type="checkbox"
+                            name="${docSnap.id}"
+                            value="D">
+                            ${q.optionD}
+                        </label>
+
+                    </div>
+
+                    `;
+                }
+
+                // ==================
+                // SENTENCE
+                // ==================
+
+                if (
+                    q.questionType === "sentence"
+                ) {
+
+                    container.innerHTML += `
+
+                    <div class="question-box">
+
+                        <h3>
+                            Q${count}. ${q.question}
+                        </h3>
+
+                        <textarea
+                        id="answer_${docSnap.id}"
+                        rows="5"
+                        placeholder="Write your answer here"></textarea>
+
+                    </div>
+
+                    `;
+                }
 
                 count++;
             }
@@ -132,17 +211,9 @@ async function loadQuestions() {
             questions.length === 0
         ) {
 
-            container.innerHTML = `
+            container.innerHTML =
 
-            <div class="question-box">
-
-                <h3>
-                    No Questions Found
-                </h3>
-
-            </div>
-
-            `;
+            `<h3>No Questions Found</h3>`;
         }
 
     }
@@ -153,13 +224,15 @@ async function loadQuestions() {
         document.getElementById(
             "questionContainer"
         ).innerHTML =
-            "<h3>Error Loading Questions</h3>";
+
+        "<h3>Error Loading Questions</h3>";
     }
+
 }
 
-// =========================
+// ==========================
 // TIMER
-// =========================
+// ==========================
 
 function startTimer() {
 
@@ -186,8 +259,8 @@ function startTimer() {
 
                 `${minutes}:${
                     seconds < 10
-                        ? "0" + seconds
-                        : seconds
+                    ? "0" + seconds
+                    : seconds
                 }`;
 
             timeLeft--;
@@ -201,18 +274,19 @@ function startTimer() {
                 );
 
                 alert(
-                    "Time Up! Submitting Assessment..."
+                    "Time Up! Assessment Submitted."
                 );
 
                 submitExam();
             }
 
         }, 1000);
+
 }
 
-// =========================
+// ==========================
 // SUBMIT EXAM
-// =========================
+// ==========================
 
 window.submitExam =
 async function () {
@@ -222,113 +296,117 @@ async function () {
         let score = 0;
         let totalMarks = 0;
 
-        ```javascript
-const subjectiveAnswers = [];
+        const subjectiveAnswers = [];
 
-questions.forEach(q => {
+        questions.forEach(q => {
 
-    totalMarks +=
-        Number(q.marks || 1);
+            totalMarks +=
+                Number(
+                    q.marks || 1
+                );
 
-    // MCQ
+            // MCQ
 
-    if (
-        !q.questionType ||
-        q.questionType === "mcq"
-    ) {
+            if (
+                !q.questionType ||
+                q.questionType === "mcq"
+            ) {
 
-        const selected =
-            document.querySelector(
-                `input[name="${q.id}"]:checked`
-            );
+                const selected =
+                    document.querySelector(
+                        `input[name="${q.id}"]:checked`
+                    );
 
-        if (
-            selected &&
-            selected.value === q.answer
-        ) {
+                if (
+                    selected &&
+                    selected.value === q.answer
+                ) {
 
-            score +=
-                Number(q.marks || 1);
-        }
-    }
+                    score +=
+                        Number(
+                            q.marks || 1
+                        );
+                }
+            }
 
-    // MULTIPLE ANSWER
+            // MULTIPLE ANSWER
 
-    if (
-        q.questionType === "multiple"
-    ) {
+            if (
+                q.questionType === "multiple"
+            ) {
 
-        const selectedAnswers = [];
+                const selectedAnswers = [];
 
-        document
-        .querySelectorAll(
-            `input[name="${q.id}"]:checked`
-        )
-        .forEach(box => {
-
-            selectedAnswers.push(
-                box.value
-            );
-
-        });
-
-        const correctAnswers =
-            q.answers || [];
-
-        const isCorrect =
-
-            selectedAnswers.length ===
-            correctAnswers.length &&
-
-            selectedAnswers.every(
-                answer =>
-                correctAnswers.includes(
-                    answer
+                document
+                .querySelectorAll(
+                    `input[name="${q.id}"]:checked`
                 )
-            );
+                .forEach(box => {
 
-        if (isCorrect) {
+                    selectedAnswers.push(
+                        box.value
+                    );
 
-            score +=
-                Number(q.marks || 1);
-        }
-    }
+                });
 
-    // SENTENCE
+                const correctAnswers =
+                    q.answers || [];
 
-    if (
-        q.questionType === "sentence"
-    ) {
+                const isCorrect =
 
-        const answerBox =
-            document.getElementById(
-                `answer_${q.id}`
-            );
+                    selectedAnswers.length ===
+                    correctAnswers.length &&
 
-        subjectiveAnswers.push({
+                    selectedAnswers.every(
+                        answer =>
+                        correctAnswers.includes(
+                            answer
+                        )
+                    );
 
-            questionId:
-                q.id,
+                if (isCorrect) {
 
-            question:
-                q.question,
+                    score +=
+                        Number(
+                            q.marks || 1
+                        );
+                }
+            }
 
-            modelAnswer:
-                q.modelAnswer || "",
+            // SENTENCE ANSWERS
 
-            studentAnswer:
-                answerBox
-                ? answerBox.value
-                : "",
+            if (
+                q.questionType === "sentence"
+            ) {
 
-            marks:
-                q.marks
+                const answerBox =
+                    document.getElementById(
+                        `answer_${q.id}`
+                    );
+
+                subjectiveAnswers.push({
+
+                    questionId:
+                        q.id,
+
+                    question:
+                        q.question,
+
+                    modelAnswer:
+                        q.modelAnswer || "",
+
+                    studentAnswer:
+                        answerBox
+                        ? answerBox.value
+                        : "",
+
+                    marks:
+                        q.marks
+
+                });
+            }
 
         });
-    }
-
-});
-```
 
         const role =
             localStorage.getItem(
@@ -338,14 +416,12 @@ questions.forEach(q => {
         const participantName =
 
             role === "teacher"
-
-                ? localStorage.getItem(
-                    "teacherName"
-                )
-
-                : localStorage.getItem(
-                    "studentName"
-                );
+            ? localStorage.getItem(
+                "teacherName"
+              )
+            : localStorage.getItem(
+                "studentName"
+              );
 
         const studentClass =
             localStorage.getItem(
@@ -360,12 +436,10 @@ questions.forEach(q => {
         const percentage =
 
             totalMarks > 0
-
-                ? (
-                    (score / totalMarks) * 100
-                ).toFixed(2)
-
-                : 0;
+            ? (
+                (score / totalMarks) * 100
+              ).toFixed(2)
+            : 0;
 
         await addDoc(
             collection(
@@ -374,30 +448,19 @@ questions.forEach(q => {
             ),
             {
                 examId,
-
                 role,
-
                 participantName,
-
                 studentClass,
-
                 studentSection,
-
                 score,
-
                 totalMarks,
-
                 percentage,
-
                 subjectiveAnswers,
-                
                 submittedAt:
                     new Date()
                     .toISOString()
             }
         );
-
-        // Save for Result Page
 
         localStorage.setItem(
             "latestScore",
@@ -417,8 +480,6 @@ questions.forEach(q => {
         alert(
             `Assessment Submitted\n\nScore: ${score}/${totalMarks}`
         );
-
-        // Redirect
 
         if (
             role === "teacher"
@@ -443,11 +504,12 @@ questions.forEach(q => {
             "Failed To Submit Assessment"
         );
     }
+
 };
 
-// =========================
+// ==========================
 // START
-// =========================
+// ==========================
 
 if (!examId) {
 
@@ -462,4 +524,6 @@ if (!examId) {
 else {
 
     loadQuestions();
+
 }
+```
