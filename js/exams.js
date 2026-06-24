@@ -1,4 +1,3 @@
-
 import { db } from "./firebase-config.js";
 
 import {
@@ -9,9 +8,9 @@ import {
     doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ===============================
+// ===================================
 // LOAD CLASSES
-// ===============================
+// ===================================
 
 async function loadClasses() {
 
@@ -22,29 +21,34 @@ async function loadClasses() {
 
         if (!classDropdown) return;
 
+        classDropdown.innerHTML =
+            '<option value="">Select Class</option>';
+
         const settingsSnap =
             await getDocs(
                 collection(db, "settings")
             );
 
-        classDropdown.innerHTML =
-            '<option value="">Select Class</option>';
-
-        settingsSnap.forEach(docSnap => {
+        settingsSnap.forEach((docSnap) => {
 
             const data =
                 docSnap.data();
 
-            if (data.classes) {
+            if (
+                data.classes &&
+                Array.isArray(data.classes)
+            ) {
 
-                data.classes.forEach(cls => {
+                data.classes.forEach((cls) => {
 
                     classDropdown.innerHTML += `
-                    <option value="${cls}">
-                        Class ${cls}
-                    </option>
+                        <option value="${cls}">
+                            Class ${cls}
+                        </option>
                     `;
+
                 });
+
             }
 
         });
@@ -56,12 +60,14 @@ async function loadClasses() {
             "Class Load Error:",
             error
         );
+
     }
+
 }
 
-// ===============================
-// CREATE ASSESSMENT
-// ===============================
+// ===================================
+// CREATE EXAM
+// ===================================
 
 window.createExam = async function () {
 
@@ -106,6 +112,7 @@ window.createExam = async function () {
             );
 
             return;
+
         }
 
         await addDoc(
@@ -116,8 +123,8 @@ window.createExam = async function () {
                 targetType,
                 examClass:
                     targetType === "student"
-                    ? examClass
-                    : "",
+                        ? examClass
+                        : "",
                 duration:
                     Number(duration),
                 totalMarks:
@@ -134,7 +141,14 @@ window.createExam = async function () {
             "Assessment Created Successfully"
         );
 
-        loadExams();
+        document.getElementById("examName").value = "";
+        document.getElementById("subject").value = "";
+        document.getElementById("duration").value = "";
+        document.getElementById("totalMarks").value = "";
+        document.getElementById("startDate").value = "";
+        document.getElementById("endDate").value = "";
+
+        await loadExams();
 
     }
     catch (error) {
@@ -147,12 +161,14 @@ window.createExam = async function () {
         alert(
             "Failed To Create Assessment"
         );
+
     }
+
 };
 
-// ===============================
-// LOAD ASSESSMENTS
-// ===============================
+// ===================================
+// LOAD EXAMS
+// ===================================
 
 async function loadExams() {
 
@@ -164,11 +180,11 @@ async function loadExams() {
         if (!table) return;
 
         table.innerHTML = `
-        <tr>
-            <td colspan="7">
-                Loading...
-            </td>
-        </tr>
+            <tr>
+                <td colspan="7">
+                    Loading Assessments...
+                </td>
+            </tr>
         `;
 
         const snapshot =
@@ -181,52 +197,52 @@ async function loadExams() {
         if (snapshot.empty) {
 
             table.innerHTML = `
-            <tr>
-                <td colspan="7">
-                    No Assessments Found
-                </td>
-            </tr>
+                <tr>
+                    <td colspan="7">
+                        No Assessments Found
+                    </td>
+                </tr>
             `;
 
             return;
+
         }
 
-        snapshot.forEach(docSnap => {
+        snapshot.forEach((docSnap) => {
 
             const exam =
                 docSnap.data();
 
             table.innerHTML += `
+                <tr>
 
-            <tr>
+                    <td>${exam.examName || ""}</td>
 
-                <td>${exam.examName}</td>
+                    <td>${exam.subject || ""}</td>
 
-                <td>${exam.subject}</td>
+                    <td>${exam.targetType || ""}</td>
 
-                <td>${exam.targetType}</td>
+                    <td>${exam.examClass || "-"}</td>
 
-                <td>${exam.examClass || "-"}</td>
+                    <td>${exam.duration || 0}</td>
 
-                <td>${exam.duration}</td>
+                    <td>${exam.totalMarks || 0}</td>
 
-                <td>${exam.totalMarks}</td>
+                    <td>
 
-                <td>
+                        <button
+                            class="delete-btn"
+                            onclick="deleteExam('${docSnap.id}')">
 
-                    <button
-                    class="delete-btn"
-                    onclick="deleteExam('${docSnap.id}')">
+                            Delete
 
-                    Delete
+                        </button>
 
-                    </button>
+                    </td>
 
-                </td>
-
-            </tr>
-
+                </tr>
             `;
+
         });
 
     }
@@ -236,12 +252,29 @@ async function loadExams() {
             "Load Exams Error:",
             error
         );
+
+        const table =
+            document.getElementById("examTable");
+
+        if (table) {
+
+            table.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        Error Loading Assessments
+                    </td>
+                </tr>
+            `;
+
+        }
+
     }
+
 }
 
-// ===============================
-// DELETE ASSESSMENT
-// ===============================
+// ===================================
+// DELETE EXAM
+// ===================================
 
 window.deleteExam = async function (examId) {
 
@@ -249,7 +282,7 @@ window.deleteExam = async function (examId) {
 
         const confirmDelete =
             confirm(
-                "Delete this assessment and all related questions/results?"
+                "Delete this assessment and all related questions and results?"
             );
 
         if (!confirmDelete) return;
@@ -259,7 +292,7 @@ window.deleteExam = async function (examId) {
             examId
         );
 
-        // Delete Questions
+        // DELETE QUESTIONS
 
         const questionSnap =
             await getDocs(
@@ -287,10 +320,12 @@ window.deleteExam = async function (examId) {
                     "Deleted Question:",
                     questionDoc.id
                 );
+
             }
+
         }
 
-        // Delete Results
+        // DELETE RESULTS
 
         const resultSnap =
             await getDocs(
@@ -318,10 +353,12 @@ window.deleteExam = async function (examId) {
                     "Deleted Result:",
                     resultDoc.id
                 );
+
             }
+
         }
 
-        // Delete Exam
+        // DELETE EXAM
 
         await deleteDoc(
             doc(
@@ -346,7 +383,7 @@ window.deleteExam = async function (examId) {
     catch (error) {
 
         console.error(
-            "DELETE ERROR:",
+            "Delete Error:",
             error
         );
 
@@ -354,12 +391,21 @@ window.deleteExam = async function (examId) {
             "Delete Failed: " +
             error.message
         );
+
     }
+
 };
 
-// ===============================
+// ===================================
 // START
-// ===============================
+// ===================================
 
-loadClasses();
-loadExams();
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        loadClasses();
+        loadExams();
+
+    }
+);
