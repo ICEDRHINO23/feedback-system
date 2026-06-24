@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Create Exam</title>
+
+<title>Create Assessment</title>
 
 <style>
 
@@ -27,12 +28,12 @@ body{
 
 .container{
     width:90%;
-    max-width:1000px;
+    max-width:1200px;
     margin:20px auto;
     background:white;
     padding:20px;
     border-radius:10px;
-    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    box-shadow:0 3px 10px rgba(0,0,0,.1);
 }
 
 .back-btn{
@@ -105,33 +106,85 @@ th{
     background:darkred;
 }
 
+.status-student{
+    color:green;
+    font-weight:bold;
+}
+
+.status-teacher{
+    color:orange;
+    font-weight:bold;
+}
+
+.status-both{
+    color:blue;
+    font-weight:bold;
+}
+
 </style>
 </head>
 
 <body>
 
 <div class="header">
-    <h1>Create Exam</h1>
+    <h1>Assessment Management</h1>
 </div>
 
 <div class="container">
 
     <a href="dashboard.html" class="back-btn">
-        ← Back to Dashboard
+        ← Back To Dashboard
     </a>
 
     <input
         type="text"
         id="examName"
-        placeholder="Exam Name">
+        placeholder="Assessment Name">
 
     <input
         type="text"
         id="subject"
         placeholder="Subject">
 
+    <select id="targetType">
+
+        <option value="student">
+            Students Only
+        </option>
+
+        <option value="teacher">
+            Teachers Only
+        </option>
+
+        <option value="both">
+            Students & Teachers
+        </option>
+
+    </select>
+
     <select id="examClass">
-        <option value="">Select Class</option>
+
+        <option value="">
+            Select Class
+        </option>
+
+        <option value="Nursery">Nursery</option>
+        <option value="LKG">LKG</option>
+        <option value="UKG">UKG</option>
+
+        <option value="1">Class 1</option>
+        <option value="2">Class 2</option>
+        <option value="3">Class 3</option>
+        <option value="4">Class 4</option>
+        <option value="5">Class 5</option>
+        <option value="6">Class 6</option>
+        <option value="7">Class 7</option>
+        <option value="8">Class 8</option>
+        <option value="9">Class 9</option>
+        <option value="10">Class 10</option>
+        <option value="11">Class 11</option>
+        <option value="12">Class 12</option>
+
     </select>
 
     <input
@@ -144,9 +197,17 @@ th{
         id="totalMarks"
         placeholder="Total Marks">
 
+    <label>
+        Start Date
+    </label>
+
     <input
         type="date"
         id="startDate">
+
+    <label>
+        End Date
+    </label>
 
     <input
         type="date"
@@ -155,28 +216,39 @@ th{
     <button
         class="create-btn"
         onclick="createExam()">
-        Create Exam
+
+        Create Assessment
+
     </button>
 
     <table>
 
         <thead>
+
             <tr>
-                <th>Exam Name</th>
+
+                <th>Assessment</th>
                 <th>Subject</th>
+                <th>Target</th>
                 <th>Class</th>
                 <th>Duration</th>
                 <th>Total Marks</th>
                 <th>Action</th>
+
             </tr>
+
         </thead>
 
         <tbody id="examTable">
 
             <tr>
-                <td colspan="6">
-                    Loading Exams...
+
+                <td colspan="7">
+
+                    Loading Assessments...
+
                 </td>
+
             </tr>
 
         </tbody>
@@ -185,7 +257,6 @@ th{
 
 </div>
 
-<!-- IMPORTANT -->
 <script type="module" src="../js/exams.js"></script>
 
 </body>
