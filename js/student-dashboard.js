@@ -20,6 +20,18 @@ async function loadExams() {
             studentClass
         );
 
+        if (!studentClass) {
+
+            examList.innerHTML = `
+                <p>
+                    Student Class Not Found.
+                    Please Login Again.
+                </p>
+            `;
+
+            return;
+        }
+
         const snapshot =
             await getDocs(
                 collection(db, "exams")
@@ -29,16 +41,31 @@ async function loadExams() {
 
         let found = false;
 
-        snapshot.forEach(docSnap => {
+        snapshot.forEach((docSnap) => {
 
             const exam =
                 docSnap.data();
 
-            console.log(exam);
+            console.log(
+                "Exam:",
+                exam
+            );
+
+            console.log(
+                "Exam Class:",
+                exam.examClass
+            );
+
+            console.log(
+                "Target Type:",
+                exam.targetType
+            );
 
             if (
+                String(exam.examClass).trim() ===
+                String(studentClass).trim() &&
                 exam.targetType === "student" &&
-                exam.examClass === studentClass
+                exam.status === "active"
             ) {
 
                 found = true;
@@ -47,7 +74,9 @@ async function loadExams() {
 
                 <div class="exam-card">
 
-                    <h3>${exam.examName}</h3>
+                    <h3>
+                        ${exam.examName}
+                    </h3>
 
                     <p>
                         Subject:
@@ -64,10 +93,20 @@ async function loadExams() {
                         ${exam.totalMarks}
                     </p>
 
-                    <button
-                    onclick="startExam('${docSnap.id}')">
+                    <p>
+                        Start Date:
+                        ${exam.startDate}
+                    </p>
 
-                    Start Exam
+                    <p>
+                        End Date:
+                        ${exam.endDate}
+                    </p>
+
+                    <button
+                        onclick="startExam('${docSnap.id}')">
+
+                        Start Exam
 
                     </button>
 
@@ -80,21 +119,48 @@ async function loadExams() {
 
         if (!found) {
 
-            examList.innerHTML =
-                "<p>No Exams Available</p>";
+            examList.innerHTML = `
+
+            <div class="exam-card">
+
+                <h3>
+                    No Exams Available
+                </h3>
+
+                <p>
+                    No assessments assigned
+                    for Class ${studentClass}
+                </p>
+
+            </div>
+
+            `;
         }
 
     }
     catch (error) {
 
-        console.error(error);
+        console.error(
+            "Exam Loading Error:",
+            error
+        );
 
-        examList.innerHTML =
-            "<p>Unable To Load Exams</p>";
+        examList.innerHTML = `
+
+        <p>
+            Unable To Load Exams
+        </p>
+
+        `;
     }
 }
 
 window.startExam = function (examId) {
+
+    console.log(
+        "Starting Exam:",
+        examId
+    );
 
     localStorage.setItem(
         "currentExamId",
