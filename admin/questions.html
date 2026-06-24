@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -140,22 +139,22 @@ id="questionId">
 
 <select id="examSelect">
 <option value="">
-Select Exam
+Select Assessment
 </option>
 </select>
 
 <select id="questionType">
 
 <option value="mcq">
-Single MCQ
+Single Correct Answer MCQ
 </option>
 
 <option value="multiple">
-Multiple Answer
+Multiple Correct Answers MCQ
 </option>
 
 <option value="sentence">
-Sentence Answer
+Descriptive / Sentence Answer
 </option>
 
 </select>
@@ -189,14 +188,14 @@ placeholder="Option D">
 
 </div>
 
-<!-- Single MCQ -->
+<!-- SINGLE MCQ -->
 
 <div id="mcqSection">
 
 <select id="answer">
 
 <option value="">
-Correct Answer
+Select Correct Answer
 </option>
 
 <option value="A">A</option>
@@ -208,7 +207,7 @@ Correct Answer
 
 </div>
 
-<!-- Multiple Answer -->
+<!-- MULTIPLE ANSWERS -->
 
 <div
 id="multipleSection"
@@ -248,7 +247,7 @@ Option D
 
 </div>
 
-<!-- Sentence Answer -->
+<!-- SENTENCE ANSWER -->
 
 <div
 id="sentenceSection"
@@ -276,25 +275,11 @@ Save Question
 
 <tr>
 
-<th>
-Question
-</th>
-
-<th>
-Type
-</th>
-
-<th>
-Answer
-</th>
-
-<th>
-Marks
-</th>
-
-<th>
-Action
-</th>
+<th>Question</th>
+<th>Type</th>
+<th>Answer</th>
+<th>Marks</th>
+<th>Action</th>
 
 </tr>
 
@@ -320,28 +305,39 @@ Loading Questions...
 
 <script>
 
-document
-.getElementById("questionType")
-.addEventListener(
-"change",
-function(){
+function updateQuestionType(){
 
 const type =
-this.value;
+document.getElementById(
+"questionType"
+).value;
+
+document.getElementById(
+"optionSection"
+).style.display =
+"none";
 
 document.getElementById(
 "mcqSection"
-).style.display = "none";
+).style.display =
+"none";
 
 document.getElementById(
 "multipleSection"
-).style.display = "none";
+).style.display =
+"none";
 
 document.getElementById(
 "sentenceSection"
-).style.display = "none";
+).style.display =
+"none";
 
 if(type === "mcq"){
+
+document.getElementById(
+"optionSection"
+).style.display =
+"block";
 
 document.getElementById(
 "mcqSection"
@@ -351,6 +347,11 @@ document.getElementById(
 }
 
 if(type === "multiple"){
+
+document.getElementById(
+"optionSection"
+).style.display =
+"block";
 
 document.getElementById(
 "multipleSection"
@@ -368,7 +369,18 @@ document.getElementById(
 
 }
 
-});
+}
+
+document
+.getElementById(
+"questionType"
+)
+.addEventListener(
+"change",
+updateQuestionType
+);
+
+updateQuestionType();
 
 </script>
 
@@ -379,4 +391,3 @@ src="../js/questions.js">
 
 </body>
 </html>
-```
