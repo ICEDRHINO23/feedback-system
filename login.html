@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,7 +26,7 @@ body{
 
 .container{
     background:#fff;
-    width:450px;
+    width:500px;
     padding:30px;
     border-radius:15px;
     box-shadow:0 10px 20px rgba(0,0,0,.2);
@@ -59,6 +59,7 @@ body{
     cursor:pointer;
     background:#d9d9d9;
     font-weight:bold;
+    font-size:14px;
 }
 
 .tab.active{
@@ -101,6 +102,10 @@ select{
 
 #studentLogin{
     display:block;
+}
+
+#teacherLogin{
+    display:none;
 }
 
 #adminLogin{
@@ -151,6 +156,13 @@ select{
 
         <button
             class="tab"
+            id="teacherTab"
+            onclick="showTeacher()">
+            Teacher Login
+        </button>
+
+        <button
+            class="tab"
             id="adminTab"
             onclick="showAdmin()">
             Admin Login
@@ -166,7 +178,9 @@ select{
             <label>Class</label>
 
             <select id="studentClass">
-                <option value="">Loading Classes...</option>
+                <option value="">
+                    Loading Classes...
+                </option>
             </select>
         </div>
 
@@ -174,7 +188,9 @@ select{
             <label>Section</label>
 
             <select id="section">
-                <option value="">Loading Sections...</option>
+                <option value="">
+                    Loading Sections...
+                </option>
             </select>
         </div>
 
@@ -208,6 +224,36 @@ select{
                 Create Account
             </a>
         </div>
+
+    </div>
+
+    <!-- TEACHER LOGIN -->
+
+    <div id="teacherLogin">
+
+        <div class="form-group">
+            <label>Employee ID</label>
+
+            <input
+                type="text"
+                id="employeeId"
+                placeholder="Enter Employee ID">
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+
+            <input
+                type="password"
+                id="teacherPassword"
+                placeholder="Enter Password">
+        </div>
+
+        <button
+            class="btn"
+            onclick="teacherLogin()">
+            Login
+        </button>
 
     </div>
 
@@ -251,27 +297,90 @@ select{
 
 function showStudent(){
 
-    document.getElementById("studentLogin").style.display = "block";
-    document.getElementById("adminLogin").style.display = "none";
+    document.getElementById(
+        "studentLogin"
+    ).style.display = "block";
 
-    document.getElementById("studentTab").classList.add("active");
-    document.getElementById("adminTab").classList.remove("active");
+    document.getElementById(
+        "teacherLogin"
+    ).style.display = "none";
+
+    document.getElementById(
+        "adminLogin"
+    ).style.display = "none";
+
+    document.getElementById(
+        "studentTab"
+    ).classList.add("active");
+
+    document.getElementById(
+        "teacherTab"
+    ).classList.remove("active");
+
+    document.getElementById(
+        "adminTab"
+    ).classList.remove("active");
+}
+
+function showTeacher(){
+
+    document.getElementById(
+        "studentLogin"
+    ).style.display = "none";
+
+    document.getElementById(
+        "teacherLogin"
+    ).style.display = "block";
+
+    document.getElementById(
+        "adminLogin"
+    ).style.display = "none";
+
+    document.getElementById(
+        "teacherTab"
+    ).classList.add("active");
+
+    document.getElementById(
+        "studentTab"
+    ).classList.remove("active");
+
+    document.getElementById(
+        "adminTab"
+    ).classList.remove("active");
 }
 
 function showAdmin(){
 
-    document.getElementById("studentLogin").style.display = "none";
-    document.getElementById("adminLogin").style.display = "block";
+    document.getElementById(
+        "studentLogin"
+    ).style.display = "none";
 
-    document.getElementById("adminTab").classList.add("active");
-    document.getElementById("studentTab").classList.remove("active");
+    document.getElementById(
+        "teacherLogin"
+    ).style.display = "none";
+
+    document.getElementById(
+        "adminLogin"
+    ).style.display = "block";
+
+    document.getElementById(
+        "adminTab"
+    ).classList.add("active");
+
+    document.getElementById(
+        "studentTab"
+    ).classList.remove("active");
+
+    document.getElementById(
+        "teacherTab"
+    ).classList.remove("active");
 }
 
 </script>
 
 <script type="module" src="js/login-settings.js"></script>
 <script type="module" src="js/auth.js"></script>
+<script type="module" src="js/teacher-auth.js"></script>
 
 </body>
 </html>
-```
