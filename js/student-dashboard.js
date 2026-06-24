@@ -13,9 +13,12 @@ async function loadExams() {
     try {
 
         const studentClass =
-            localStorage.getItem(
-                "studentClass"
-            );
+            localStorage.getItem("studentClass");
+
+        console.log(
+            "Student Class:",
+            studentClass
+        );
 
         const snapshot =
             await getDocs(
@@ -26,14 +29,16 @@ async function loadExams() {
 
         let found = false;
 
-        snapshot.forEach(doc => {
+        snapshot.forEach(docSnap => {
 
             const exam =
-                doc.data();
+                docSnap.data();
+
+            console.log(exam);
 
             if (
-                exam.class ===
-                studentClass
+                exam.targetType === "student" &&
+                exam.examClass === studentClass
             ) {
 
                 found = true;
@@ -42,9 +47,7 @@ async function loadExams() {
 
                 <div class="exam-card">
 
-                    <h3>
-                        ${exam.examName}
-                    </h3>
+                    <h3>${exam.examName}</h3>
 
                     <p>
                         Subject:
@@ -53,8 +56,7 @@ async function loadExams() {
 
                     <p>
                         Duration:
-                        ${exam.duration}
-                        Minutes
+                        ${exam.duration} Minutes
                     </p>
 
                     <p>
@@ -63,14 +65,17 @@ async function loadExams() {
                     </p>
 
                     <button
-                    onclick="startExam('${doc.id}')">
+                    onclick="startExam('${docSnap.id}')">
+
                     Start Exam
+
                     </button>
 
                 </div>
 
                 `;
             }
+
         });
 
         if (!found) {
@@ -79,7 +84,8 @@ async function loadExams() {
                 "<p>No Exams Available</p>";
         }
 
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(error);
 
