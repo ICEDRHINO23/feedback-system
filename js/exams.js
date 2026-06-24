@@ -2,56 +2,47 @@ import { db } from "./firebase-config.js";
 
 import {
     collection,
-    addDoc,
     getDocs,
+    addDoc,
     deleteDoc,
-    doc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    doc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const examTable =
-    document.getElementById("examTable");
 
-// =====================
+// ======================
 // LOAD CLASSES
-// =====================
+// ======================
 
 async function loadClasses() {
 
     try {
 
-        const configRef =
-            doc(db, "settings", "config");
-
-        const configSnap =
-            await getDoc(configRef);
-
-        const classSelect =
+        const classDropdown =
             document.getElementById("examClass");
 
-        classSelect.innerHTML =
-            '<option value="">Select Class</option>';
+        if (!classDropdown) return;
 
-        if (!configSnap.exists()) {
+        classDropdown.innerHTML =
+            `<option value="">Select Class</option>`;
 
-            console.log(
-                "Config document not found"
+        const settingsSnapshot =
+            await getDocs(
+                collection(db, "settings")
             );
 
-            return;
-        }
+        settingsSnapshot.forEach((d) => {
 
-        const classes =
-            configSnap.data().classes || [];
+            const data = d.data();
 
-        classes.forEach(cls => {
+            if (data.className) {
 
-            classSelect.innerHTML += `
-                <option value="${cls}">
-                    ${cls}
+                classDropdown.innerHTML += `
+                <option value="${data.className}">
+                    ${data.className}
                 </option>
-            `;
-
+                `;
+            }
         });
 
     } catch (error) {
@@ -63,66 +54,69 @@ async function loadClasses() {
     }
 }
 
-// =====================
+
+// ======================
 // CREATE EXAM
-// =====================
+// ======================
 
 window.createExam =
 async function () {
 
-    const examName =
-        document.getElementById(
-            "examName"
-        ).value.trim();
-
-    const subject =
-        document.getElementById(
-            "subject"
-        ).value.trim();
-
-    const examClass =
-        document.getElementById(
-            "examClass"
-        ).value;
-
-    const duration =
-        document.getElementById(
-            "duration"
-        ).value;
-
-    const totalMarks =
-        document.getElementById(
-            "totalMarks"
-        ).value;
-
-    const startDate =
-        document.getElementById(
-            "startDate"
-        ).value;
-
-    const endDate =
-        document.getElementById(
-            "endDate"
-        ).value;
-
-    if (
-        !examName ||
-        !subject ||
-        !examClass ||
-        !duration ||
-        !totalMarks ||
-        !startDate ||
-        !endDate
-    ) {
-
-        alert(
-            "Please fill all fields"
-        );
-
-        return;
-    }
-
     try {
+
+        const examName =
+            document.getElementById(
+                "examName"
+            ).value.trim();
+
+        const subject =
+            document.getElementById(
+                "subject"
+            ).value.trim();
+
+        const targetType =
+            document.getElementById(
+                "targetType"
+            ).value;
+
+        const examClass =
+            document.getElementById(
+                "examClass"
+            ).value;
+
+        const duration =
+            document.getElementById(
+                "duration"
+            ).value;
+
+        const totalMarks =
+            document.getElementById(
+                "totalMarks"
+            ).value;
+
+        const startDate =
+            document.getElementById(
+                "startDate"
+            ).value;
+
+        const endDate =
+            document.getElementById(
+                "endDate"
+            ).value;
+
+        if (
+            !examName ||
+            !subject ||
+            !duration ||
+            !totalMarks
+        ) {
+
+            alert(
+                "Please fill all required fields"
+            );
+
+            return;
+        }
 
         await addDoc(
             collection(db, "exams"),
@@ -134,14 +128,17 @@ async function () {
                 subject:
                     subject,
 
-                class:
+                targetType:
+                    targetType,
+
+                examClass:
                     examClass,
 
                 duration:
-                    duration,
+                    Number(duration),
 
                 totalMarks:
-                    totalMarks,
+                    Number(totalMarks),
 
                 startDate:
                     startDate,
@@ -149,15 +146,17 @@ async function () {
                 endDate:
                     endDate,
 
+                status:
+                    "active",
+
                 createdAt:
                     new Date()
                     .toISOString()
-
             }
         );
 
         alert(
-            "Exam Created Successfully"
+            "Assessment Created Successfully"
         );
 
         document.getElementById(
@@ -191,122 +190,128 @@ async function () {
         console.error(error);
 
         alert(
-            "Failed To Create Exam"
+            "Failed To Create Assessment"
         );
     }
 };
 
-// =====================
+
+// ======================
 // LOAD EXAMS
-// =====================
+// ======================
 
 async function loadExams() {
 
     try {
+
+        const table =
+            document.getElementById(
+                "examTable"
+            );
+
+        table.innerHTML =
+            `
+            <tr>
+                <td colspan="7">
+                    Loading...
+                </td>
+            </tr>
+            `;
 
         const snapshot =
             await getDocs(
                 collection(db, "exams")
             );
 
-        examTable.innerHTML = "";
+        table.innerHTML = "";
 
         if (snapshot.empty) {
 
-            examTable.innerHTML = `
+            table.innerHTML =
+                `
                 <tr>
-                    <td colspan="6">
-                        No Exams Found
+                    <td colspan="7">
+                        No Assessments Found
                     </td>
                 </tr>
-            `;
+                `;
 
             return;
         }
 
-        snapshot.forEach(
-            examDoc => {
+        snapshot.forEach((examDoc) => {
 
-                const exam =
-                    examDoc.data();
+            const exam =
+                examDoc.data();
 
-                examTable.innerHTML += `
+            table.innerHTML += `
 
-                <tr>
+            <tr>
 
-                    <td>
-                        ${exam.examName || ""}
-                    </td>
+                <td>
+                    ${exam.examName || ""}
+                </td>
 
-                    <td>
-                        ${exam.subject || ""}
-                    </td>
+                <td>
+                    ${exam.subject || ""}
+                </td>
 
-                    <td>
-                        ${exam.class || ""}
-                    </td>
+                <td>
+                    ${exam.targetType || "student"}
+                </td>
 
-                    <td>
-                        ${exam.duration || ""}
-                        Min
-                    </td>
+                <td>
+                    ${exam.examClass || "-"}
+                </td>
 
-                    <td>
-                        ${exam.totalMarks || ""}
-                    </td>
+                <td>
+                    ${exam.duration || 0}
+                </td>
 
-                    <td>
+                <td>
+                    ${exam.totalMarks || 0}
+                </td>
 
-                        <button
+                <td>
+
+                    <button
                         class="delete-btn"
                         onclick="deleteExam('${examDoc.id}')">
 
                         Delete
 
-                        </button>
+                    </button>
 
-                    </td>
+                </td>
 
-                </tr>
+            </tr>
 
-                `;
-
-            }
-        );
+            `;
+        });
 
     } catch (error) {
 
-        console.error(
-            "Load Exams Error:",
-            error
-        );
-
-        examTable.innerHTML = `
-            <tr>
-                <td colspan="6">
-                    Error Loading Exams
-                </td>
-            </tr>
-        `;
+        console.error(error);
     }
 }
 
-// =====================
+
+// ======================
 // DELETE EXAM
-// =====================
+// ======================
 
 window.deleteExam =
 async function (id) {
 
-    const confirmDelete =
-        confirm(
-            "Delete this exam?"
-        );
-
-    if (!confirmDelete)
-        return;
-
     try {
+
+        const confirmDelete =
+            confirm(
+                "Delete Assessment?"
+            );
+
+        if (!confirmDelete)
+            return;
 
         await deleteDoc(
             doc(
@@ -316,6 +321,10 @@ async function (id) {
             )
         );
 
+        alert(
+            "Assessment Deleted"
+        );
+
         loadExams();
 
     } catch (error) {
@@ -323,14 +332,15 @@ async function (id) {
         console.error(error);
 
         alert(
-            "Unable To Delete Exam"
+            "Delete Failed"
         );
     }
 };
 
-// =====================
+
+// ======================
 // INIT
-// =====================
+// ======================
 
 loadClasses();
 loadExams();
