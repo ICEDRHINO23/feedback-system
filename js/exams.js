@@ -3,61 +3,78 @@ import { db } from "./firebase-config.js";
 import {
     collection,
     getDocs,
+    getDoc,
     addDoc,
     deleteDoc,
     doc
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
-// ======================
-// LOAD CLASSES
-// ======================
+// =====================================
+// LOAD CLASSES FROM settings/config
+// =====================================
 
 async function loadClasses() {
 
     try {
 
         const classDropdown =
-            document.getElementById("examClass");
+            document.getElementById(
+                "examClass"
+            );
 
         if (!classDropdown) return;
 
         classDropdown.innerHTML =
             `<option value="">Select Class</option>`;
 
-        const settingsSnapshot =
-            await getDocs(
-                collection(db, "settings")
+        const settingsDoc =
+            await getDoc(
+                doc(
+                    db,
+                    "settings",
+                    "config"
+                )
             );
 
-        settingsSnapshot.forEach((d) => {
+        if (settingsDoc.exists()) {
 
-            const data = d.data();
+            const data =
+                settingsDoc.data();
 
-            if (data.className) {
+            if (
+                data.classes &&
+                Array.isArray(
+                    data.classes
+                )
+            ) {
 
-                classDropdown.innerHTML += `
-                <option value="${data.className}">
-                    ${data.className}
-                </option>
-                `;
+                data.classes.forEach(
+                    cls => {
+
+                    classDropdown.innerHTML += `
+                    <option value="${cls}">
+                        Class ${cls}
+                    </option>
+                    `;
+
+                });
             }
-        });
+        }
 
     } catch (error) {
 
         console.error(
-            "Load Classes Error:",
+            "Class Load Error:",
             error
         );
     }
 }
 
 
-// ======================
-// CREATE EXAM
-// ======================
+// =====================================
+// CREATE ASSESSMENT
+// =====================================
 
 window.createExam =
 async function () {
@@ -196,9 +213,9 @@ async function () {
 };
 
 
-// ======================
-// LOAD EXAMS
-// ======================
+// =====================================
+// LOAD ASSESSMENTS
+// =====================================
 
 async function loadExams() {
 
@@ -209,14 +226,13 @@ async function loadExams() {
                 "examTable"
             );
 
-        table.innerHTML =
-            `
-            <tr>
-                <td colspan="7">
-                    Loading...
-                </td>
-            </tr>
-            `;
+        table.innerHTML = `
+        <tr>
+            <td colspan="7">
+                Loading Assessments...
+            </td>
+        </tr>
+        `;
 
         const snapshot =
             await getDocs(
@@ -227,19 +243,19 @@ async function loadExams() {
 
         if (snapshot.empty) {
 
-            table.innerHTML =
-                `
-                <tr>
-                    <td colspan="7">
-                        No Assessments Found
-                    </td>
-                </tr>
-                `;
+            table.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    No Assessments Found
+                </td>
+            </tr>
+            `;
 
             return;
         }
 
-        snapshot.forEach((examDoc) => {
+        snapshot.forEach(
+            examDoc => {
 
             const exam =
                 examDoc.data();
@@ -275,10 +291,10 @@ async function loadExams() {
                 <td>
 
                     <button
-                        class="delete-btn"
-                        onclick="deleteExam('${examDoc.id}')">
+                    class="delete-btn"
+                    onclick="deleteExam('${examDoc.id}')">
 
-                        Delete
+                    Delete
 
                     </button>
 
@@ -287,18 +303,22 @@ async function loadExams() {
             </tr>
 
             `;
+
         });
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Load Exam Error:",
+            error
+        );
     }
 }
 
 
-// ======================
-// DELETE EXAM
-// ======================
+// =====================================
+// DELETE ASSESSMENT
+// =====================================
 
 window.deleteExam =
 async function (id) {
@@ -338,9 +358,9 @@ async function (id) {
 };
 
 
-// ======================
-// INIT
-// ======================
+// =====================================
+// INITIAL LOAD
+// =====================================
 
 loadClasses();
 loadExams();
