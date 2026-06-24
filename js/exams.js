@@ -2,21 +2,74 @@ import { db } from "./firebase-config.js";
 
 import {
     collection,
-    addDoc,
     getDocs,
+    addDoc,
     deleteDoc,
     doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+// ===============================
+// LOAD CLASSES
+// ===============================
+
+async function loadClasses() {
+
+    try {
+
+        const classDropdown =
+            document.getElementById("examClass");
+
+        if (!classDropdown) return;
+
+        const settingsSnap =
+            await getDocs(
+                collection(db, "settings")
+            );
+
+        settingsSnap.forEach(docSnap => {
+
+            const data =
+                docSnap.data();
+
+            if (data.classes) {
+
+                data.classes.forEach(cls => {
+
+                    classDropdown.innerHTML += `
+                        <option value="${cls}">
+                            Class ${cls}
+                        </option>
+                    `;
+                });
+            }
+
+        });
+
+    }
+    catch (error) {
+
+        console.error(
+            "Class Load Error:",
+            error
+        );
+    }
+}
+
+
+// ===============================
+// CREATE ASSESSMENT
+// ===============================
 
 window.createExam = async function () {
 
     try {
 
         const examName =
-            document.getElementById("examName").value;
+            document.getElementById("examName").value.trim();
 
         const subject =
-            document.getElementById("subject").value;
+            document.getElementById("subject").value.trim();
 
         const targetType =
             document.getElementById("targetType").value;
@@ -40,10 +93,15 @@ window.createExam = async function () {
             !examName ||
             !subject ||
             !duration ||
-            !totalMarks
+            !totalMarks ||
+            !startDate ||
+            !endDate
         ) {
 
-            alert("Fill all required fields");
+            alert(
+                "Please fill all fields"
+            );
+
             return;
         }
 
@@ -69,7 +127,9 @@ window.createExam = async function () {
             }
         );
 
-        alert("Assessment Created");
+        alert(
+            "Assessment Created Successfully"
+        );
 
         location.reload();
 
@@ -78,25 +138,34 @@ window.createExam = async function () {
 
         console.error(error);
 
-        alert("Creation Failed");
+        alert(
+            "Failed To Create Assessment"
+        );
     }
 };
 
-async function loadExams() {
 
-    const table =
-        document.getElementById("examTable");
+// ===============================
+// LOAD ASSESSMENTS
+// ===============================
+
+async function loadExams() {
 
     try {
 
-        table.innerHTML = "";
+        const table =
+            document.getElementById("examTable");
+
+        if (!table) return;
 
         const snapshot =
             await getDocs(
                 collection(db, "exams")
             );
 
-        snapshot.forEach((docSnap) => {
+        table.innerHTML = "";
+
+        snapshot.forEach(docSnap => {
 
             const exam =
                 docSnap.data();
@@ -105,33 +174,38 @@ async function loadExams() {
 
             <tr>
 
-                <td>${exam.examName}</td>
+                <td>
+                    ${exam.examName}
+                </td>
 
-                <td>${exam.subject}</td>
+                <td>
+                    ${exam.subject}
+                </td>
 
-                <td>${exam.targetType}</td>
+                <td>
+                    ${exam.targetType}
+                </td>
 
                 <td>
                     ${exam.examClass || "-"}
                 </td>
 
-                <td>${exam.duration}</td>
+                <td>
+                    ${exam.duration}
+                </td>
 
-                <td>${exam.totalMarks}</td>
+                <td>
+                    ${exam.totalMarks}
+                </td>
 
                 <td>
 
                     <button
-                    onclick="deleteExam('${docSnap.id}')"
-                    style="
-                        background:red;
-                        color:white;
-                        border:none;
-                        padding:8px 12px;
-                        border-radius:5px;
-                        cursor:pointer;
-                    ">
+                    class="delete-btn"
+                    onclick="deleteExam('${docSnap.id}')">
+
                     Delete
+
                     </button>
 
                 </td>
@@ -144,27 +218,84 @@ async function loadExams() {
     }
     catch (error) {
 
-        console.error(error);
-
-        table.innerHTML =
-
-        `<tr>
-            <td colspan="7">
-                Failed To Load Assessments
-            </td>
-        </tr>`;
+        console.error(
+            "Load Exams Error:",
+            error
+        );
     }
 }
 
+
+// ===============================
+// DELETE ASSESSMENT
+// ===============================
+
 window.deleteExam = async function (examId) {
 
-    if (!confirm(
-        "Delete this assessment?"
-    )) {
-        return;
-    }
-
     try {
+
+        const confirmDelete =
+            confirm(
+                "Delete this assessment and all related data?"
+            );
+
+        if (!confirmDelete) {
+            return;
+        }
+
+        // DELETE QUESTIONS
+
+        const questionSnap =
+            await getDocs(
+                collection(db, "questions")
+            );
+
+        for (const questionDoc of questionSnap.docs) {
+
+            const question =
+                questionDoc.data();
+
+            if (
+                question.examId === examId
+            ) {
+
+                await deleteDoc(
+                    doc(
+                        db,
+                        "questions",
+                        questionDoc.id
+                    )
+                );
+            }
+        }
+
+        // DELETE RESULTS
+
+        const resultSnap =
+            await getDocs(
+                collection(db, "results")
+            );
+
+        for (const resultDoc of resultSnap.docs) {
+
+            const result =
+                resultDoc.data();
+
+            if (
+                result.examId === examId
+            ) {
+
+                await deleteDoc(
+                    doc(
+                        db,
+                        "results",
+                        resultDoc.id
+                    )
+                );
+            }
+        }
+
+        // DELETE EXAM
 
         await deleteDoc(
             doc(
@@ -175,7 +306,7 @@ window.deleteExam = async function (examId) {
         );
 
         alert(
-            "Assessment Deleted"
+            "Assessment Deleted Successfully"
         );
 
         loadExams();
@@ -183,12 +314,21 @@ window.deleteExam = async function (examId) {
     }
     catch (error) {
 
-        console.error(error);
+        console.error(
+            "Delete Error:",
+            error
+        );
 
         alert(
-            "Delete Failed"
+            "Failed To Delete Assessment"
         );
     }
 };
 
+
+// ===============================
+// INITIALIZE
+// ===============================
+
+loadClasses();
 loadExams();
