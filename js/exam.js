@@ -222,30 +222,113 @@ async function () {
         let score = 0;
         let totalMarks = 0;
 
-        questions.forEach(q => {
+        ```javascript
+const subjectiveAnswers = [];
 
-            totalMarks +=
-                Number(
-                    q.marks || 1
-                );
+questions.forEach(q => {
 
-            const selected =
-                document.querySelector(
-                    `input[name="${q.id}"]:checked`
-                );
+    totalMarks +=
+        Number(q.marks || 1);
 
-            if (
-                selected &&
-                selected.value === q.answer
-            ) {
+    // MCQ
 
-                score +=
-                    Number(
-                        q.marks || 1
-                    );
-            }
+    if (
+        !q.questionType ||
+        q.questionType === "mcq"
+    ) {
+
+        const selected =
+            document.querySelector(
+                `input[name="${q.id}"]:checked`
+            );
+
+        if (
+            selected &&
+            selected.value === q.answer
+        ) {
+
+            score +=
+                Number(q.marks || 1);
+        }
+    }
+
+    // MULTIPLE ANSWER
+
+    if (
+        q.questionType === "multiple"
+    ) {
+
+        const selectedAnswers = [];
+
+        document
+        .querySelectorAll(
+            `input[name="${q.id}"]:checked`
+        )
+        .forEach(box => {
+
+            selectedAnswers.push(
+                box.value
+            );
 
         });
+
+        const correctAnswers =
+            q.answers || [];
+
+        const isCorrect =
+
+            selectedAnswers.length ===
+            correctAnswers.length &&
+
+            selectedAnswers.every(
+                answer =>
+                correctAnswers.includes(
+                    answer
+                )
+            );
+
+        if (isCorrect) {
+
+            score +=
+                Number(q.marks || 1);
+        }
+    }
+
+    // SENTENCE
+
+    if (
+        q.questionType === "sentence"
+    ) {
+
+        const answerBox =
+            document.getElementById(
+                `answer_${q.id}`
+            );
+
+        subjectiveAnswers.push({
+
+            questionId:
+                q.id,
+
+            question:
+                q.question,
+
+            modelAnswer:
+                q.modelAnswer || "",
+
+            studentAnswer:
+                answerBox
+                ? answerBox.value
+                : "",
+
+            marks:
+                q.marks
+
+        });
+    }
+
+});
+```
 
         const role =
             localStorage.getItem(
@@ -306,6 +389,8 @@ async function () {
 
                 percentage,
 
+                subjectiveAnswers,
+                
                 submittedAt:
                     new Date()
                     .toISOString()
