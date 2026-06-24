@@ -1,3 +1,4 @@
+```javascript
 import { db } from "./firebase-config.js";
 
 import {
@@ -7,7 +8,6 @@ import {
     deleteDoc,
     doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
 
 // ===============================
 // LOAD CLASSES
@@ -27,6 +27,9 @@ async function loadClasses() {
                 collection(db, "settings")
             );
 
+        classDropdown.innerHTML =
+            '<option value="">Select Class</option>';
+
         settingsSnap.forEach(docSnap => {
 
             const data =
@@ -37,9 +40,9 @@ async function loadClasses() {
                 data.classes.forEach(cls => {
 
                     classDropdown.innerHTML += `
-                        <option value="${cls}">
-                            Class ${cls}
-                        </option>
+                    <option value="${cls}">
+                        Class ${cls}
+                    </option>
                     `;
                 });
             }
@@ -55,7 +58,6 @@ async function loadClasses() {
         );
     }
 }
-
 
 // ===============================
 // CREATE ASSESSMENT
@@ -92,6 +94,7 @@ window.createExam = async function () {
         if (
             !examName ||
             !subject ||
+            !targetType ||
             !duration ||
             !totalMarks ||
             !startDate ||
@@ -113,8 +116,8 @@ window.createExam = async function () {
                 targetType,
                 examClass:
                     targetType === "student"
-                        ? examClass
-                        : "",
+                    ? examClass
+                    : "",
                 duration:
                     Number(duration),
                 totalMarks:
@@ -131,19 +134,21 @@ window.createExam = async function () {
             "Assessment Created Successfully"
         );
 
-        location.reload();
+        loadExams();
 
     }
     catch (error) {
 
-        console.error(error);
+        console.error(
+            "Create Exam Error:",
+            error
+        );
 
         alert(
             "Failed To Create Assessment"
         );
     }
 };
-
 
 // ===============================
 // LOAD ASSESSMENTS
@@ -158,12 +163,33 @@ async function loadExams() {
 
         if (!table) return;
 
+        table.innerHTML = `
+        <tr>
+            <td colspan="7">
+                Loading...
+            </td>
+        </tr>
+        `;
+
         const snapshot =
             await getDocs(
                 collection(db, "exams")
             );
 
         table.innerHTML = "";
+
+        if (snapshot.empty) {
+
+            table.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    No Assessments Found
+                </td>
+            </tr>
+            `;
+
+            return;
+        }
 
         snapshot.forEach(docSnap => {
 
@@ -174,29 +200,17 @@ async function loadExams() {
 
             <tr>
 
-                <td>
-                    ${exam.examName}
-                </td>
+                <td>${exam.examName}</td>
 
-                <td>
-                    ${exam.subject}
-                </td>
+                <td>${exam.subject}</td>
 
-                <td>
-                    ${exam.targetType}
-                </td>
+                <td>${exam.targetType}</td>
 
-                <td>
-                    ${exam.examClass || "-"}
-                </td>
+                <td>${exam.examClass || "-"}</td>
 
-                <td>
-                    ${exam.duration}
-                </td>
+                <td>${exam.duration}</td>
 
-                <td>
-                    ${exam.totalMarks}
-                </td>
+                <td>${exam.totalMarks}</td>
 
                 <td>
 
@@ -225,7 +239,6 @@ async function loadExams() {
     }
 }
 
-
 // ===============================
 // DELETE ASSESSMENT
 // ===============================
@@ -236,14 +249,17 @@ window.deleteExam = async function (examId) {
 
         const confirmDelete =
             confirm(
-                "Delete this assessment and all related data?"
+                "Delete this assessment and all related questions/results?"
             );
 
-        if (!confirmDelete) {
-            return;
-        }
+        if (!confirmDelete) return;
 
-        // DELETE QUESTIONS
+        console.log(
+            "Deleting Exam:",
+            examId
+        );
+
+        // Delete Questions
 
         const questionSnap =
             await getDocs(
@@ -266,10 +282,15 @@ window.deleteExam = async function (examId) {
                         questionDoc.id
                     )
                 );
+
+                console.log(
+                    "Deleted Question:",
+                    questionDoc.id
+                );
             }
         }
 
-        // DELETE RESULTS
+        // Delete Results
 
         const resultSnap =
             await getDocs(
@@ -292,10 +313,15 @@ window.deleteExam = async function (examId) {
                         resultDoc.id
                     )
                 );
+
+                console.log(
+                    "Deleted Result:",
+                    resultDoc.id
+                );
             }
         }
 
-        // DELETE EXAM
+        // Delete Exam
 
         await deleteDoc(
             doc(
@@ -305,30 +331,36 @@ window.deleteExam = async function (examId) {
             )
         );
 
+        console.log(
+            "Deleted Exam:",
+            examId
+        );
+
         alert(
             "Assessment Deleted Successfully"
         );
 
-        loadExams();
+        await loadExams();
 
     }
     catch (error) {
 
         console.error(
-            "Delete Error:",
+            "DELETE ERROR:",
             error
         );
 
         alert(
-            "Failed To Delete Assessment"
+            "Delete Failed: " +
+            error.message
         );
     }
 };
 
-
 // ===============================
-// INITIALIZE
+// START
 // ===============================
 
 loadClasses();
 loadExams();
+```
