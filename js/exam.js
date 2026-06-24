@@ -526,4 +526,3 @@ else {
     loadQuestions();
 
 }
-```
