@@ -6,33 +6,63 @@ import {
     addDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const examId = localStorage.getItem("currentExamId");
+const examId =
+    localStorage.getItem("currentExamId");
 
 let questions = [];
+let totalDuration = 30;
 
-console.log("Current Exam ID:", examId);
+// ==========================
+// LOAD QUESTIONS
+// ==========================
 
 async function loadQuestions() {
 
-    const container =
-        document.getElementById("questionContainer");
-
     try {
+
+        const container =
+            document.getElementById(
+                "questionContainer"
+            );
 
         container.innerHTML = "";
 
-        const snapshot =
+        // Load Exam Details
+
+        const examSnapshot =
+            await getDocs(
+                collection(db, "exams")
+            );
+
+        examSnapshot.forEach(docSnap => {
+
+            if(docSnap.id === examId){
+
+                const exam =
+                    docSnap.data();
+
+                totalDuration =
+                    Number(exam.duration || 30);
+            }
+        });
+
+        startTimer();
+
+        // Load Questions
+
+        const questionSnapshot =
             await getDocs(
                 collection(db, "questions")
             );
 
         let count = 1;
 
-        snapshot.forEach((docSnap) => {
+        questionSnapshot.forEach(docSnap => {
 
-            const q = docSnap.data();
+            const q =
+                docSnap.data();
 
-            if (q.examId === examId) {
+            if(q.examId === examId){
 
                 questions.push({
                     id: docSnap.id,
@@ -48,30 +78,38 @@ async function loadQuestions() {
                     </h3>
 
                     <label>
-                        <input type="radio"
+                        <input
+                        type="radio"
                         name="${docSnap.id}"
                         value="A">
+
                         ${q.optionA}
                     </label>
 
                     <label>
-                        <input type="radio"
+                        <input
+                        type="radio"
                         name="${docSnap.id}"
                         value="B">
+
                         ${q.optionB}
                     </label>
 
                     <label>
-                        <input type="radio"
+                        <input
+                        type="radio"
                         name="${docSnap.id}"
                         value="C">
+
                         ${q.optionC}
                     </label>
 
                     <label>
-                        <input type="radio"
+                        <input
+                        type="radio"
                         name="${docSnap.id}"
                         value="D">
+
                         ${q.optionD}
                     </label>
 
@@ -84,71 +122,144 @@ async function loadQuestions() {
 
         });
 
-        if (questions.length === 0) {
+        if(questions.length === 0){
 
             container.innerHTML = `
 
             <div class="question-box">
-                <h3>No Questions Found</h3>
-                <p>This assessment contains no questions.</p>
+
+                <h3>
+                    No Questions Found
+                </h3>
+
             </div>
 
             `;
         }
 
     }
-    catch (error) {
+    catch(error){
 
         console.error(error);
 
-        container.innerHTML =
-            "<h3>Error Loading Questions</h3>";
+        document.getElementById(
+            "questionContainer"
+        ).innerHTML =
+
+        "<h3>Error Loading Questions</h3>";
     }
 }
 
-window.submitExam = async function () {
 
-    try {
+// ==========================
+// TIMER
+// ==========================
+
+function startTimer(){
+
+    let timeLeft =
+        totalDuration * 60;
+
+    const timer =
+        document.getElementById(
+            "timer"
+        );
+
+    const interval =
+        setInterval(() => {
+
+            const minutes =
+                Math.floor(
+                    timeLeft / 60
+                );
+
+            const seconds =
+                timeLeft % 60;
+
+            timer.innerHTML =
+
+            `${minutes}:${
+                seconds < 10
+                ? "0" + seconds
+                : seconds
+            }`;
+
+            timeLeft--;
+
+            if(timeLeft < 0){
+
+                clearInterval(
+                    interval
+                );
+
+                submitExam();
+            }
+
+        },1000);
+}
+
+
+// ==========================
+// SUBMIT EXAM
+// ==========================
+
+window.submitExam =
+async function(){
+
+    try{
 
         let score = 0;
         let totalMarks = 0;
 
-        questions.forEach((q) => {
+        questions.forEach(q => {
 
-            totalMarks += Number(q.marks || 1);
+            totalMarks +=
+                Number(q.marks || 1);
 
             const selected =
                 document.querySelector(
                     `input[name="${q.id}"]:checked`
                 );
 
-            if (
+            if(
                 selected &&
                 selected.value === q.answer
-            ) {
-                score += Number(q.marks || 1);
+            ){
+
+                score +=
+                    Number(q.marks || 1);
             }
 
         });
 
         const role =
-            localStorage.getItem("role") || "student";
+            localStorage.getItem(
+                "role"
+            );
 
         const participantName =
-            localStorage.getItem("studentName") ||
-            localStorage.getItem("teacherName") ||
-            "Unknown";
+
+            role === "teacher"
+
+            ? localStorage.getItem(
+                "teacherName"
+              )
+
+            : localStorage.getItem(
+                "studentName"
+              );
 
         await addDoc(
-            collection(db, "results"),
+            collection(db,"results"),
             {
                 examId,
-                participantName,
                 role,
+                participantName,
                 score,
                 totalMarks,
                 submittedAt:
-                    new Date().toISOString()
+                    new Date()
+                    .toISOString()
             }
         );
 
@@ -163,19 +274,37 @@ window.submitExam = async function () {
         );
 
         alert(
-            `Assessment Submitted\nScore : ${score}/${totalMarks}`
+            `Assessment Submitted\nScore: ${score}/${totalMarks}`
         );
 
-        window.location.href =
-            "result.html";
+        // Redirect based on role
+
+        if(role === "teacher"){
+
+            window.location.href =
+                "teacher-results.html";
+
+        }
+        else{
+
+            window.location.href =
+                "result.html";
+        }
 
     }
-    catch (error) {
+    catch(error){
 
         console.error(error);
 
-        alert("Submission Failed");
+        alert(
+            "Failed To Submit Assessment"
+        );
     }
 };
+
+
+// ==========================
+// START
+// ==========================
 
 loadQuestions();
