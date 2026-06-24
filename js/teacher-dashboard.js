@@ -5,6 +5,36 @@ import {
     getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+// ======================
+// LOAD TEACHER DETAILS
+// ======================
+
+const teacherName =
+    localStorage.getItem("teacherName");
+
+const teacherSubject =
+    localStorage.getItem("teacherSubject");
+
+const welcomeText =
+    document.getElementById("teacherName");
+
+const subjectText =
+    document.getElementById("teacherSubject");
+
+if (welcomeText) {
+    welcomeText.innerHTML =
+        teacherName || "Teacher";
+}
+
+if (subjectText) {
+    subjectText.innerHTML =
+        teacherSubject || "";
+}
+
+// ======================
+// LOAD ASSESSMENTS
+// ======================
+
 async function loadAssessments() {
 
     try {
@@ -30,12 +60,13 @@ async function loadAssessments() {
 
         snapshot.forEach(doc => {
 
-            const exam =
-                doc.data();
+            const exam = doc.data();
+
+            // TEACHER ASSESSMENTS ONLY
 
             if (
-                exam.targetRole === "teacher" ||
-                exam.targetRole === "all"
+                exam.targetType === "teacher" &&
+                exam.status === "active"
             ) {
 
                 totalAssessments++;
@@ -55,7 +86,8 @@ async function loadAssessments() {
 
                     <p>
                         Duration:
-                        ${exam.duration} Minutes
+                        ${exam.duration}
+                        Minutes
                     </p>
 
                     <p>
@@ -63,11 +95,21 @@ async function loadAssessments() {
                         ${exam.totalMarks}
                     </p>
 
-                    <button
-                    class="start-btn"
-                    onclick="startAssessment('${doc.id}')">
+                    <p>
+                        Start Date:
+                        ${exam.startDate}
+                    </p>
 
-                    Start Assessment
+                    <p>
+                        End Date:
+                        ${exam.endDate}
+                    </p>
+
+                    <button
+                        class="start-btn"
+                        onclick="startAssessment('${doc.id}')">
+
+                        Start Assessment
 
                     </button>
 
@@ -81,9 +123,7 @@ async function loadAssessments() {
         examCount.innerHTML =
             totalAssessments;
 
-        if (
-            totalAssessments === 0
-        ) {
+        if (totalAssessments === 0) {
 
             assessmentList.innerHTML = `
 
@@ -103,9 +143,12 @@ async function loadAssessments() {
         }
 
     }
-    catch(error){
+    catch (error) {
 
-        console.error(error);
+        console.error(
+            "Assessment Load Error:",
+            error
+        );
 
         document.getElementById(
             "assessmentList"
@@ -115,8 +158,12 @@ async function loadAssessments() {
     }
 }
 
+// ======================
+// START ASSESSMENT
+// ======================
+
 window.startAssessment =
-function(examId){
+function(examId) {
 
     localStorage.setItem(
         "currentExamId",
@@ -131,6 +178,10 @@ function(examId){
     window.location.href =
         "exam.html";
 };
+
+// ======================
+// COMPLETED ASSESSMENTS
+// ======================
 
 async function loadTeacherResults() {
 
@@ -151,7 +202,7 @@ async function loadTeacherResults() {
                 collection(db, "results")
             );
 
-        let count = 0;
+        let completed = 0;
 
         snapshot.forEach(doc => {
 
@@ -163,20 +214,51 @@ async function loadTeacherResults() {
                 teacherName
             ) {
 
-                count++;
+                completed++;
             }
 
         });
 
         resultCount.innerHTML =
-            count;
+            completed;
 
     }
     catch(error){
 
-        console.error(error);
+        console.error(
+            "Result Load Error:",
+            error
+        );
     }
 }
+
+// ======================
+// LOGOUT
+// ======================
+
+window.logout = function() {
+
+    localStorage.removeItem(
+        "teacherName"
+    );
+
+    localStorage.removeItem(
+        "teacherSubject"
+    );
+
+    localStorage.removeItem(
+        "teacherId"
+    );
+
+    localStorage.removeItem(
+        "participantRole"
+    );
+
+    window.location.href =
+        "teacher-login.html";
+};
+
+// ======================
 
 loadAssessments();
 loadTeacherResults();
