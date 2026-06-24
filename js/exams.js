@@ -2,195 +2,183 @@ import { db } from "./firebase-config.js";
 
 import {
     collection,
+    addDoc,
     getDocs,
-    addDoc
+    deleteDoc,
+    doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const examId =
-    localStorage.getItem("currentExamId");
-
-let questions = [];
-
-async function loadQuestions() {
+window.createExam = async function () {
 
     try {
 
-        const container =
-            document.getElementById(
-                "questionContainer"
-            );
+        const examName =
+            document.getElementById("examName").value;
 
-        container.innerHTML = "";
+        const subject =
+            document.getElementById("subject").value;
 
-        const snapshot =
-            await getDocs(
-                collection(db, "questions")
-            );
+        const targetType =
+            document.getElementById("targetType").value;
 
-        let count = 1;
+        const examClass =
+            document.getElementById("examClass").value;
 
-        snapshot.forEach((docSnap) => {
+        const duration =
+            document.getElementById("duration").value;
 
-            const q = docSnap.data();
+        const totalMarks =
+            document.getElementById("totalMarks").value;
 
-            if (q.examId === examId) {
+        const startDate =
+            document.getElementById("startDate").value;
 
-                questions.push({
-                    id: docSnap.id,
-                    ...q
-                });
+        const endDate =
+            document.getElementById("endDate").value;
 
-                container.innerHTML += `
+        if (
+            !examName ||
+            !subject ||
+            !duration ||
+            !totalMarks
+        ) {
 
-                <div class="question-box">
-
-                    <h3>
-                        Q${count}. ${q.question}
-                    </h3>
-
-                    <label>
-                        <input
-                            type="radio"
-                            name="${docSnap.id}"
-                            value="A">
-                        ${q.optionA}
-                    </label>
-
-                    <br><br>
-
-                    <label>
-                        <input
-                            type="radio"
-                            name="${docSnap.id}"
-                            value="B">
-                        ${q.optionB}
-                    </label>
-
-                    <br><br>
-
-                    <label>
-                        <input
-                            type="radio"
-                            name="${docSnap.id}"
-                            value="C">
-                        ${q.optionC}
-                    </label>
-
-                    <br><br>
-
-                    <label>
-                        <input
-                            type="radio"
-                            name="${docSnap.id}"
-                            value="D">
-                        ${q.optionD}
-                    </label>
-
-                </div>
-
-                `;
-                count++;
-            }
-
-        });
-
-        if (questions.length === 0) {
-
-            container.innerHTML = `
-
-            <div class="question-box">
-
-                <h3>
-                    No Questions Found
-                </h3>
-
-                <p>
-                    This assessment does not contain any questions.
-                </p>
-
-            </div>
-
-            `;
+            alert("Fill all required fields");
+            return;
         }
 
-    }
-    catch (error) {
-
-        console.error(error);
-
-        document.getElementById(
-            "questionContainer"
-        ).innerHTML =
-
-        "<h3>Error Loading Questions</h3>";
-    }
-}
-
-window.submitExam = async function () {
-
-    try {
-
-        let score = 0;
-        let totalMarks = 0;
-
-        questions.forEach((q) => {
-
-            totalMarks +=
-                Number(q.marks || 1);
-
-            const selected =
-                document.querySelector(
-                    `input[name="${q.id}"]:checked`
-                );
-
-            if (
-                selected &&
-                selected.value === q.answer
-            ) {
-
-                score +=
-                    Number(q.marks || 1);
-            }
-        });
-
-        const role =
-            localStorage.getItem("role");
-
-        const participantName =
-            role === "teacher"
-                ? localStorage.getItem("teacherName")
-                : localStorage.getItem("studentName");
-
         await addDoc(
-            collection(db, "results"),
+            collection(db, "exams"),
             {
-                examId: examId,
-                participantName:
-                    participantName,
-                role: role,
-                score: score,
-                totalMarks: totalMarks,
-                submittedAt:
+                examName,
+                subject,
+                targetType,
+                examClass:
+                    targetType === "student"
+                        ? examClass
+                        : "",
+                duration:
+                    Number(duration),
+                totalMarks:
+                    Number(totalMarks),
+                startDate,
+                endDate,
+                status: "active",
+                createdAt:
                     new Date().toISOString()
             }
         );
 
-        localStorage.setItem(
-            "latestScore",
-            score
-        );
+        alert("Assessment Created");
 
-        localStorage.setItem(
-            "latestTotal",
-            totalMarks
+        location.reload();
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        alert("Creation Failed");
+    }
+};
+
+async function loadExams() {
+
+    const table =
+        document.getElementById("examTable");
+
+    try {
+
+        table.innerHTML = "";
+
+        const snapshot =
+            await getDocs(
+                collection(db, "exams")
+            );
+
+        snapshot.forEach((docSnap) => {
+
+            const exam =
+                docSnap.data();
+
+            table.innerHTML += `
+
+            <tr>
+
+                <td>${exam.examName}</td>
+
+                <td>${exam.subject}</td>
+
+                <td>${exam.targetType}</td>
+
+                <td>
+                    ${exam.examClass || "-"}
+                </td>
+
+                <td>${exam.duration}</td>
+
+                <td>${exam.totalMarks}</td>
+
+                <td>
+
+                    <button
+                    onclick="deleteExam('${docSnap.id}')"
+                    style="
+                        background:red;
+                        color:white;
+                        border:none;
+                        padding:8px 12px;
+                        border-radius:5px;
+                        cursor:pointer;
+                    ">
+                    Delete
+                    </button>
+
+                </td>
+
+            </tr>
+
+            `;
+        });
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        table.innerHTML =
+
+        `<tr>
+            <td colspan="7">
+                Failed To Load Assessments
+            </td>
+        </tr>`;
+    }
+}
+
+window.deleteExam = async function (examId) {
+
+    if (!confirm(
+        "Delete this assessment?"
+    )) {
+        return;
+    }
+
+    try {
+
+        await deleteDoc(
+            doc(
+                db,
+                "exams",
+                examId
+            )
         );
 
         alert(
-            `Assessment Submitted\nScore: ${score}/${totalMarks}`
+            "Assessment Deleted"
         );
 
-        window.location.href =
-            "result.html";
+        loadExams();
 
     }
     catch (error) {
@@ -198,9 +186,9 @@ window.submitExam = async function () {
         console.error(error);
 
         alert(
-            "Failed to submit assessment"
+            "Delete Failed"
         );
     }
 };
 
-loadQuestions();
+loadExams();
