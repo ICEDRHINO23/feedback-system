@@ -351,8 +351,9 @@ async function loadQuestions() {
             let answerText = "-";
 
             if (
-                q.questionType === "mcq"
-            ) {
+                !q.questionType ||
+                 q.questionType === "mcq"
+          ) {
 
                 answerText =
                     q.answer;
@@ -388,8 +389,7 @@ async function loadQuestions() {
 
                 <td>
 
-                    ${q.questionType}
-
+                ${q.questionType || "mcq"}
                 </td>
 
                 <td>
@@ -477,7 +477,7 @@ async function(id){
             "questionType"
         ).value =
             q.questionType || "mcq";
-
+        updateQuestionType();
         document.getElementById(
             "question"
         ).value =
@@ -512,7 +512,10 @@ async function(id){
             "answer"
         ).value =
             q.answer || "";
-
+        document.getElementById("ansA").checked = false;
+        document.getElementById("ansB").checked = false;
+        document.getElementById("ansC").checked = false;
+        document.getElementById("ansD").checked = false;
         if (q.answers) {
 
             document.getElementById(
@@ -615,37 +618,43 @@ function clearForm(){
         "optionC"
     ).value = "";
 
-    document.getElementById(
-        "optionD"
-    ).value = "";
+document.getElementById(
+    "optionD"
+).value = "";
 
-    document.getElementById(
-        "answer"
-    ).value = "";
+document.getElementById(
+    "answer"
+).value = "";
 
-    document.getElementById(
-        "marks"
-    ).value = "";
+document.getElementById(
+    "marks"
+).value = "";
 
-    document.getElementById(
-        "modelAnswer"
-    ).value = "";
+document.getElementById(
+    "modelAnswer"
+).value = "";
 
-    document.getElementById(
-        "ansA"
-    ).checked = false;
+document.getElementById(
+    "ansA"
+).checked = false;
 
-    document.getElementById(
-        "ansB"
-    ).checked = false;
+document.getElementById(
+    "ansB"
+).checked = false;
 
-    document.getElementById(
-        "ansC"
-    ).checked = false;
+document.getElementById(
+    "ansC"
+).checked = false;
 
-    document.getElementById(
-        "ansD"
-    ).checked = false;
+document.getElementById(
+    "ansD"
+).checked = false;
+
+document.getElementById(
+    "questionType"
+).value = "mcq";
+
+updateQuestionType();
 }
 
 // ============================
@@ -654,4 +663,4 @@ function clearForm(){
 
 loadExams();
 loadQuestions();
-```
+
