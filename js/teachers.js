@@ -1,180 +1,329 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+import { db } from "./firebase-config.js";
 
-<title>Manage Teachers</title>
+import {
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc,
+    updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<style>
+const teacherTable =
+    document.getElementById(
+        "teacherTable"
+    );
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,sans-serif;
+// =========================
+// ADD TEACHER
+// =========================
+
+window.addTeacher =
+async function(){
+
+    try{
+
+        const teacherName =
+            document.getElementById(
+                "teacherName"
+            ).value.trim();
+
+        const employeeId =
+            document.getElementById(
+                "employeeId"
+            ).value.trim();
+
+        const subject =
+            document.getElementById(
+                "subject"
+            ).value.trim();
+
+        if(
+            !teacherName ||
+            !employeeId ||
+            !subject
+        ){
+            alert(
+                "Please fill all fields"
+            );
+            return;
+        }
+
+        const password =
+            "AHPS" +
+            employeeId +
+            "@2026";
+
+        await addDoc(
+            collection(
+                db,
+                "teachers"
+            ),
+            {
+                teacherName:
+                    teacherName,
+
+                employeeId:
+                    employeeId,
+
+                subject:
+                    subject,
+
+                password:
+                    password,
+
+                role:
+                    "teacher",
+
+                status:
+                    "active",
+
+                mustChangePassword:
+                    true,
+
+                createdAt:
+                    new Date()
+                    .toISOString()
+            }
+        );
+
+        alert(
+            "Teacher Added Successfully\n\n" +
+            "Employee ID : " +
+            employeeId +
+            "\nPassword : " +
+            password
+        );
+
+        document.getElementById(
+            "teacherName"
+        ).value = "";
+
+        document.getElementById(
+            "employeeId"
+        ).value = "";
+
+        document.getElementById(
+            "subject"
+        ).value = "";
+
+        loadTeachers();
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        alert(
+            "Failed To Add Teacher"
+        );
+    }
+};
+
+// =========================
+// LOAD TEACHERS
+// =========================
+
+async function loadTeachers(){
+
+    try{
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "teachers"
+                )
+            );
+
+        teacherTable.innerHTML =
+            "";
+
+        if(
+            snapshot.empty
+        ){
+
+            teacherTable.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    No Teachers Found
+                </td>
+            </tr>
+            `;
+
+            return;
+        }
+
+        snapshot.forEach(
+            teacherDoc => {
+
+            const teacher =
+                teacherDoc.data();
+
+            teacherTable.innerHTML += `
+
+            <tr>
+
+                <td>
+                    ${teacher.teacherName || ""}
+                </td>
+
+                <td>
+                    ${teacher.employeeId || ""}
+                </td>
+
+                <td>
+                    ${teacher.subject || ""}
+                </td>
+
+                <td>
+                    ${teacher.status || "active"}
+                </td>
+
+                <td>
+                    ${teacher.password || ""}
+                </td>
+
+                <td>
+
+                    <button
+                    class="reset-btn"
+                    onclick="resetPassword(
+                    '${teacherDoc.id}',
+                    '${teacher.employeeId}'
+                    )">
+
+                    Reset
+
+                    </button>
+
+                    <button
+                    class="delete-btn"
+                    onclick="deleteTeacher(
+                    '${teacherDoc.id}'
+                    )">
+
+                    Delete
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+            `;
+        });
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        teacherTable.innerHTML = `
+        <tr>
+            <td colspan="6">
+                Error Loading Teachers
+            </td>
+        </tr>
+        `;
+    }
 }
 
-body{
-    background:#f4f6f9;
-}
+// =========================
+// DELETE TEACHER
+// =========================
 
-.header{
-    background:#001f5b;
-    color:white;
-    padding:20px;
-    text-align:center;
-}
+window.deleteTeacher =
+async function(id){
 
-.container{
-    width:90%;
-    max-width:1200px;
-    margin:30px auto;
-}
+    if(
+        !confirm(
+            "Delete this teacher?"
+        )
+    ){
+        return;
+    }
 
-.card{
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,.1);
-}
+    try{
 
-input{
-    width:100%;
-    padding:12px;
-    margin-bottom:15px;
-    border:1px solid #ccc;
-    border-radius:5px;
-}
+        await deleteDoc(
+            doc(
+                db,
+                "teachers",
+                id
+            )
+        );
 
-button{
-    padding:12px 20px;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
+        alert(
+            "Teacher Deleted"
+        );
 
-.add-btn{
-    background:#001f5b;
-    color:white;
-    width:100%;
-}
+        loadTeachers();
 
-.delete-btn{
-    background:red;
-    color:white;
-}
+    }
+    catch(error){
 
-.reset-btn{
-    background:orange;
-    color:white;
-}
+        console.error(error);
 
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
-}
+        alert(
+            "Unable To Delete Teacher"
+        );
+    }
+};
 
-table th{
-    background:#001f5b;
-    color:white;
-    padding:12px;
-}
+// =========================
+// RESET PASSWORD
+// =========================
 
-table td{
-    border:1px solid #ddd;
-    padding:10px;
-    text-align:center;
-}
+window.resetPassword =
+async function(
+    id,
+    employeeId
+){
 
-.back-btn{
-    background:#001f5b;
-    color:white;
-    margin-bottom:15px;
-}
+    try{
 
-</style>
-</head>
+        const newPassword =
+            "AHPS" +
+            employeeId +
+            "@2026";
 
-<body>
+        await updateDoc(
+            doc(
+                db,
+                "teachers",
+                id
+            ),
+            {
+                password:
+                    newPassword,
 
-<div class="header">
-    <h1>Teacher Management</h1>
-</div>
+                mustChangePassword:
+                    true
+            }
+        );
 
-<div class="container">
+        alert(
+            "Password Reset Successfully\n\n" +
+            "New Password : " +
+            newPassword
+        );
 
-    <button
-        class="back-btn"
-        onclick="location.href='dashboard.html'">
-        ← Back To Dashboard
-    </button>
+        loadTeachers();
 
-    <div class="card">
+    }
+    catch(error){
 
-        <h2>Add Teacher</h2>
+        console.error(error);
 
-        <br>
+        alert(
+            "Password Reset Failed"
+        );
+    }
+};
 
-        <input
-            type="text"
-            id="teacherName"
-            placeholder="Teacher Name">
+// =========================
+// INITIAL LOAD
+// =========================
 
-        <input
-            type="text"
-            id="employeeId"
-            placeholder="Employee ID">
-
-        <input
-            type="text"
-            id="subject"
-            placeholder="Subject">
-
-        <button
-            class="add-btn"
-            onclick="addTeacher()">
-            Add Teacher
-        </button>
-
-    </div>
-
-    <div class="card" style="margin-top:20px;">
-
-        <h2>Teachers List</h2>
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Name</th>
-                    <th>Employee ID</th>
-                    <th>Subject</th>
-                    <th>Password</th>
-                    <th>Action</th>
-                </tr>
-
-            </thead>
-
-            <tbody id="teacherTable">
-
-                <tr>
-                    <td colspan="5">
-                        Loading...
-                    </td>
-                </tr>
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-
-<script type="module" src="../js/teachers.js"></script>
-
-</body>
-</html>
+loadTeachers();
