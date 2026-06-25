@@ -1,0 +1,467 @@
+/* ===============================
+   AHPS Answer Review
+================================ */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
+}
+
+.main-content{
+    padding:25px;
+}
+
+.page-header{
+    margin-bottom:20px;
+}
+
+.page-header h1{
+    font-size:30px;
+    color:#1e293b;
+}
+
+.page-header p{
+    color:#64748b;
+    margin-top:5px;
+}
+
+.card{
+
+    background:#fff;
+
+    border-radius:12px;
+
+    padding:20px;
+
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+
+    margin-bottom:25px;
+
+}
+
+/* ==========================
+        Filters
+========================== */
+
+.filter-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(220px,1fr));
+
+    gap:18px;
+
+    align-items:end;
+
+}
+
+.filter-grid label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-weight:600;
+
+    color:#334155;
+
+}
+
+.filter-grid select{
+
+    width:100%;
+
+    padding:12px;
+
+    border-radius:8px;
+
+    border:1px solid #d1d5db;
+
+    outline:none;
+
+    transition:.3s;
+
+}
+
+.filter-grid select:focus{
+
+    border-color:#2563eb;
+
+}
+
+.primary-btn{
+
+    width:100%;
+
+    padding:12px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#2563eb;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+.primary-btn:hover{
+
+    background:#1d4ed8;
+
+}
+
+/* ==========================
+            Tabs
+========================== */
+
+.tabs{
+
+    display:flex;
+
+    gap:10px;
+
+    margin-bottom:20px;
+
+    flex-wrap:wrap;
+
+}
+
+.tab{
+
+    padding:12px 24px;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    background:#e5e7eb;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+.tab.active{
+
+    background:#2563eb;
+
+    color:#fff;
+
+}
+
+.tab:hover{
+
+    transform:translateY(-2px);
+
+}
+
+/* ==========================
+        Tab Content
+========================== */
+
+.tab-content{
+
+    display:none;
+
+}
+
+.tab-content.active{
+
+    display:block;
+
+}
+
+/* ==========================
+           Table
+========================== */
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    min-width:900px;
+
+}
+
+thead{
+
+    background:#2563eb;
+
+    color:#fff;
+
+}
+
+th{
+
+    padding:15px;
+
+    text-align:left;
+
+}
+
+td{
+
+    padding:14px;
+
+    border-bottom:1px solid #e5e7eb;
+
+}
+
+tbody tr:hover{
+
+    background:#f8fafc;
+
+}
+
+/* Horizontal scroll */
+
+.card{
+
+    overflow:auto;
+
+}
+
+/* ==========================
+      Action Button
+========================== */
+
+.view-btn{
+
+    padding:8px 15px;
+
+    background:#10b981;
+
+    color:#fff;
+
+    border:none;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+}
+
+.view-btn:hover{
+
+    background:#059669;
+
+}
+
+/* ==========================
+            Modal
+========================== */
+
+.modal{
+
+    display:none;
+
+    position:fixed;
+
+    left:0;
+
+    top:0;
+
+    width:100%;
+
+    height:100%;
+
+    background:rgba(0,0,0,.5);
+
+    z-index:999;
+
+}
+
+.modal-content{
+
+    background:#fff;
+
+    width:90%;
+
+    max-width:950px;
+
+    margin:40px auto;
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+    animation:popup .25s ease;
+
+}
+
+@keyframes popup{
+
+    from{
+
+        transform:scale(.9);
+
+        opacity:0;
+
+    }
+
+    to{
+
+        transform:scale(1);
+
+        opacity:1;
+
+    }
+
+}
+
+.modal-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:18px;
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+.close{
+
+    font-size:30px;
+
+    cursor:pointer;
+
+}
+
+#answerContent{
+
+    padding:25px;
+
+    max-height:75vh;
+
+    overflow:auto;
+
+}
+
+/* ==========================
+    Question Cards
+========================== */
+
+.question-card{
+
+    border:1px solid #e5e7eb;
+
+    border-radius:10px;
+
+    padding:18px;
+
+    margin-bottom:18px;
+
+}
+
+.question-card h4{
+
+    margin-bottom:12px;
+
+    color:#1e293b;
+
+}
+
+.answer{
+
+    margin-top:10px;
+
+    padding:10px;
+
+    border-radius:6px;
+
+}
+
+.correct{
+
+    background:#dcfce7;
+
+    color:#166534;
+
+    border-left:5px solid #22c55e;
+
+}
+
+.wrong{
+
+    background:#fee2e2;
+
+    color:#991b1b;
+
+    border-left:5px solid #ef4444;
+
+}
+
+.notanswered{
+
+    background:#fef9c3;
+
+    color:#854d0e;
+
+    border-left:5px solid #facc15;
+
+}
+
+/* ==========================
+      Matrix Scroll
+========================== */
+
+#matrixContainer{
+
+    overflow-x:auto;
+
+}
+
+/* ==========================
+      Responsive
+========================== */
+
+@media(max-width:768px){
+
+    .page-header h1{
+
+        font-size:24px;
+
+    }
+
+    .filter-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .tabs{
+
+        flex-direction:column;
+
+    }
+
+    .tab{
+
+        width:100%;
+
+    }
+
+}
