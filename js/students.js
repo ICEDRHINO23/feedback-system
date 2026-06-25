@@ -8,101 +8,198 @@ import {
     deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+let allStudents = [];
+
 async function loadStudents() {
 
     const tbody = document.getElementById("studentTable");
 
-    if (!tbody) {
-        console.error("studentTable not found");
-        return;
-    }
+    if (!tbody) return;
 
     try {
 
-        const snapshot = await getDocs(
-            collection(db, "students")
-        );
+        const snapshot = await getDocs(collection(db, "students"));
 
-        tbody.innerHTML = "";
-
-        if (snapshot.empty) {
-
-            tbody.innerHTML = `
-            <tr>
-                <td colspan="7">
-                    No Students Found
-                </td>
-            </tr>
-            `;
-
-            return;
-        }
+        allStudents = [];
 
         snapshot.forEach((studentDoc) => {
 
-            const student = studentDoc.data();
-
-            tbody.innerHTML += `
-            <tr>
-                <td>${student.name || ""}</td>
-                <td>${student.class || ""}</td>
-                <td>${student.section || ""}</td>
-                <td>${student.rollNo || ""}</td>
-                <td>${student.status || "active"}</td>
-                <td>${student.lastlogin || "-"}</td>
-
-                <td>
-
-                    <button
-                        class="action-btn disable"
-                        onclick="toggleStudentStatus(
-                            '${studentDoc.id}',
-                            '${student.status || "active"}'
-                        )">
-
-                        ${student.status || "active"}
-
-                    </button>
-
-                    <button
-                        class="action-btn delete"
-                        onclick="deleteStudent(
-                            '${studentDoc.id}'
-                        )">
-
-                        Delete
-
-                    </button>
-
-                </td>
-
-            </tr>
-            `;
+            allStudents.push({
+                id: studentDoc.id,
+                ...studentDoc.data()
+            });
 
         });
 
+        renderStudents(allStudents);
+
+        loadClassFilter();
+
+        loadSectionFilter();
+
     } catch (error) {
 
-        console.error(
-            "Error Loading Students:",
-            error
-        );
+        console.error(error);
 
         tbody.innerHTML = `
         <tr>
             <td colspan="7">
                 Error Loading Students
             </td>
-        </tr>
-        `;
+        </tr>`;
     }
+
 }
 
+function renderStudents(students) {
 
-// Enable / Disable Student
+    const tbody = document.getElementById("studentTable");
 
-window.toggleStudentStatus =
-async function(id, currentStatus){
+    tbody.innerHTML = "";
+
+    if (students.length === 0) {
+
+        tbody.innerHTML = `
+        <tr>
+            <td colspan="7">
+                No Students Found
+            </td>
+        </tr>`;
+
+        return;
+    }
+
+    students.forEach(student => {
+
+        tbody.innerHTML += `
+
+        <tr>
+
+            <td>${student.name || ""}</td>
+
+            <td>${student.class || ""}</td>
+
+            <td>${student.section || ""}</td>
+
+            <td>${student.rollNo || ""}</td>
+
+            <td>${student.status || "active"}</td>
+
+            <td>${student.lastlogin || "-"}</td>
+
+            <td>
+
+                <button
+                    class="action-btn disable"
+                    onclick="toggleStudentStatus('${student.id}','${student.status || "active"}')">
+
+                    ${student.status || "active"}
+
+                </button>
+
+                <button
+                    class="action-btn delete"
+                    onclick="deleteStudent('${student.id}')">
+
+                    Delete
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+function loadClassFilter() {
+
+    const filter = document.getElementById("classFilter");
+
+    if (!filter) return;
+
+    filter.innerHTML = `<option value="">All Classes</option>`;
+
+    const classes = [...new Set(allStudents.map(s => s.class))].sort();
+
+    classes.forEach(cls => {
+
+        if (!cls) return;
+
+        filter.innerHTML += `
+            <option value="${cls}">
+                ${cls}
+            </option>`;
+    });
+
+}
+
+function loadSectionFilter() {
+
+    const filter = document.getElementById("sectionFilter");
+
+    if (!filter) return;
+
+    filter.innerHTML = `<option value="">All Sections</option>`;
+
+    const sections = [...new Set(allStudents.map(s => s.section))].sort();
+
+    sections.forEach(sec => {
+
+        if (!sec) return;
+
+        filter.innerHTML += `
+            <option value="${sec}">
+                ${sec}
+            </option>`;
+    });
+
+}
+
+function filterStudents() {
+
+    const search = document
+        .getElementById("searchBox")
+        .value
+        .toLowerCase();
+
+    const selectedClass =
+        document
+        .getElementById("classFilter")
+        .value;
+
+    const selectedSection =
+        document
+        .getElementById("sectionFilter")
+        .value;
+
+    const filtered = allStudents.filter(student => {
+
+        const searchMatch =
+            (student.name || "")
+            .toLowerCase()
+            .includes(search);
+
+        const classMatch =
+            selectedClass === "" ||
+            student.class === selectedClass;
+
+        const sectionMatch =
+            selectedSection === "" ||
+            student.section === selectedSection;
+
+        return searchMatch && classMatch && sectionMatch;
+
+    });
+
+    renderStudents(filtered);
+
+}
+
+window.toggleStudentStatus = async function(id, currentStatus){
 
     try{
 
@@ -111,16 +208,9 @@ async function(id, currentStatus){
             ? "disabled"
             : "active";
 
-        await updateDoc(
-            doc(db, "students", id),
-            {
-                status: newStatus
-            }
-        );
-
-        alert(
-            "Student status updated"
-        );
+        await updateDoc(doc(db,"students",id),{
+            status:newStatus
+        });
 
         loadStudents();
 
@@ -128,35 +218,20 @@ async function(id, currentStatus){
 
         console.error(error);
 
-        alert(
-            "Unable to update status"
-        );
+        alert("Unable to update status");
+
     }
+
 };
 
+window.deleteStudent = async function(id){
 
-// Delete Student
-
-window.deleteStudent =
-async function(id){
-
-    const confirmDelete =
-        confirm(
-            "Delete this student?"
-        );
-
-    if(!confirmDelete)
+    if(!confirm("Delete this student?"))
         return;
 
     try{
 
-        await deleteDoc(
-            doc(db, "students", id)
-        );
-
-        alert(
-            "Student deleted"
-        );
+        await deleteDoc(doc(db,"students",id));
 
         loadStudents();
 
@@ -164,11 +239,25 @@ async function(id){
 
         console.error(error);
 
-        alert(
-            "Unable to delete student"
-        );
+        alert("Unable to delete student");
+
     }
+
 };
 
+document.getElementById("searchBox")?.addEventListener(
+    "input",
+    filterStudents
+);
+
+document.getElementById("classFilter")?.addEventListener(
+    "change",
+    filterStudents
+);
+
+document.getElementById("sectionFilter")?.addEventListener(
+    "change",
+    filterStudents
+);
 
 loadStudents();
