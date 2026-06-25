@@ -1,1 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Answer Review | AHPS Online Examination System</title>
+
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/answer-review.css">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <h2>AHPS</h2>
+            <span>Online Examination</span>
+        </div>
+
+        <ul>
+
+            <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+
+            <li><a href="students.html"><i class="fas fa-user-graduate"></i> Students</a></li>
+
+            <li><a href="questions.html"><i class="fas fa-book"></i> Questions</a></li>
+
+            <li><a href="exams.html"><i class="fas fa-file-alt"></i> Exams</a></li>
+
+            <li><a href="results.html"><i class="fas fa-chart-bar"></i> Results</a></li>
+
+            <li class="active">
+                <a href="answer-review.html">
+                    <i class="fas fa-search"></i>
+                    Answer Review
+                </a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+
+    <!-- Main Content -->
+
+    <main class="main-content">
+
+        <div class="page-header">
+
+            <h1>Answer Review</h1>
+
+            <p>
+                Review answers submitted by students.
+            </p>
+
+        </div>
+
+
+        <!-- Filter Card -->
+
+        <div class="card">
+
+            <div class="filter-grid">
+
+                <div>
+
+                    <label>Exam</label>
+
+                    <select id="examFilter">
+
+                        <option value="">
+                            Select Exam
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div>
+
+                    <label>Class</label>
+
+                    <select id="classFilter">
+
+                        <option value="">
+                            All Classes
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div>
+
+                    <label>Section</label>
+
+                    <select id="sectionFilter">
+
+                        <option value="">
+                            All Sections
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div>
+
+                    <button
+                        id="loadAnswers"
+                        class="primary-btn">
+
+                        <i class="fas fa-search"></i>
+
+                        Load Answers
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Tabs -->
+
+        <div class="tabs">
+
+            <button
+                class="tab active"
+                data-tab="students">
+
+                By Student
+
+            </button>
+
+            <button
+                class="tab"
+                data-tab="matrix">
+
+                Class Matrix
+
+            </button>
+
+            <button
+                class="tab"
+                data-tab="analysis">
+
+                Question Analysis
+
+            </button>
+
+        </div>
+
+
+
+        <!-- Student View -->
+
+        <div
+            id="students"
+            class="tab-content active">
+
+            <div class="card">
+
+                <table>
+
+                    <thead>
+
+                    <tr>
+
+                        <th>Roll No</th>
+
+                        <th>Name</th>
+
+                        <th>Class</th>
+
+                        <th>Section</th>
+
+                        <th>Score</th>
+
+                        <th>Percentage</th>
+
+                        <th>Submitted</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody id="studentResultTable">
+
+                        <tr>
+
+                            <td colspan="8">
+
+                                No Data Found
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Matrix View -->
+
+        <div
+            id="matrix"
+            class="tab-content">
+
+            <div class="card">
+
+                <div
+                    id="matrixContainer">
+
+                    Select an exam to load matrix.
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Question Analysis -->
+
+        <div
+            id="analysis"
+            class="tab-content">
+
+            <div class="card">
+
+                <div
+                    id="analysisContainer">
+
+                    Question analysis will appear here.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+
+<!-- Student Answer Modal -->
+
+<div
+    id="answerModal"
+    class="modal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>
+
+                Student Answer Sheet
+
+            </h2>
+
+            <span
+                class="close">
+
+                &times;
+
+            </span>
+
+        </div>
+
+        <div
+            id="answerContent">
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script type="module" src="../js/answer-review.js"></script>
+
+</body>
+
+</html>
