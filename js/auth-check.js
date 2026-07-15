@@ -1,16 +1,54 @@
-import { auth } from "./firebase-config.js";
+// =========================
+// LOGIN PROTECTION
+// =========================
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+const role = localStorage.getItem("role");
 
-onAuthStateChanged(auth, (user) => {
+if (!role) {
 
-    if (!user) {
+    alert("Please login first.");
 
-        alert("Please login first.");
+    window.location.href = "login.html";
+
+}
+
+// =========================
+// STUDENT PAGES
+// =========================
+
+const page =
+    window.location.pathname.toLowerCase();
+
+if (
+    page.includes("dashboard.html") ||
+    page.includes("exam.html") ||
+    page.includes("result.html")
+) {
+
+    if (role !== "student") {
+
+        alert("Unauthorized Access");
 
         window.location.href = "login.html";
+
     }
 
-});
+}
+
+// =========================
+// ADMIN PAGES
+// =========================
+
+if (
+    page.includes("/admin/")
+) {
+
+    if (role !== "admin") {
+
+        alert("Administrator Login Required");
+
+        window.location.href = "../login.html";
+
+    }
+
+}
