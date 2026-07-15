@@ -1,32 +1,27 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-import {
-    getFirestore
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-    getAuth
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
 
-    apiKey: "...",
+    apiKey: "YOUR_API_KEY",
 
-    authDomain: "...",
+    authDomain: "feedbacksys-e3fe0.firebaseapp.com",
 
-    projectId: "...",
+    projectId: "feedbacksys-e3fe0",
 
-    storageBucket: "...",
+    storageBucket: "feedbacksys-e3fe0.appspot.com",
 
-    messagingSenderId: "...",
+    messagingSenderId: "YOUR_SENDER_ID",
 
-    appId: "..."
+    appId: "YOUR_APP_ID"
+
 };
 
 const app = initializeApp(firebaseConfig);
 
-const db = getFirestore(app);
+export const db = getFirestore(app);
 
-const auth = getAuth(app);
-
-export { db, auth };
+export const auth = getAuth(app);
