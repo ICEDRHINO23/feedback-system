@@ -6,17 +6,17 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-aut
 
 const firebaseConfig = {
 
-    apiKey: "YOUR_API_KEY",
+    apiKey: "AIzaSyDJ7WP7TCT3mZ4WKa20d-b3HSrZ0ZKn0mU",
 
     authDomain: "feedbacksys-e3fe0.firebaseapp.com",
 
     projectId: "feedbacksys-e3fe0",
 
-    storageBucket: "feedbacksys-e3fe0.appspot.com",
+    storageBucket: "feedbacksys-e3fe0.firebasestorage.app",
 
-    messagingSenderId: "YOUR_SENDER_ID",
+    messagingSenderId: "556077863051",
 
-    appId: "YOUR_APP_ID"
+    appId: "1:556077863051:web:756ce5148c828b3b5e048e"
 
 };
 
