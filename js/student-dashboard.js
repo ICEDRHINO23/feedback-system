@@ -169,6 +169,8 @@ window.startExam = function (examId) {
         "Stored Exam ID:",
         localStorage.getItem("currentExamId")
     );
+    // START THE PAGE
+loadExams();
 
     window.location.href =
         "exam.html";
