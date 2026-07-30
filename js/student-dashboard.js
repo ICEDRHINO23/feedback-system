@@ -172,6 +172,4 @@ window.startExam = function (examId) {
 
 // Load exams automatically
 loadExams();
-    window.location.href =
-        "exam.html";
-};
+   
