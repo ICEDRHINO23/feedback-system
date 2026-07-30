@@ -157,18 +157,19 @@ async function loadExams() {
 
 window.startExam = function (examId) {
 
-    console.log(
-        "Starting Exam:",
-        examId
-    );
+    console.log("Start Exam Clicked");
+    console.log("Exam ID:", examId);
 
     localStorage.setItem(
         "currentExamId",
         examId
     );
 
+    console.log(
+        "Stored Exam ID:",
+        localStorage.getItem("currentExamId")
+    );
+
     window.location.href =
         "exam.html";
 };
-
-loadExams();
