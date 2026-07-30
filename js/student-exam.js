@@ -188,8 +188,12 @@ async function submitExam() {
             "%"
         );
 
-        window.location.href =
-            "result.html";
+ localStorage.setItem("latestScore", score);
+localStorage.setItem("latestTotal", totalMarks);
+localStorage.setItem("latestPercentage", percentage.toFixed(2));
+localStorage.setItem("latestCorrectAnswers", correctAnswers);
+
+window.location.href = "result.html";
 
     } catch (error) {
 
