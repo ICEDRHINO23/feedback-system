@@ -135,44 +135,9 @@ body{
 
 </div>
 
-<script>
 
-let timeLeft = 1800;
 
-const timerInterval = setInterval(() => {
-
-    let minutes =
-        Math.floor(timeLeft / 60);
-
-    let seconds =
-        timeLeft % 60;
-
-    document.getElementById(
-        "timer"
-    ).innerHTML =
-
-    `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-
-    timeLeft--;
-
-    if(timeLeft < 0){
-
-        clearInterval(
-            timerInterval
-        );
-
-        alert(
-            "Time Up! Assessment Submitted."
-        );
-
-        submitExam();
-    }
-
-},1000);
-
-</script>
-
-<script type="module" src="js/exam.js"></script>
+<script src="js/auth-check.js"></script>
 <script src="js/route-guard.js"></script>
 <script type="module" src="js/exam.js"></script>
 </body>
