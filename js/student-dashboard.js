@@ -160,18 +160,18 @@ window.startExam = function (examId) {
     console.log("Start Exam Clicked");
     console.log("Exam ID:", examId);
 
-    localStorage.setItem(
-        "currentExamId",
-        examId
-    );
+    localStorage.setItem("currentExamId", examId);
 
     console.log(
         "Stored Exam ID:",
         localStorage.getItem("currentExamId")
     );
-    // START THE PAGE
-loadExams();
 
+    window.location.href = "exam.html";
+};
+
+// Load exams automatically
+loadExams();
     window.location.href =
         "exam.html";
 };
