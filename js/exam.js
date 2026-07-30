@@ -9,7 +9,17 @@ import {
 
 const examId =
     localStorage.getItem("currentExamId");
+console.log("===== EXAM PAGE =====");
 
+console.log(
+    "Exam ID:",
+    examId
+);
+
+console.log(
+    "All Local Storage:",
+    { ...localStorage }
+);
 let questions = [];
 let totalDuration = 30;
 
