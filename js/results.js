@@ -47,7 +47,10 @@ async function loadResults() {
             allResults.push(result);
 
         });
-
+        allResults.sort((a, b) =>
+    new Date(b.submittedAt) - new Date(a.submittedAt)
+);
+        
         renderResults(allResults);
         loadClassFilter();
 
@@ -76,18 +79,13 @@ function renderResults(results) {
     results.forEach(result => {
 
         const percentage =
-            result.totalMarks > 0
-                ? (
-                    (result.score / result.totalMarks) * 100
-                  ).toFixed(2)
-                : 0;
-
+    result.percentage || "0.00";
         tbody.innerHTML += `
 
         <tr>
 
             <td>
-                ${result.participantName || "-"}
+                ${result.studentName || "-"}
             </td>
 
             <td>
@@ -95,7 +93,7 @@ function renderResults(results) {
             </td>
 
             <td>
-                ${result.studentSection || "-"}
+                ${result.section || "-"}
             </td>
 
             <td>
@@ -213,12 +211,11 @@ function filterResults() {
         allResults.filter(result => {
 
             const nameMatch =
-                (
-                    result.participantName || ""
-                )
-                .toLowerCase()
-                .includes(search);
-
+(
+    result.studentName || ""
+)
+.toLowerCase()
+.includes(search);
             const classMatch =
                 selectedClass === "" ||
                 result.studentClass === selectedClass;
