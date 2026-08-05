@@ -68,7 +68,7 @@ async function loadResults() {
 
             <tr>
 
-                <td colspan="10">
+                <td colspan="11">
 
                     No Results Found
 
@@ -119,7 +119,7 @@ async function loadResults() {
 
         <tr>
 
-            <td colspan="10">
+            <td colspan="11">
 
                 Error Loading Results
 
@@ -145,7 +145,7 @@ function renderResults(results) {
 
     tbody.innerHTML = "";
 
-    results.forEach(result => {
+  results.forEach((result,index) => {
 
         const exam =
             examMap[result.examId] || {};
@@ -156,7 +156,7 @@ function renderResults(results) {
         tbody.innerHTML += `
 
         <tr>
-
+<td>${index + 1}</td>
             <td>
 
                 ${
@@ -441,14 +441,36 @@ function loadFilters() {
         const exam =
             examMap[result.examId] || {};
 
-        if (exam.examClass)
-            classSet.add(exam.examClass);
+        const className =
+    exam.examClass ||
+    result.examClass ||
+    result.studentClass;
 
-        if (exam.examName)
-            examSet.add(exam.examName);
+if(className){
 
-        if (exam.subject)
-            subjectSet.add(exam.subject);
+    classSet.add(className);
+
+}
+
+       const examName =
+    exam.examName ||
+    result.examName;
+
+if(examName){
+
+    examSet.add(examName);
+
+}
+
+       const subjectName =
+    exam.subject ||
+    result.subject;
+
+if(subjectName){
+
+    subjectSet.add(subjectName);
+
+}
 
     });
 
@@ -582,12 +604,11 @@ function filterResults(){
                 exam.subject ||
                 result.subject ||
                 "";
-
             const className =
                 exam.examClass ||
+                result.examClass ||
                 result.studentClass ||
-                "";
-
+                 "";
             const searchMatch =
 
                 (
