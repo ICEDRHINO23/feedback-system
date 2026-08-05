@@ -348,6 +348,7 @@ function filterQuestions(){
         });
 
     renderQuestions(filtered);
+}
     // ======================================
 // PREVIEW QUESTION
 // ======================================
@@ -714,4 +715,3 @@ if(updateBtn){
 
 loadQuestions();
 
-}
