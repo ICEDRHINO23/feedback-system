@@ -28,7 +28,7 @@ async function loadResults() {
 
             tbody.innerHTML = `
             <tr>
-                <td colspan="8">
+                <td colspan="10">
                     No Results Found
                 </td>
             </tr>
@@ -114,7 +114,7 @@ function renderResults(results) {
     </td>
 
     <td>
-        ${result.percentage || "0"}%
+        ${percentage}%
     </td>
 
     <td>
@@ -217,17 +217,20 @@ function filterResults() {
     const filtered =
         allResults.filter(result => {
 
-            const nameMatch =
-(
-  (
+const nameMatch = (
+
     (result.studentName || "") +
+
     " " +
+
     (result.examName || "") +
+
     " " +
+
     (result.subject || "")
+
 )
 .toLowerCase()
-
 .includes(search);
             const classMatch =
                 selectedClass === "" ||
