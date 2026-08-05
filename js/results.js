@@ -345,7 +345,6 @@ function loadFilters() {
             `;
 
         });
-
 }
 // ======================================
 // DELETE RESULT
