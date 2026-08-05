@@ -338,11 +338,9 @@ let correctAnswers = 0;
                     selected &&
                     selected.value === q.answer
                 ) {
-
-                    score += Number(q.marks || 1);
-
-    correctAnswers++;
-                        );
+                score += Number(q.marks || 1);
+                correctAnswers++;
+                
                 }
             }
 
@@ -381,12 +379,12 @@ let correctAnswers = 0;
                         )
                     );
 
-                if (isCorrect) {
+               if (isCorrect) {
 
     score += Number(q.marks || 1);
 
     correctAnswers++;
-                        );
+
                 }
             }
 
@@ -458,81 +456,58 @@ let correctAnswers = 0;
               ).toFixed(2)
             : 0;
 
-       await addDoc(
+  await addDoc(
     collection(db, "results"),
     {
 
-        // ==========================
-        // ASSESSMENT DETAILS
-        // ==========================
+        examId: examId,
 
-        examId:
-            examId,
+        examName: currentExam?.examName || "",
 
-        examName:
-            currentExam?.examName || "",
+        subject: currentExam?.subject || "",
 
-        subject:
-            currentExam?.subject || "",
-
-        examClass:
-            currentExam?.examClass || "",
-
-        // ==========================
-        // STUDENT DETAILS
-        // ==========================
+        examClass: currentExam?.examClass || "",
 
         studentName:
-            localStorage.getItem(
-                "studentName"
-            ) || "",
+            localStorage.getItem("studentName") || "",
 
         studentClass:
-            localStorage.getItem(
-                "studentClass"
-            ) || "",
+            localStorage.getItem("studentClass") || "",
 
         section:
-            localStorage.getItem(
-                "studentSection"
-            ) || "",
+            localStorage.getItem("studentSection") || "",
 
         rollNo:
-            localStorage.getItem(
-                "rollNo"
-            ) || "",
+            localStorage.getItem("rollNo") || "",
 
-        // ==========================
-        // RESULT DETAILS
-        // ==========================
+        score: score,
 
-        score:
-            score,
+        totalMarks: totalMarks,
 
-        totalMarks:
-            totalMarks,
+        correctAnswers: correctAnswers,
 
-        correctAnswers:
-            correctAnswers,
+        totalQuestions: questions.length,
 
-        totalQuestions:
-            questions.length,
+        percentage: percentage,
 
-        percentage:
-            percentage.toFixed(2),
-
-        submittedAt:
-            new Date().toISOString()
+        submittedAt: new Date().toISOString()
 
     }
-    catch (error) {
+);
 
-        console.error(error);
+alert("Assessment Submitted Successfully");
 
-        alert(
-            "Failed To Submit Assessment"
-        );
-    }
+window.location.href = "dashboard.html";
+}
+catch (error) {
+
+    console.error(error);
+
+    alert(
+        "Failed To Submit Assessment"
+    );
+
+}
 
 };
 
