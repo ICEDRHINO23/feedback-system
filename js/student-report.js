@@ -1,4 +1,3 @@
-import { db } from "./firebase-config.js";
 import {
     doc,
     getDoc,
@@ -170,10 +169,6 @@ async function loadReport() {
 // Rank Calculation
 // ======================
 
-import {
-    collection,
-    getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const resultsSnapshot =
     await getDocs(
@@ -205,16 +200,19 @@ resultList.sort((a,b)=>
 
 );
 
+const currentStudent =
+    result.studentName ||
+    result.participantName;
+
 const rank =
+    resultList.findIndex(r =>
 
-resultList.findIndex(r=>
+        (r.studentName || r.participantName) === currentStudent
 
-    r.studentName===result.studentName
-
-)+1;
+    ) + 1;
 
 document.getElementById("rank").innerText =
-rank>0 ? rank : "-";
+    rank > 0 ? rank : "-";
 
     }
 
