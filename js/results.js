@@ -8,6 +8,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let allResults = [];
+let examMap = {};
 
 async function loadResults() {
 
@@ -86,23 +87,23 @@ function renderResults(results) {
 <tr>
 
     <td>
-        ${result.studentName || "-"}
+       ${result.studentName || result.participantName || "-"}
+    </td>
+
+    <td>${exam.examName || result.examName || "-"}
     </td>
 
     <td>
-        ${result.examName || "-"}
+    ${exam.subject || result.subject || "-"}
+    
     </td>
 
     <td>
-        ${result.subject || "-"}
+        ${exam.examClass || result.studentClass || "-"}
     </td>
 
     <td>
-        ${result.examClass || result.studentClass || "-"}
-    </td>
-
-    <td>
-        ${result.section || "-"}
+        ${result.section || result.studentSection || "-"}
     </td>
 
     <td>
@@ -187,7 +188,27 @@ async function(id) {
                 id
             )
         );
+async function loadExamMap() {
 
+    examMap = {};
+
+  await loadExamMap();
+
+const snapshot =
+    await getDocs(
+        collection(db, "results")
+    );
+
+    snapshot.forEach(docSnap => {
+
+        examMap[docSnap.id] = {
+            id: docSnap.id,
+            ...docSnap.data()
+        };
+
+    });
+
+}
         loadResults();
 
     }
