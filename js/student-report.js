@@ -162,12 +162,55 @@ async function loadReport() {
         document.getElementById("wrongAnswers").innerText =
             wrongAnswers;
 
-        // ======================
-        // Rank (Temporary)
-        // ======================
+      // ======================
+// Rank Calculation
+// ======================
 
-        document.getElementById("rank").innerText =
-            "-";
+import {
+    collection,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const resultsSnapshot =
+    await getDocs(
+        collection(db,"results")
+    );
+
+let resultList = [];
+
+resultsSnapshot.forEach(docSnap=>{
+
+    const r = docSnap.data();
+
+    if(
+        (r.examId || "") ===
+        (result.examId || "")
+    ){
+
+        resultList.push(r);
+
+    }
+
+});
+
+resultList.sort((a,b)=>
+
+    Number(b.percentage||0) -
+
+    Number(a.percentage||0)
+
+);
+
+const rank =
+
+resultList.findIndex(r=>
+
+    r.studentName===result.studentName
+
+)+1;
+
+document.getElementById("rank").innerText =
+rank>0 ? rank : "-";
 
     }
 
