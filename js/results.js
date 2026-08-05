@@ -82,55 +82,65 @@ function renderResults(results) {
     result.percentage || "0.00";
         tbody.innerHTML += `
 
-        <tr>
+       tbody.innerHTML += `
 
-            <td>
-               ${result.participantName || result.studentName || "-"}
-            </td>
+<tr>
 
-            <td>
-                ${result.studentClass || "-"}
-            </td>
+    <td>
+        ${result.studentName || "-"}
+    </td>
 
-            <td>
-${result.studentSection || result.section || "-"}
-            </td>
+    <td>
+        ${result.examName || "-"}
+    </td>
 
-            <td>
-                ${result.score || 0}
-            </td>
+    <td>
+        ${result.subject || "-"}
+    </td>
 
-            <td>
-                ${result.totalMarks || 0}
-            </td>
+    <td>
+        ${result.examClass || result.studentClass || "-"}
+    </td>
 
-            <td>
-                ${percentage}%
-            </td>
+    <td>
+        ${result.section || "-"}
+    </td>
 
-            <td>
-                ${
-                    result.submittedAt
-                    ? new Date(
-                        result.submittedAt
-                      ).toLocaleString()
-                    : "-"
-                }
-            </td>
+    <td>
+        ${result.score || 0}
+    </td>
 
-            <td>
+    <td>
+        ${result.totalMarks || 0}
+    </td>
 
-                <button
-                    class="delete-btn"
-                    onclick="deleteResult('${result.id}')">
+    <td>
+        ${result.percentage || "0"}%
+    </td>
 
-                    Delete
+    <td>
+        ${
+            result.submittedAt
+            ? new Date(result.submittedAt).toLocaleString()
+            : "-"
+        }
+    </td>
 
-                </button>
+    <td>
 
-            </td>
+        <button
+            class="delete-btn"
+            onclick="deleteResult('${result.id}')">
 
-        </tr>
+            Delete
+
+        </button>
+
+    </td>
+
+</tr>
+
+`;
 
         `;
     });
@@ -212,7 +222,14 @@ function filterResults() {
 
             const nameMatch =
 (
-    result.studentName || ""
+  (
+    (result.studentName || "") +
+    " " +
+    (result.examName || "") +
+    " " +
+    (result.subject || "")
+)
+.toLowerCase()
 )
 .toLowerCase()
 .includes(search);
