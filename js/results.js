@@ -218,17 +218,11 @@ function filterResults() {
         allResults.filter(result => {
 
 const nameMatch = (
-
     (result.studentName || "") +
-
     " " +
-
     (result.examName || "") +
-
     " " +
-
     (result.subject || "")
-
 )
 .toLowerCase()
 .includes(search);
