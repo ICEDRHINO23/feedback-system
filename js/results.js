@@ -61,7 +61,7 @@ async function loadResults() {
 
         tbody.innerHTML = `
         <tr>
-            <td colspan="8">
+            <td colspan="10">
                 Error Loading Results
             </td>
         </tr>
@@ -82,7 +82,6 @@ function renderResults(results) {
     result.percentage || "0.00";
         tbody.innerHTML += `
 
-       tbody.innerHTML += `
 
 <tr>
 
@@ -139,8 +138,6 @@ function renderResults(results) {
     </td>
 
 </tr>
-
-`;
 
         `;
     });
@@ -230,8 +227,7 @@ function filterResults() {
     (result.subject || "")
 )
 .toLowerCase()
-)
-.toLowerCase()
+
 .includes(search);
             const classMatch =
                 selectedClass === "" ||
