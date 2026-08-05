@@ -85,7 +85,7 @@ function renderResults(results) {
         <tr>
 
             <td>
-                ${result.studentName || "-"}
+               ${result.participantName || result.studentName || "-"}
             </td>
 
             <td>
@@ -93,7 +93,7 @@ function renderResults(results) {
             </td>
 
             <td>
-                ${result.section || "-"}
+${result.studentSection || result.section || "-"}
             </td>
 
             <td>
