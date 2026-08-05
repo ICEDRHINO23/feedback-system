@@ -545,21 +545,9 @@ async function updateQuestion(){
 
 }
 
-// ======================================
-// UPDATE BUTTON
-// ======================================
 
-const updateBtn =
-    document.getElementById("updateBtn");
 
-if(updateBtn){
 
-    updateBtn.addEventListener(
-        "click",
-        updateQuestion
-    );
-
-}
     // ======================================
 // DELETE QUESTION
 // ======================================
@@ -702,12 +690,13 @@ document
     "change",
     filterQuestions
 );
-
+// ======================================
+// UPDATE BUTTON
+// ======================================
 const updateBtn =
     document.getElementById(
         "updateBtn"
-    );
-
+    )
 if(updateBtn){
 
     updateBtn.addEventListener(
