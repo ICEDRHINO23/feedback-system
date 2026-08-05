@@ -238,18 +238,25 @@ function renderResults(results) {
 
             </td>
 
-            <td>
+           <td>
 
-                <button
-                    class="delete-btn"
-                    onclick="deleteResult('${result.id}')">
+<button
+class="action-btn preview-btn"
+onclick="window.open('student-report.html?id=${result.id}','_blank')">
 
-                    Delete
+Report
 
-                </button>
+</button>
 
-            </td>
+<button
+class="delete-btn"
+onclick="deleteResult('${result.id}')">
 
+Delete
+
+</button>
+
+</td>
         </tr>
 
         `;
