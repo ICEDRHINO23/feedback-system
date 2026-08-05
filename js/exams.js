@@ -191,7 +191,7 @@ async function loadExams() {
             await getDocs(
                 collection(db, "exams")
             );
-
+console.log("Exam Count:", snapshot.size);
         table.innerHTML = "";
 
         if (snapshot.empty) {
