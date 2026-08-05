@@ -107,8 +107,7 @@ async function loadResults() {
 
         renderResults(allResults);
 
-        loadClassFilter();
-
+        loadFilters();
     }
 
     catch(error){
@@ -258,61 +257,96 @@ function renderResults(results) {
 
 }
 // ======================================
-// LOAD CLASS FILTER
+// LOAD FILTERS
 // ======================================
 
-function loadClassFilter() {
+function loadFilters() {
 
-    const filter =
-        document.getElementById(
-            "classFilter"
-        );
+    const classFilter =
+        document.getElementById("classFilter");
 
-    if (!filter) return;
+    const examFilter =
+        document.getElementById("examFilter");
 
-    filter.innerHTML =
-        `<option value="">
-            All Classes
-        </option>`;
+    const subjectFilter =
+        document.getElementById("subjectFilter");
 
-    const classes =
-        [...new Set(
+    if (!classFilter ||
+        !examFilter ||
+        !subjectFilter) return;
 
-            allResults.map(result => {
+    classFilter.innerHTML =
+        `<option value="">All Classes</option>`;
 
-                const exam =
-                    examMap[result.examId] || {};
+    examFilter.innerHTML =
+        `<option value="">All Assessments</option>`;
 
-                return (
-                    exam.examClass ||
-                    result.examClass ||
-                    result.studentClass
-                );
+    subjectFilter.innerHTML =
+        `<option value="">All Subjects</option>`;
 
-            })
+    const classSet = new Set();
+    const examSet = new Set();
+    const subjectSet = new Set();
 
-        )];
+    allResults.forEach(result => {
 
-    classes.sort();
+        const exam =
+            examMap[result.examId] || {};
 
-    classes.forEach(cls => {
+        if (exam.examClass)
+            classSet.add(exam.examClass);
 
-        if (!cls) return;
+        if (exam.examName)
+            examSet.add(exam.examName);
 
-        filter.innerHTML += `
-
-        <option value="${cls}">
-
-            ${cls}
-
-        </option>
-
-        `;
+        if (exam.subject)
+            subjectSet.add(exam.subject);
 
     });
 
-}
+    [...classSet]
+        .sort()
+        .forEach(cls => {
 
+            classFilter.innerHTML += `
+
+            <option value="${cls}">
+                ${cls}
+            </option>
+
+            `;
+
+        });
+
+    [...examSet]
+        .sort()
+        .forEach(exam => {
+
+            examFilter.innerHTML += `
+
+            <option value="${exam}">
+                ${exam}
+            </option>
+
+            `;
+
+        });
+
+    [...subjectSet]
+        .sort()
+        .forEach(subject => {
+
+            subjectFilter.innerHTML += `
+
+            <option value="${subject}">
+                ${subject}
+            </option>
+
+            `;
+
+        });
+
+}
 // ======================================
 // DELETE RESULT
 // ======================================
@@ -360,16 +394,24 @@ async function(id){
 function filterResults(){
 
     const search =
-
         document
         .getElementById("searchBox")
         .value
         .toLowerCase();
 
     const selectedClass =
-
         document
         .getElementById("classFilter")
+        .value;
+
+    const selectedExam =
+        document
+        .getElementById("examFilter")
+        .value;
+
+    const selectedSubject =
+        document
+        .getElementById("subjectFilter")
         .value;
 
     const filtered =
@@ -396,7 +438,6 @@ function filterResults(){
 
             const className =
                 exam.examClass ||
-                result.examClass ||
                 result.studentClass ||
                 "";
 
@@ -404,29 +445,32 @@ function filterResults(){
 
                 (
                     studentName +
-
                     " " +
-
                     examName +
-
                     " " +
-
                     subject
                 )
                 .toLowerCase()
                 .includes(search);
 
             const classMatch =
-
                 selectedClass === "" ||
-
                 className === selectedClass;
+
+            const examMatch =
+                selectedExam === "" ||
+                examName === selectedExam;
+
+            const subjectMatch =
+                selectedSubject === "" ||
+                subject === selectedSubject;
 
             return (
 
                 searchMatch &&
-
-                classMatch
+                classMatch &&
+                examMatch &&
+                subjectMatch
 
             );
 
@@ -435,7 +479,6 @@ function filterResults(){
     renderResults(filtered);
 
 }
-
 // ======================================
 // EVENTS
 // ======================================
@@ -473,7 +516,33 @@ if(classFilter){
     );
 
 }
+const examFilter =
+    document.getElementById(
+        "examFilter"
+    );
 
+if(examFilter){
+
+    examFilter.addEventListener(
+        "change",
+        filterResults
+    );
+
+}
+
+const subjectFilter =
+    document.getElementById(
+        "subjectFilter"
+    );
+
+if(subjectFilter){
+
+    subjectFilter.addEventListener(
+        "change",
+        filterResults
+    );
+
+}
 // ======================================
 // START
 // ======================================
