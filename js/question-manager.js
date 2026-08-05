@@ -712,6 +712,9 @@ if(updateBtn){
     // ======================================
 // START
 // ======================================
+document.addEventListener("DOMContentLoaded", () => {
 
-loadQuestions();
+    loadQuestions();
+
+});
 
