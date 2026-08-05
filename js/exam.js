@@ -22,7 +22,8 @@ console.log(
 );
 let questions = [];
 let totalDuration = 30;
-
+// Current assessment details
+let currentExam = null;
 // ==========================
 // LOAD QUESTIONS
 // ==========================
@@ -47,18 +48,24 @@ async function loadQuestions() {
 
         examSnapshot.forEach(docSnap => {
 
-            if (
-                docSnap.id === examId
-            ) {
+        if (
+    docSnap.id === examId
+) {
 
-                const exam =
-                    docSnap.data();
+    const exam =
+        docSnap.data();
 
-                totalDuration =
-                    Number(
-                        exam.duration || 30
-                    );
-            }
+    // Save current assessment details
+    currentExam = exam;
+
+    totalDuration =
+        Number(
+            exam.duration || 30
+        );
+
+    console.log("Current Exam:", currentExam);
+
+}
 
         });
 
@@ -303,9 +310,9 @@ async function () {
 
     try {
 
-        let score = 0;
-        let totalMarks = 0;
-
+       let score = 0;
+let totalMarks = 0;
+let correctAnswers = 0;
         const subjectiveAnswers = [];
 
         questions.forEach(q => {
@@ -332,9 +339,9 @@ async function () {
                     selected.value === q.answer
                 ) {
 
-                    score +=
-                        Number(
-                            q.marks || 1
+                    score += Number(q.marks || 1);
+
+    correctAnswers++;
                         );
                 }
             }
@@ -376,9 +383,9 @@ async function () {
 
                 if (isCorrect) {
 
-                    score +=
-                        Number(
-                            q.marks || 1
+    score += Number(q.marks || 1);
+
+    correctAnswers++;
                         );
                 }
             }
@@ -451,59 +458,71 @@ async function () {
               ).toFixed(2)
             : 0;
 
-        await addDoc(
-            collection(
-                db,
-                "results"
-            ),
-            {
-                examId,
-                role,
-                participantName,
-                studentClass,
-                studentSection,
-                score,
-                totalMarks,
-                percentage,
-                subjectiveAnswers,
-                submittedAt:
-                    new Date()
-                    .toISOString()
-            }
-        );
+       await addDoc(
+    collection(db, "results"),
+    {
 
-        localStorage.setItem(
-            "latestScore",
-            score
-        );
+        // ==========================
+        // ASSESSMENT DETAILS
+        // ==========================
 
-        localStorage.setItem(
-            "latestTotal",
-            totalMarks
-        );
+        examId:
+            examId,
 
-        localStorage.setItem(
-            "latestPercentage",
-            percentage
-        );
+        examName:
+            currentExam?.examName || "",
 
-        alert(
-            `Assessment Submitted\n\nScore: ${score}/${totalMarks}`
-        );
+        subject:
+            currentExam?.subject || "",
 
-        if (
-            role === "teacher"
-        ) {
+        examClass:
+            currentExam?.examClass || "",
 
-            window.location.href =
-                "teacher-results.html";
+        // ==========================
+        // STUDENT DETAILS
+        // ==========================
 
-        }
-        else {
+        studentName:
+            localStorage.getItem(
+                "studentName"
+            ) || "",
 
-            window.location.href =
-                "result.html";
-        }
+        studentClass:
+            localStorage.getItem(
+                "studentClass"
+            ) || "",
+
+        section:
+            localStorage.getItem(
+                "studentSection"
+            ) || "",
+
+        rollNo:
+            localStorage.getItem(
+                "rollNo"
+            ) || "",
+
+        // ==========================
+        // RESULT DETAILS
+        // ==========================
+
+        score:
+            score,
+
+        totalMarks:
+            totalMarks,
+
+        correctAnswers:
+            correctAnswers,
+
+        totalQuestions:
+            questions.length,
+
+        percentage:
+            percentage.toFixed(2),
+
+        submittedAt:
+            new Date().toISOString()
 
     }
     catch (error) {
