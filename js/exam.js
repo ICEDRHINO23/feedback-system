@@ -364,20 +364,13 @@ let correctAnswers = 0;
 
                 });
 
-                const correctAnswers =
-                    q.answers || [];
+               const correctOptions = q.answers || [];
 
                 const isCorrect =
-
-                    selectedAnswers.length ===
-                    correctAnswers.length &&
-
-                    selectedAnswers.every(
-                        answer =>
-                        correctAnswers.includes(
-                            answer
-                        )
-                    );
+    selectedAnswers.length === correctOptions.length &&
+    selectedAnswers.every(answer =>
+        correctOptions.includes(answer)
+    );
 
                if (isCorrect) {
 
@@ -469,13 +462,13 @@ let correctAnswers = 0;
         examClass: currentExam?.examClass || "",
 
         studentName:
-            localStorage.getItem("studentName") || "",
+    participantName || "",
 
-        studentClass:
-            localStorage.getItem("studentClass") || "",
+studentClass:
+    studentClass,
 
-        section:
-            localStorage.getItem("studentSection") || "",
+section:
+    studentSection,
 
         rollNo:
             localStorage.getItem("rollNo") || "",
