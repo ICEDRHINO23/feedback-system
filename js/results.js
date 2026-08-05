@@ -107,6 +107,8 @@ async function loadResults() {
 
         renderResults(allResults);
 
+        updateDashboard(allResults);
+
         loadFilters();
     }
 
@@ -254,6 +256,153 @@ function renderResults(results) {
         `;
 
     });
+
+}
+// ======================================
+// UPDATE DASHBOARD
+// ======================================
+
+function updateDashboard(results){
+
+    const totalAttempts =
+        results.length;
+
+    const students =
+        new Set();
+
+    let totalPercentage = 0;
+
+    let highestPercentage = 0;
+
+    let passed = 0;
+
+    results.forEach(result=>{
+
+        students.add(
+
+            result.studentName ||
+
+            result.participantName ||
+
+            "Unknown"
+
+        );
+
+        const percentage =
+
+            Number(result.percentage || 0);
+
+        totalPercentage += percentage;
+
+        if(
+
+            percentage >
+
+            highestPercentage
+
+        ){
+
+            highestPercentage = percentage;
+
+        }
+
+        if(
+
+            percentage >= 35
+
+        ){
+
+            passed++;
+
+        }
+
+    });
+
+    const average =
+
+        totalAttempts
+
+        ?
+
+        (
+
+            totalPercentage /
+
+            totalAttempts
+
+        ).toFixed(2)
+
+        :
+
+        0;
+
+    const passPercentage =
+
+        totalAttempts
+
+        ?
+
+        (
+
+            passed /
+
+            totalAttempts *
+
+            100
+
+        ).toFixed(2)
+
+        :
+
+        0;
+
+    document.getElementById(
+
+        "totalStudents"
+
+    ).textContent =
+
+        students.size;
+
+    document.getElementById(
+
+        "totalAttempts"
+
+    ).textContent =
+
+        totalAttempts;
+
+    document.getElementById(
+
+        "averagePercentage"
+
+    ).textContent =
+
+        average + "%";
+
+    document.getElementById(
+
+        "highestPercentage"
+
+    ).textContent =
+
+        highestPercentage + "%";
+
+    document.getElementById(
+
+        "passPercentage"
+
+    ).textContent =
+
+        passPercentage + "%";
+
+    document.getElementById(
+
+        "failedStudents"
+
+    ).textContent =
+
+        totalAttempts - passed;
 
 }
 // ======================================
@@ -476,7 +625,7 @@ function filterResults(){
         });
 
     renderResults(filtered);
-
+    updateDashboard(filtered);
 }
 // ======================================
 // EVENTS
