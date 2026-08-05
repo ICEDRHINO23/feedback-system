@@ -834,6 +834,70 @@ window.onclick=function(event){
     document.getElementById(
         "reportModal"
     );
+<!-- ==========================================
+     JAVASCRIPT
+========================================== -->
+
+<script src="../js/auth-check.js"></script>
+
+<script type="module" src="../js/results.js"></script>
+
+<script>
+
+document
+.getElementById("printBtn")
+.addEventListener("click",()=>{
+
+    window.print();
+
+});
+
+// ==========================================
+// PDF (Coming Soon)
+// ==========================================
+
+document
+.getElementById("pdfBtn")
+.addEventListener("click",()=>{
+
+    alert(
+        "PDF Export will be added in Version 2."
+    );
+
+});
+
+// ==========================================
+// EXCEL (Coming Soon)
+// ==========================================
+
+document
+.getElementById("excelBtn")
+.addEventListener("click",()=>{
+
+    alert(
+        "Excel Export will be added in Version 2."
+    );
+
+});
+
+// ==========================================
+// REPORT MODAL
+// ==========================================
+
+window.closeReport=function(){
+
+    document
+    .getElementById("reportModal")
+    .style.display="none";
+
+};
+
+window.onclick=function(event){
+
+    const modal=
+    document.getElementById(
+        "reportModal"
+    );
 
     if(event.target===modal){
 
