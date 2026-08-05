@@ -1,5 +1,9 @@
-const role = localStorage.getItem("role");
+const adminRole = localStorage.getItem("role");
 
-if (!role || role !== "admin") {
-    window.location.replace("../login.html");
+if (adminRole !== "admin") {
+
+    alert("Administrator Login Required");
+
+    window.location.href = "../login.html";
+
 }
