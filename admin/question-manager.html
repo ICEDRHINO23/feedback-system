@@ -258,7 +258,130 @@ td{
     </div>
 
 </div>
+<!-- ========================= -->
+<!-- PREVIEW MODAL -->
+<!-- ========================= -->
 
+<div id="previewModal" class="modal">
+
+<div class="modal-content">
+
+<span class="close"
+onclick="closePreview()">
+
+&times;
+
+</span>
+
+<h2>Question Preview</h2>
+
+<hr><br>
+
+<p><b>Question</b></p>
+
+<p id="previewQuestion"></p>
+
+<br>
+
+<p><b>Options</b></p>
+
+<div id="previewOptions"></div>
+
+<br>
+
+<p>
+
+<b>Correct Answer :</b>
+
+<span id="previewAnswer"></span>
+
+</p>
+
+<p>
+
+<b>Marks :</b>
+
+<span id="previewMarks"></span>
+
+</p>
+
+</div>
+
+</div>
+    <!-- ========================= -->
+<!-- EDIT MODAL -->
+<!-- ========================= -->
+
+<div id="editModal" class="modal">
+
+<div class="modal-content">
+
+<span class="close"
+onclick="closeEdit()">
+
+&times;
+
+</span>
+
+<h2>Edit Question</h2>
+
+<hr><br>
+
+<input
+type="text"
+id="editQuestion"
+placeholder="Question">
+
+<input
+type="text"
+id="editOptionA"
+placeholder="Option A">
+
+<input
+type="text"
+id="editOptionB"
+placeholder="Option B">
+
+<input
+type="text"
+id="editOptionC"
+placeholder="Option C">
+
+<input
+type="text"
+id="editOptionD"
+placeholder="Option D">
+
+<select id="editAnswer">
+
+<option value="A">A</option>
+
+<option value="B">B</option>
+
+<option value="C">C</option>
+
+<option value="D">D</option>
+
+</select>
+
+<input
+type="number"
+id="editMarks"
+placeholder="Marks">
+
+<br><br>
+
+<button
+class="action-btn edit-btn"
+onclick="updateQuestion()">
+
+Update Question
+
+</button>
+
+</div>
+
+</div>
 <script src="../js/auth-check.js"></script>
 <script src="../js/admin-guard.js"></script>
 <script type="module" src="../js/question-manager.js"></script>
