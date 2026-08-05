@@ -1,13 +1,47 @@
-// ================================
-// Student Route Guard
-// ================================
+// ======================================
+// STUDENT ROUTE GUARD
+// ======================================
 
-const role = localStorage.getItem("role");
+(() => {
 
-if (!role) {
-    window.location.replace("login.html");
-}
+    const userRole =
+        localStorage.getItem("role");
 
-if (role !== "student") {
-    window.location.replace("login.html");
-}
+    console.log(
+        "Route Guard Role:",
+        userRole
+    );
+
+    if (!userRole) {
+
+        alert(
+            "Please login first."
+        );
+
+        window.location.replace(
+            "login.html"
+        );
+
+        return;
+
+    }
+
+    if (userRole !== "student") {
+
+        alert(
+            "Access Denied!"
+        );
+
+        window.location.replace(
+            "login.html"
+        );
+
+        return;
+
+    }
+
+    console.log(
+        "Student Route Guard Passed"
+    );
+
+})();
