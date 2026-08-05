@@ -67,8 +67,10 @@ async function loadReport() {
         // Student Details
         // ======================
 
-        document.getElementById("studentName").innerText =
-            result.studentName || "-";
+       document.getElementById("studentName").innerText =
+    result.studentName ||
+    result.participantName ||
+    "-";
 
         document.getElementById("rollNo").innerText =
             result.rollNo || "-";
@@ -79,9 +81,10 @@ async function loadReport() {
             exam.examClass ||
             "-";
 
-        document.getElementById("section").innerText =
-            result.section || "-";
-
+       document.getElementById("section").innerText =
+    result.section ||
+    result.studentSection ||
+    "-";
         // ======================
         // Exam Details
         // ======================
@@ -98,7 +101,7 @@ async function loadReport() {
 
         document.getElementById("submittedDate").innerText =
             result.submittedAt
-            ? new Date(result.submittedAt).toLocaleString()
+            ?new Date(result.submittedAt).toLocaleString()
             : "-";
 
         // ======================
