@@ -128,45 +128,117 @@ td{
     <a href="dashboard.html" class="back-btn">
         ← Back to Dashboard
     </a>
+/* ======================================
+   RESULT DASHBOARD
+====================================== */
 
-    <!-- ====================================== -->
-<!-- DASHBOARD -->
-<!-- ====================================== -->
+.dashboard-cards{
 
-<div class="dashboard-cards">
+    display:grid;
 
-    <div class="dashboard-card">
-        <h3>Total Students</h3>
-        <h1 id="totalStudents">0</h1>
-    </div>
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 
-    <div class="dashboard-card">
-        <h3>Total Attempts</h3>
-        <h1 id="totalAttempts">0</h1>
-    </div>
+    gap:20px;
 
-    <div class="dashboard-card">
-        <h3>Average %</h3>
-        <h1 id="averagePercentage">0%</h1>
-    </div>
+    margin-bottom:25px;
 
-    <div class="dashboard-card">
-        <h3>Highest %</h3>
-        <h1 id="highestPercentage">0%</h1>
-    </div>
+}
 
-    <div class="dashboard-card">
-        <h3>Pass %</h3>
-        <h1 id="passPercentage">0%</h1>
-    </div>
+.dashboard-card{
 
-    <div class="dashboard-card">
-        <h3>Failed</h3>
-        <h1 id="failedStudents">0</h1>
-    </div>
+    color:#fff;
 
-</div>
+    border-radius:12px;
 
+    padding:22px;
+
+    text-align:center;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.15);
+
+    transition:.3s;
+
+}
+
+.dashboard-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.card-title{
+
+    font-size:16px;
+
+    font-weight:bold;
+
+    margin-bottom:15px;
+
+}
+
+.card-value{
+
+    font-size:40px;
+
+    font-weight:bold;
+
+}
+
+/* Card Colors */
+
+.blue{
+
+    background:#0d6efd;
+
+}
+
+.green{
+
+    background:#198754;
+
+}
+
+.orange{
+
+    background:#fd7e14;
+
+}
+
+.purple{
+
+    background:#6f42c1;
+
+}
+
+.teal{
+
+    background:#20c997;
+
+}
+
+.red{
+
+    background:#dc3545;
+
+}
+
+/* Responsive */
+
+@media(max-width:768px){
+
+.dashboard-cards{
+
+    grid-template-columns:1fr;
+
+}
+
+.card-value{
+
+    font-size:32px;
+
+}
+
+}
 <!-- ====================================== -->
 <!-- FILTERS -->
 <!-- ====================================== -->
@@ -191,98 +263,7 @@ td{
     </select>
 
 </div>
-<!-- ====================================== -->
-<!-- RESULT DASHBOARD -->
-<!-- ====================================== -->
 
-<div class="dashboard-cards">
-
-    <div class="dashboard-card">
-
-        <h3>Total Students</h3>
-
-        <h1 id="totalStudents">
-            0
-        </h1>
-
-    </div>
-
-    <div class="dashboard-card">
-
-        <h3>Total Attempts</h3>
-
-        <h1 id="totalAttempts">
-            0
-        </h1>
-
-    </div>
-
-    <div class="dashboard-card">
-
-        <h3>Average %</h3>
-
-        <h1 id="averagePercentage">
-            0%
-        </h1>
-
-    </div>
-
-    <div class="dashboard-card">
-
-        <h3>Highest %</h3>
-
-        <h1 id="highestPercentage">
-            0%
-        </h1>
-
-    </div>
-
-    <div class="dashboard-card">
-
-        <h3>Pass %</h3>
-
-        <h1 id="passPercentage">
-            0%
-        </h1>
-
-    </div>
-
-    <div class="dashboard-card">
-
-        <h3>Failed</h3>
-
-        <h1 id="failedStudents">
-            0
-        </h1>
-
-    </div>
-
-</div>
-<select id="examFilter">
-
-    <option value="">
-        All Assessments
-    </option>
-
-</select>
-
-<select id="subjectFilter">
-
-    <option value="">
-        All Subjects
-    </option>
-
-</select>
-
-<select id="classFilter">
-
-    <option value="">
-        All Classes
-    </option>
-
-</select>
-
-    </div>
 
     <table>
 
