@@ -1,3 +1,4 @@
+import { db } from "./firebase-config.js";
 import {
     doc,
     getDoc,
@@ -41,27 +42,34 @@ async function loadReport() {
             return;
 
         }
+const result = resultSnap.data();
 
-        const result = resultSnap.data();
+console.log("Result ID:", resultId);
+console.log("Result Data:", result);
 
-        // Load Exam
+// ======================
+// LOAD EXAM
+// ======================
 
-        let exam = {};
+let exam = {};
 
-        if (result.examId) {
+if (result.examId) {
 
-            const examRef = doc(db, "exams", result.examId);
+    const examRef =
+        doc(db, "exams", result.examId);
 
-            const examSnap = await getDoc(examRef);
+    const examSnap =
+        await getDoc(examRef);
 
-            if (examSnap.exists()) {
+    if (examSnap.exists()) {
 
-                exam = examSnap.data();
+        exam = examSnap.data();
 
-            }
+    }
 
-        }
+}
 
+console.log("Exam Data:", exam);
         // ======================
         // Student Details
         // ======================
