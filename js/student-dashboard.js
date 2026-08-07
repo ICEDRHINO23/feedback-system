@@ -1,175 +1,116 @@
-import { db } from "./firebase-config.js";
-
 import {
     collection,
     getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-async function loadExams() {
+// ======================================
+// LOAD COMPLETED EXAMS
+// ======================================
 
-    const examList =
-        document.getElementById("examList");
+async function loadCompletedExams() {
+
+    const completedDiv =
+        document.getElementById("completedExamList");
+
+    completedDiv.innerHTML = "Loading Results...";
 
     try {
 
-        const studentClass =
-            localStorage.getItem("studentClass");
-
-        console.log(
-            "Student Class:",
-            studentClass
-        );
-
-        if (!studentClass) {
-
-            examList.innerHTML = `
-                <p>
-                    Student Class Not Found.
-                    Please Login Again.
-                </p>
-            `;
-
-            return;
-        }
+        const studentName =
+            localStorage.getItem("studentName");
 
         const snapshot =
             await getDocs(
-                collection(db, "exams")
+                collection(db, "results")
             );
 
-        examList.innerHTML = "";
+        let html = "";
 
-        let found = false;
+        snapshot.forEach(docSnap => {
 
-        snapshot.forEach((docSnap) => {
-
-            const exam =
-                docSnap.data();
-
-            console.log(
-                "Exam:",
-                exam
-            );
-
-            console.log(
-                "Exam Class:",
-                exam.examClass
-            );
-
-            console.log(
-                "Target Type:",
-                exam.targetType
-            );
+            const result = docSnap.data();
 
             if (
-                String(exam.examClass).trim() ===
-                String(studentClass).trim() &&
-                exam.targetType === "student" &&
-                exam.status === "active"
+                (result.studentName || result.participantName) === studentName
             ) {
 
-                found = true;
-
-                examList.innerHTML += `
+                html += `
 
                 <div class="exam-card">
 
-                    <h3>
-                        ${exam.examName}
-                    </h3>
+                    <h3>${result.examName}</h3>
 
                     <p>
-                        Subject:
-                        ${exam.subject}
+                        Subject :
+                        ${result.subject}
                     </p>
 
                     <p>
-                        Duration:
-                        ${exam.duration} Minutes
+                        Score :
+                        ${result.score}/${result.totalMarks}
                     </p>
 
                     <p>
-                        Total Marks:
-                        ${exam.totalMarks}
-                    </p>
-
-                    <p>
-                        Start Date:
-                        ${exam.startDate}
-                    </p>
-
-                    <p>
-                        End Date:
-                        ${exam.endDate}
+                        Percentage :
+                        ${Number(result.percentage).toFixed(2)}%
                     </p>
 
                     <button
-                        onclick="startExam('${docSnap.id}')">
+                        onclick="viewResult('${docSnap.id}')">
 
-                        Start Exam
+                        📄 Result
+
+                    </button>
+
+                    <button
+                        onclick="reviewAssessment('${docSnap.id}')">
+
+                        🔍 Review
 
                     </button>
 
                 </div>
 
                 `;
+
             }
 
         });
 
-        if (!found) {
+        if (html === "") {
 
-            examList.innerHTML = `
-
-            <div class="exam-card">
-
-                <h3>
-                    No Exams Available
-                </h3>
-
+            html = `
                 <p>
-                    No assessments assigned
-                    for Class ${studentClass}
+                    No completed assessments.
                 </p>
-
-            </div>
-
             `;
+
         }
 
+        completedDiv.innerHTML = html;
+
     }
+
     catch (error) {
 
-        console.error(
-            "Exam Loading Error:",
-            error
-        );
+        console.error(error);
 
-        examList.innerHTML = `
+        completedDiv.innerHTML =
+            "Unable to load results.";
 
-        <p>
-            Unable To Load Exams
-        </p>
-
-        `;
     }
+
 }
+window.viewResult = function(resultId){
 
-window.startExam = function (examId) {
+    window.location.href =
+        "result.html?id=" + resultId;
 
-    console.log("Start Exam Clicked");
-    console.log("Exam ID:", examId);
-
-    localStorage.setItem("currentExamId", examId);
-
-    console.log(
-        "Stored Exam ID:",
-        localStorage.getItem("currentExamId")
-    );
-
-    window.location.href = "exam.html";
 };
 
-// Load exams automatically
-loadExams();
-   
+window.reviewAssessment = function(resultId){
+
+    window.location.href =
+        "review/review.html?id=" + resultId;
+
+};
