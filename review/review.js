@@ -117,14 +117,14 @@ async function loadReview() {
 
                     </p>
 
-                    <p>
+                  ${q.explanation ? `
 
-                        <b>Explanation :</b>
+<p>
+    <b>Explanation :</b>
+    ${q.explanation}
+</p>
 
-                        ${q.explanation || "Not Available"}
-
-                    </p>
-
+` : ""}
                 </div>
 
                 `;
