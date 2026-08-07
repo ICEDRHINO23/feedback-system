@@ -1,8 +1,9 @@
+import { db } from "./firebase-config.js";
+
 import {
     collection,
     getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
 // ======================================
 // LOAD COMPLETED EXAMS
 // ======================================
@@ -109,6 +110,13 @@ window.viewResult = function(resultId){
 };
 
 window.reviewAssessment = function(resultId){
+
+    window.location.href =
+        "review/review.html?id=" + resultId;
+
+};
+
+loadCompletedExams();
 
     window.location.href =
         "review/review.html?id=" + resultId;
