@@ -162,7 +162,9 @@ questions.forEach((q, index) => {
 
     isCorrect: isCorrect
 
-});    const percentage =
+});   
+    });
+    const percentage =
         (
             score /
             totalMarks
