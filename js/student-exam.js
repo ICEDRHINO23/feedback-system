@@ -109,29 +109,60 @@ function previousQuestion() {
 async function submitExam() {
 
     let score = 0;
+    let review = [];
     let totalMarks = 0;
     let correctAnswers = 0;
+questions.forEach((q, index) => {
 
-    questions.forEach((q, index) => {
+    const studentAnswer =
+        answers[index] || "";
 
-        totalMarks += Number(
-            q.marks || 1
-        );
+    const correctAnswer =
+        q.answer;
 
-        if (
-            answers[index] === q.answer
-        ) {
+    const marks =
+        Number(q.marks || 1);
 
-            score += Number(
-                q.marks || 1
-            );
+    totalMarks += marks;
 
-            correctAnswers++;
-        }
+    const isCorrect =
+        studentAnswer === correctAnswer;
 
-    });
+    if (isCorrect) {
 
-    const percentage =
+        score += marks;
+
+        correctAnswers++;
+
+    }
+
+   review.push({
+
+    questionId: q.id || "",
+
+    question: q.question || "",
+
+    optionA: q.optionA || "",
+
+    optionB: q.optionB || "",
+
+    optionC: q.optionC || "",
+
+    optionD: q.optionD || "",
+
+    selectedAnswer: studentAnswer,
+
+    correctAnswer: correctAnswer,
+
+    explanation: q.explanation || "",
+
+    marks: isCorrect ? marks : 0,
+
+    totalMarks: marks,
+
+    isCorrect: isCorrect
+
+});    const percentage =
         (
             score /
             totalMarks
@@ -139,43 +170,41 @@ async function submitExam() {
 
     try {
 
-        await addDoc(
-            collection(db, "results"),
-            {
-                studentName:
-                    localStorage.getItem(
-                        "studentName"
-                    ) || "",
+     await addDoc(
+    collection(db, "results"),
+    {
 
-                studentClass:
-                    localStorage.getItem(
-                        "studentClass"
-                    ) || "",
+        // Student Details
+        studentName:
+            localStorage.getItem("studentName") || "",
 
-                section:
-                    localStorage.getItem(
-                        "studentSection"
-                    ) || "",
+        studentClass:
+            localStorage.getItem("studentClass") || "",
 
-                score: score,
+        studentSection:
+            localStorage.getItem("studentSection") || "",
 
-                totalMarks:
-                    totalMarks,
+        // Exam Details
+        examId: examId,
+        examName: exam.examName,
+        subject: exam.subject,
 
-                correctAnswers:
-                    correctAnswers,
+        // Marks
+        score: score,
+        totalMarks: totalMarks,
+        correctAnswers: correctAnswers,
+        totalQuestions: questions.length,
+        percentage: percentage.toFixed(2),
 
-                totalQuestions:
-                    questions.length,
+        // ⭐ Review Data
+        review: review,
 
-                percentage:
-                    percentage.toFixed(2),
+        // Time
+        submittedAt:
+            new Date().toISOString()
 
-                submittedAt:
-                    new Date()
-                        .toISOString()
-            }
-        );
+    }
+);
 
         alert(
             "Exam Submitted!\n\n" +
