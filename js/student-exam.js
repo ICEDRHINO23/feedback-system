@@ -55,8 +55,414 @@ window.previousQuestion =
 window.nextQuestion =
     nextQuestion;
 
+// ======================================
+// SUBMIT EXAM
+// ======================================
+
 window.submitExam =
-    submitExam;
+async function () {
+
+    try {
+
+        let automaticMarks = 0;
+
+        let totalMarks = 0;
+
+        let correctAnswers = 0;
+
+        const subjectiveAnswers = [];
+
+        let hasDescriptiveQuestions = false;
+
+
+        // ==================================
+        // PROCESS QUESTIONS
+        // ==================================
+
+        questions.forEach(q => {
+
+            const marks =
+                Number(q.marks || 1);
+
+            totalMarks += marks;
+
+
+            // ==================================
+            // MCQ
+            // ==================================
+
+            if (
+                !q.questionType ||
+                q.questionType === "mcq"
+            ) {
+
+                const selected =
+                    document.querySelector(
+                        `input[name="${q.id}"]:checked`
+                    );
+
+
+                if (
+                    selected &&
+                    selected.value === q.answer
+                ) {
+
+                    automaticMarks += marks;
+
+                    correctAnswers++;
+
+                }
+
+            }
+
+
+            // ==================================
+            // MULTIPLE ANSWER
+            // ==================================
+
+            if (
+                q.questionType === "multiple"
+            ) {
+
+                const selectedAnswers = [];
+
+
+                document
+                    .querySelectorAll(
+                        `input[name="${q.id}"]:checked`
+                    )
+                    .forEach(box => {
+
+                        selectedAnswers.push(
+                            box.value
+                        );
+
+                    });
+
+
+                const correctOptions =
+                    q.answers || [];
+
+
+                const isCorrect =
+                    selectedAnswers.length ===
+                        correctOptions.length &&
+
+                    selectedAnswers.every(
+                        answer =>
+                            correctOptions.includes(answer)
+                    );
+
+
+                if (isCorrect) {
+
+                    automaticMarks += marks;
+
+                    correctAnswers++;
+
+                }
+
+            }
+
+
+            // ==================================
+            // DESCRIPTIVE / SENTENCE
+            // ==================================
+
+            if (
+                q.questionType === "sentence"
+            ) {
+
+                hasDescriptiveQuestions =
+                    true;
+
+
+                const answerBox =
+                    document.getElementById(
+                        `answer_${q.id}`
+                    );
+
+
+                subjectiveAnswers.push({
+
+                    questionId:
+                        q.id,
+
+                    question:
+                        q.question || "",
+
+                    modelAnswer:
+                        q.modelAnswer || "",
+
+                    studentAnswer:
+                        answerBox
+                            ? answerBox.value.trim()
+                            : "",
+
+                    maxMarks:
+                        marks,
+
+                    teacherMarks:
+                        null,
+
+                    teacherRemark:
+                        "",
+
+                    evaluationStatus:
+                        "pending"
+
+                });
+
+            }
+
+        });
+
+
+        // ==================================
+        // STUDENT DETAILS
+        // ==================================
+
+        const studentName =
+            localStorage.getItem(
+                "studentName"
+            ) || "";
+
+
+        const studentClass =
+            localStorage.getItem(
+                "studentClass"
+            ) || "";
+
+
+        const studentSection =
+            localStorage.getItem(
+                "studentSection"
+            ) || "";
+
+
+        const rollNo =
+            localStorage.getItem(
+                "rollNo"
+            ) || "";
+
+
+        // ==================================
+        // RESULT STATUS
+        // ==================================
+
+        let score = automaticMarks;
+
+        let percentage = 0;
+
+        let reviewStatus =
+            "not_required";
+
+        let resultPublished =
+            true;
+
+
+        // ==================================
+        // DESCRIPTIVE QUESTIONS EXIST
+        // ==================================
+
+        if (hasDescriptiveQuestions) {
+
+            reviewStatus =
+                "pending";
+
+            resultPublished =
+                false;
+
+            // Do NOT publish partial percentage
+            percentage = 0;
+
+        }
+
+
+        // ==================================
+        // NO DESCRIPTIVE QUESTIONS
+        // ==================================
+
+        else {
+
+            percentage =
+                totalMarks > 0
+                    ? (
+                        (score / totalMarks) *
+                        100
+                    ).toFixed(2)
+                    : 0;
+
+        }
+
+
+        // ==================================
+        // SAVE RESULT
+        // ==================================
+
+        await addDoc(
+            collection(db, "results"),
+            {
+
+                // --------------------------
+                // EXAM
+                // --------------------------
+
+                examId:
+                    examId,
+
+                examName:
+                    currentExam?.examName || "",
+
+                subject:
+                    currentExam?.subject || "",
+
+                examClass:
+                    currentExam?.examClass || "",
+
+
+                // --------------------------
+                // STUDENT
+                // --------------------------
+
+                studentName:
+                    studentName,
+
+                studentClass:
+                    studentClass,
+
+                section:
+                    studentSection,
+
+                rollNo:
+                    rollNo,
+
+
+                // --------------------------
+                // MARKS
+                // --------------------------
+
+                score:
+                    score,
+
+                automaticMarks:
+                    automaticMarks,
+
+                descriptiveMarks:
+                    hasDescriptiveQuestions
+                        ? 0
+                        : 0,
+
+                totalMarks:
+                    totalMarks,
+
+                correctAnswers:
+                    correctAnswers,
+
+                totalQuestions:
+                    questions.length,
+
+                percentage:
+                    percentage,
+
+
+                // --------------------------
+                // DESCRIPTIVE ANSWERS
+                // --------------------------
+
+                subjectiveAnswers:
+                    subjectiveAnswers,
+
+
+                hasDescriptiveQuestions:
+                    hasDescriptiveQuestions,
+
+
+                // --------------------------
+                // REVIEW STATUS
+                // --------------------------
+
+                reviewStatus:
+                    reviewStatus,
+
+                resultPublished:
+                    resultPublished,
+
+
+                // --------------------------
+                // TEACHER REVIEW
+                // --------------------------
+
+                reviewedBy:
+                    "",
+
+                reviewedAt:
+                    null,
+
+
+                // --------------------------
+                // TIMESTAMP
+                // --------------------------
+
+                submittedAt:
+                    new Date().toISOString()
+
+            }
+        );
+
+
+        // ==================================
+        // STUDENT MESSAGE
+        // ==================================
+
+        if (hasDescriptiveQuestions) {
+
+            alert(
+                "Assessment Submitted Successfully.\n\n" +
+
+                "Your descriptive answers are " +
+                "pending teacher evaluation.\n\n" +
+
+                "Your final marks and result will " +
+                "be published after teacher evaluation."
+            );
+
+        }
+
+        else {
+
+            alert(
+                "Assessment Submitted Successfully."
+            );
+
+        }
+
+
+        // ==================================
+        // RETURN TO DASHBOARD
+        // ==================================
+
+        window.location.href =
+            "dashboard.html";
+
+
+    }
+    catch (error) {
+
+        console.error(
+            "SUBMIT EXAM ERROR:",
+            error
+        );
+
+
+        alert(
+            "Failed To Submit Assessment\n\n" +
+            error.message
+        );
+
+    }
+
+};
 
 
 // ======================================
