@@ -563,37 +563,126 @@ function calculatePreview() {
         "%";
 
 }
-
-
 // ======================================
-// SAVE / PUBLISH
+// SAVE / PUBLISH RESULT
 // ======================================
 
 document
-    .getElementById(
-        "publishBtn"
-    )
+    .getElementById("publishBtn")
     .addEventListener(
         "click",
         async function () {
 
             try {
 
+                // ==================================
+                // VERIFY RESULT
+                // ==================================
+
+                if (!result || !resultId) {
+
+                    alert(
+                        "Result information not available."
+                    );
+
+                    return;
+
+                }
+
+
+                // ==================================
+                // VERIFY TEACHER
+                // ==================================
+
+                const teacherName =
+                    localStorage.getItem(
+                        "teacherName"
+                    ) || "";
+
+                const teacherSubject =
+                    localStorage.getItem(
+                        "teacherSubject"
+                    ) || "";
+
+
+                if (!teacherName) {
+
+                    alert(
+                        "Teacher session not found.\n\nPlease login again."
+                    );
+
+                    window.location.href =
+                        "teacher-login.html";
+
+                    return;
+
+                }
+
+
+                // ==================================
+                // VERIFY SUBJECT
+                // ==================================
+
+                const resultSubject =
+                    String(
+                        result.subject || ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+                const currentSubject =
+                    String(
+                        teacherSubject || ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                if (
+                    currentSubject &&
+                    resultSubject !==
+                    currentSubject
+                ) {
+
+                    alert(
+                        "You are not authorized to evaluate this assessment."
+                    );
+
+                    return;
+
+                }
+
+
+                // ==================================
+                // DESCRIPTIVE ANSWERS
+                // ==================================
+
                 const subjectiveAnswers =
-                    result.subjectiveAnswers ||
-                    [];
+                    result.subjectiveAnswers || [];
+
+
+                if (
+                    subjectiveAnswers.length === 0
+                ) {
+
+                    alert(
+                        "No descriptive questions found."
+                    );
+
+                    return;
+
+                }
 
 
                 let teacherMarksTotal =
                     0;
-
 
                 const updatedSubjective =
                     [];
 
 
                 // ==================================
-                // VALIDATE & COLLECT MARKS
+                // VALIDATE EVERY QUESTION
                 // ==================================
 
                 for (
@@ -613,9 +702,43 @@ document
                         );
 
 
+                    if (!marksInput) {
+
+                        alert(
+                            "A descriptive question is missing from the review page."
+                        );
+
+                        return;
+
+                    }
+
+
+                    const rawMarks =
+                        marksInput.value.trim();
+
+
+                    // ==================================
+                    // MARKS REQUIRED
+                    // ==================================
+
+                    if (
+                        rawMarks === ""
+                    ) {
+
+                        alert(
+                            "Please enter marks for every descriptive question before publishing."
+                        );
+
+                        marksInput.focus();
+
+                        return;
+
+                    }
+
+
                     const marks =
                         Number(
-                            marksInput.value
+                            rawMarks
                         );
 
 
@@ -625,14 +748,36 @@ document
                         );
 
 
+                    // ==================================
+                    // VALIDATE MARKS
+                    // ==================================
+
                     if (
-                        isNaN(marks) ||
+                        !Number.isFinite(
+                            marks
+                        )
+                    ) {
+
+                        alert(
+                            "Please enter valid marks."
+                        );
+
+                        marksInput.focus();
+
+                        return;
+
+                    }
+
+
+                    if (
                         marks < 0 ||
                         marks > maxMarks
                     ) {
 
                         alert(
-                            "Please enter valid marks for all descriptive questions."
+                            "Marks for a question must be between 0 and " +
+                            maxMarks +
+                            "."
                         );
 
                         marksInput.focus();
@@ -654,7 +799,9 @@ document
                             marks,
 
                         teacherRemark:
-                            remarkInput.value.trim(),
+                            remarkInput
+                                ? remarkInput.value.trim()
+                                : "",
 
                         evaluationStatus:
                             "completed"
@@ -695,17 +842,39 @@ document
 
 
                 // ==================================
-                // TEACHER
+                // CONFIRM PUBLISH
                 // ==================================
 
-                const teacherName =
-                    localStorage.getItem(
-                        "teacherName"
-                    ) || "Teacher";
+                const confirmed =
+                    confirm(
+
+                        "Publish this result?\n\n" +
+
+                        "Student: " +
+                        (
+                            result.studentName ||
+                            "-"
+                        ) +
+
+                        "\n\nFinal Marks: " +
+                        finalMarks +
+                        "/" +
+                        totalMarks +
+
+                        "\nPercentage: " +
+                        percentage.toFixed(2) +
+                        "%"
+
+                    );
+
+
+                if (!confirmed) {
+                    return;
+                }
 
 
                 // ==================================
-                // UPDATE RESULT
+                // UPDATE FIRESTORE
                 // ==================================
 
                 const resultRef =
@@ -751,8 +920,13 @@ document
                 );
 
 
+                // ==================================
+                // SUCCESS
+                // ==================================
+
                 alert(
-                    "Evaluation completed successfully.\n\n" +
+
+                    "Evaluation completed successfully!\n\n" +
 
                     "Final Marks: " +
                     finalMarks +
@@ -762,6 +936,7 @@ document
                     "\nPercentage: " +
                     percentage.toFixed(2) +
                     "%"
+
                 );
 
 
@@ -786,7 +961,6 @@ document
 
         }
     );
-
 
 // ======================================
 // LIVE MARK PREVIEW
