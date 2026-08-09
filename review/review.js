@@ -209,14 +209,7 @@ if(review.length === 0){
                 were not stored.
             </p>
 
-            <div class="bottom-buttons">
-
-                <button
-                    onclick="window.location.href='../dashboard.html'">
-
-                    ← Back to Dashboard
-
-                </button>
+           
 
             </div>
 
