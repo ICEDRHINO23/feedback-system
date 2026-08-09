@@ -4,12 +4,14 @@ import {
     collection,
     addDoc,
     getDocs,
+    getDoc,
     deleteDoc,
     doc,
     updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 window.addTeacher = addTeacher;
+window.editTeacher = editTeacher;
 window.deleteTeacher = deleteTeacher;
 window.resetPassword = resetPassword;
 
@@ -160,19 +162,20 @@ async function loadTeachers() {
                     <td>
 
                         <button
+                            class="edit-btn"
+                            onclick="editTeacher('${teacherDoc.id}')">
+                            Edit
+                        </button>
+
+                        <button
                             class="reset-btn"
-                            onclick="resetPassword(
-                                '${teacherDoc.id}',
-                                '${employeeId}'
-                            )">
+                            onclick="resetPassword('${teacherDoc.id}','${teacher.employeeId}')">
                             Reset
                         </button>
 
                         <button
                             class="delete-btn"
-                            onclick="deleteTeacher(
-                                '${teacherDoc.id}'
-                            )">
+                            onclick="deleteTeacher('${teacherDoc.id}')">
                             Delete
                         </button>
 
@@ -213,7 +216,198 @@ async function loadTeachers() {
 
     }
 }
+// ======================================
+// EDIT TEACHER
+// ======================================
 
+async function editTeacher(id) {
+
+    try {
+
+        const teacherRef =
+            doc(db, "teachers", id);
+
+        const teacherSnap =
+            await getDoc(teacherRef);
+
+        if (!teacherSnap.exists()) {
+
+            alert("Teacher Not Found");
+            return;
+
+        }
+
+        const teacher =
+            teacherSnap.data();
+
+
+        // ==============================
+        // GET UPDATED DETAILS
+        // ==============================
+
+        const teacherName =
+            prompt(
+                "Teacher Name:",
+                teacher.teacherName || ""
+            );
+
+        if (teacherName === null) {
+            return;
+        }
+
+
+        const employeeId =
+            prompt(
+                "Employee ID:",
+                teacher.employeeId || ""
+            );
+
+        if (employeeId === null) {
+            return;
+        }
+
+
+        const subject =
+            prompt(
+                "Subject:",
+                teacher.subject || ""
+            );
+
+        if (subject === null) {
+            return;
+        }
+
+
+        const status =
+            prompt(
+                "Status (active / inactive):",
+                teacher.status || "active"
+            );
+
+        if (status === null) {
+            return;
+        }
+
+
+        // ==============================
+        // VALIDATION
+        // ==============================
+
+        if (
+            !teacherName.trim() ||
+            !employeeId.trim() ||
+            !subject.trim()
+        ) {
+
+            alert(
+                "Teacher Name, Employee ID and Subject are required."
+            );
+
+            return;
+        }
+
+
+        const cleanName =
+            teacherName.trim();
+
+        const cleanEmployeeId =
+            employeeId.trim();
+
+        const cleanSubject =
+            subject.trim();
+
+        const cleanStatus =
+            status.trim().toLowerCase();
+
+
+        if (
+            cleanStatus !== "active" &&
+            cleanStatus !== "inactive"
+        ) {
+
+            alert(
+                "Status must be active or inactive."
+            );
+
+            return;
+        }
+
+
+        // ==============================
+        // PASSWORD
+        // ==============================
+
+        let password =
+            teacher.password || "";
+
+
+        if (
+            cleanEmployeeId !==
+            String(
+                teacher.employeeId || ""
+            )
+        ) {
+
+            password =
+                "AHPS" +
+                cleanEmployeeId +
+                "@2026";
+
+        }
+
+
+        // ==============================
+        // UPDATE FIRESTORE
+        // ==============================
+
+        await updateDoc(
+            teacherRef,
+            {
+                teacherName:
+                    cleanName,
+
+                employeeId:
+                    cleanEmployeeId,
+
+                subject:
+                    cleanSubject,
+
+                status:
+                    cleanStatus,
+
+                password:
+                    password,
+
+                updatedAt:
+                    new Date().toISOString()
+            }
+        );
+
+
+        alert(
+            "Teacher Details Updated Successfully"
+        );
+
+
+        // Reload list
+
+        loadTeachers();
+
+    }
+    catch (error) {
+
+        console.error(
+            "EDIT TEACHER ERROR:",
+            error
+        );
+
+        alert(
+            "Failed To Update Teacher\n\n" +
+            error.message
+        );
+
+    }
+}
 async function deleteTeacher(id) {
 
     if (
