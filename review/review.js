@@ -5,150 +5,475 @@ import {
     getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// =======================================
+
+// ======================================
 // GET RESULT ID
-// =======================================
+// ======================================
 
 const params =
-    new URLSearchParams(window.location.search);
+    new URLSearchParams(
+        window.location.search
+    );
 
 const resultId =
     params.get("id");
 
-if (!resultId) {
 
-    alert("Review not found");
-
-    window.location.href =
-        "../dashboard.html";
-
-}
-
-// =======================================
+// ======================================
 // LOAD REVIEW
-// =======================================
+// ======================================
 
-async function loadReview() {
+async function loadReview(){
 
-    try {
+    const container =
+        document.getElementById(
+            "reviewContainer"
+        );
+
+
+    if(!resultId){
+
+        container.innerHTML = `
+            <div class="question-card">
+                Result ID not found.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    try{
+
+        console.log(
+            "Review Result ID:",
+            resultId
+        );
+
+
+        // ==================================
+        // LOAD RESULT
+        // ==================================
 
         const resultRef =
-            doc(db, "results", resultId);
+            doc(
+                db,
+                "results",
+                resultId
+            );
+
 
         const resultSnap =
-            await getDoc(resultRef);
+            await getDoc(
+                resultRef
+            );
 
-        if (!resultSnap.exists()) {
 
-            alert("Result not found");
+        if(!resultSnap.exists()){
+
+            container.innerHTML = `
+                <div class="question-card">
+                    Result not found.
+                </div>
+            `;
 
             return;
 
         }
 
+
         const result =
             resultSnap.data();
 
-        document.getElementById("studentName").innerText =
-            result.studentName || "-";
 
-        document.getElementById("examName").innerText =
-            result.examName || "-";
+        console.log(
+            "Review Result:",
+            result
+        );
 
-        document.getElementById("subject").innerText =
-            result.subject || "-";
 
-        document.getElementById("score").innerText =
-            result.score + " / " + result.totalMarks;
+        // ==================================
+        // SUMMARY
+        // ==================================
 
-        document.getElementById("percentage").innerText =
-            result.percentage + "%";
+        document.getElementById(
+            "examName"
+        ).innerText =
+            result.examName ||
+            "Assessment";
 
-        const reviewDiv =
-            document.getElementById("reviewContainer");
 
-        reviewDiv.innerHTML = "";
+        document.getElementById(
+            "subject"
+        ).innerText =
+            "Subject: " +
+            (
+                result.subject ||
+                "-"
+            );
 
-        // Questions
-        if (
-            result.review &&
-            result.review.length > 0
-        ) {
 
-            result.review.forEach((q,index)=>{
+        const score =
+            Number(
+                result.score || 0
+            );
 
-                reviewDiv.innerHTML += `
 
+        const totalMarks =
+            Number(
+                result.totalMarks || 0
+            );
+
+
+        const percentage =
+            Number(
+                result.percentage || 0
+            );
+
+
+        const correct =
+            Number(
+                result.correctAnswers || 0
+            );
+
+
+        const totalQuestions =
+            Number(
+                result.totalQuestions || 0
+            );
+
+
+        const wrong =
+            totalQuestions -
+            correct;
+
+
+        document.getElementById(
+            "score"
+        ).innerText =
+            score +
+            "/" +
+            totalMarks;
+
+
+        document.getElementById(
+            "percentage"
+        ).innerText =
+            percentage.toFixed(2) +
+            "%";
+
+
+        document.getElementById(
+            "correct"
+        ).innerText =
+            correct;
+
+
+        document.getElementById(
+            "wrong"
+        ).innerText =
+            wrong;
+
+
+        // ==================================
+        // REVIEW ARRAY
+        // ==================================
+
+        const review =
+            Array.isArray(
+                result.review
+            )
+            ? result.review
+            : [];
+
+
+        if(review.length === 0){
+
+            container.innerHTML = `
                 <div class="question-card">
 
                     <h3>
-
-                        Question ${index+1}
-
+                        Review Not Available
                     </h3>
 
                     <p>
-
-                        ${q.question}
-
+                        No question review data
+                        was saved for this assessment.
                     </p>
 
-                    <p>
-
-                        <b>Your Answer :</b>
-
-                        ${q.selectedAnswer}
-
-                    </p>
-
-                    <p>
-
-                        <b>Correct Answer :</b>
-
-                        ${q.correctAnswer}
-
-                    </p>
-
-                    <p>
-
-                        <b>Marks :</b>
-
-                        ${q.marks}
-
-                    </p>
-
-                  ${q.explanation ? `
-
-<p>
-    <b>Explanation :</b>
-    ${q.explanation}
-</p>
-
-` : ""}
                 </div>
+            `;
+
+            return;
+
+        }
+
+
+        // ==================================
+        // BUILD REVIEW
+        // ==================================
+
+        let html = "";
+
+
+        review.forEach(
+            (q,index) => {
+
+                const selected =
+                    q.selectedAnswer || "";
+
+
+                const correctAnswer =
+                    q.correctAnswer || "";
+
+
+                const isCorrect =
+                    q.isCorrect === true;
+
+
+                let optionsHTML = "";
+
+
+                const options = [
+
+                    {
+                        key:"A",
+                        text:q.optionA || ""
+                    },
+
+                    {
+                        key:"B",
+                        text:q.optionB || ""
+                    },
+
+                    {
+                        key:"C",
+                        text:q.optionC || ""
+                    },
+
+                    {
+                        key:"D",
+                        text:q.optionD || ""
+                    }
+
+                ];
+
+
+                options.forEach(
+                    option => {
+
+                        let classes =
+                            "option";
+
+
+                        if(
+                            option.key ===
+                            correctAnswer
+                        ){
+
+                            classes +=
+                                " correct";
+
+                        }
+
+
+                        if(
+                            option.key ===
+                            selected &&
+                            option.key !==
+                            correctAnswer
+                        ){
+
+                            classes +=
+                                " wrong";
+
+                        }
+
+
+                        if(
+                            option.key ===
+                            selected
+                        ){
+
+                            classes +=
+                                " selected";
+
+                        }
+
+
+                        let marker = "";
+
+
+                        if(
+                            option.key ===
+                            selected
+                        ){
+
+                            marker +=
+                                " Your Answer";
+
+                        }
+
+
+                        if(
+                            option.key ===
+                            correctAnswer
+                        ){
+
+                            marker +=
+                                " ✓ Correct Answer";
+
+                        }
+
+
+                        optionsHTML += `
+
+                            <div
+                                class="${classes}"
+                            >
+
+                                <span
+                                    class="option-label"
+                                >
+
+                                    ${option.key}.
+
+                                </span>
+
+                                ${option.text}
+
+                                <small>
+
+                                    ${marker}
+
+                                </small>
+
+                            </div>
+
+                        `;
+
+                    }
+                );
+
+
+                const statusClass =
+                    isCorrect
+                    ? "correct"
+                    : "wrong";
+
+
+                const statusText =
+                    isCorrect
+                    ? "✓ Correct Answer"
+                    : "✗ Incorrect Answer";
+
+
+                html += `
+
+                    <div
+                        class="question-card"
+                    >
+
+                        <div
+                            class="question-number"
+                        >
+
+                            Question ${index + 1}
+
+                        </div>
+
+
+                        <div
+                            class="question-text"
+                        >
+
+                            ${q.question || ""}
+
+                        </div>
+
+
+                        ${optionsHTML}
+
+
+                        <div
+                            class="answer-status ${statusClass}"
+                        >
+
+                            ${statusText}
+
+                        </div>
+
+
+                        <div class="marks">
+
+                            Marks:
+                            ${q.marks || 0}
+                            /
+                            ${q.totalMarks || 0}
+
+                        </div>
+
+
+                        <div
+                            class="explanation"
+                        >
+
+                            <strong>
+                                Explanation
+                            </strong>
+
+                            ${
+                                q.explanation ||
+                                "Not Available"
+                            }
+
+                        </div>
+
+                    </div>
 
                 `;
 
-            });
+            }
+        );
 
-        }
-        else{
 
-            reviewDiv.innerHTML =
-            "<h3>No review data available.</h3>";
+        container.innerHTML =
+            html;
 
-        }
 
     }
-
     catch(error){
 
-        console.error(error);
+        console.error(
+            "Review Loading Error:",
+            error
+        );
 
-        alert("Unable to load review.");
+
+        container.innerHTML = `
+
+            <div class="question-card">
+
+                <h3>
+                    Unable to Load Review
+                </h3>
+
+                <p>
+                    ${error.message}
+                </p>
+
+            </div>
+
+        `;
 
     }
 
 }
+
+
+// ======================================
+// START
+// ======================================
 
 loadReview();
