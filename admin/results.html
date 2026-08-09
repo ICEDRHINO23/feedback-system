@@ -905,11 +905,14 @@ document
 
 document
 .getElementById("excelBtn")
-.addEventListener("click",()=>{
+.addEventListener(
+    "click",
+    () => {
 
-    alert("Excel Export Coming Soon");
+        window.exportExcel();
 
-});
+    }
+);
 
 window.closeReport=function(){
 
