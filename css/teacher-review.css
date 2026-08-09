@@ -1,0 +1,476 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+
+body {
+
+    background: #f4f6f9;
+
+    color: #222;
+
+}
+
+
+/* ======================================
+   HEADER
+====================================== */
+
+.header {
+
+    background: #001f5b;
+
+    color: white;
+
+    padding: 25px;
+
+    text-align: center;
+
+}
+
+
+.header h1 {
+
+    margin-bottom: 6px;
+
+}
+
+
+/* ======================================
+   CONTAINER
+====================================== */
+
+.container {
+
+    width: 95%;
+
+    max-width: 1100px;
+
+    margin: 25px auto;
+
+}
+
+
+/* ======================================
+   CARDS
+====================================== */
+
+.student-card,
+.assessment-card,
+.score-card,
+.publish-card {
+
+    background: white;
+
+    padding: 22px;
+
+    margin-bottom: 20px;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 3px 10px
+        rgba(0,0,0,.08);
+
+}
+
+
+.student-card h2,
+.assessment-card h2,
+.score-card h2 {
+
+    color: #001f5b;
+
+    margin-bottom: 15px;
+
+}
+
+
+/* ======================================
+   STUDENT DETAILS
+====================================== */
+
+.details-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(200px, 1fr)
+        );
+
+    gap: 15px;
+
+}
+
+
+.details-grid div {
+
+    background: #f8fafc;
+
+    padding: 14px;
+
+    border-radius: 8px;
+
+}
+
+
+.details-grid strong {
+
+    display: block;
+
+    color: #555;
+
+    margin-bottom: 5px;
+
+}
+
+
+.details-grid span {
+
+    font-weight: bold;
+
+}
+
+
+/* ======================================
+   SECTION TITLE
+====================================== */
+
+.section-title {
+
+    font-size: 22px;
+
+    font-weight: bold;
+
+    color: #001f5b;
+
+    margin: 25px 0 15px;
+
+}
+
+
+/* ======================================
+   QUESTION CARD
+====================================== */
+
+.question-card {
+
+    background: white;
+
+    padding: 22px;
+
+    margin-bottom: 18px;
+
+    border-radius: 12px;
+
+    border-left: 5px solid #001f5b;
+
+    box-shadow:
+        0 3px 10px
+        rgba(0,0,0,.08);
+
+}
+
+
+.question-card h3 {
+
+    margin-bottom: 12px;
+
+    color: #001f5b;
+
+}
+
+
+.question-type {
+
+    display: inline-block;
+
+    background: #eef2ff;
+
+    color: #3730a3;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    margin-bottom: 15px;
+
+}
+
+
+/* ======================================
+   ANSWERS
+====================================== */
+
+.answer-box {
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    padding: 15px;
+
+    border-radius: 8px;
+
+    margin: 10px 0;
+
+    white-space: pre-wrap;
+
+}
+
+
+.correct-answer {
+
+    border-left: 4px solid #16a34a;
+
+}
+
+
+.student-answer {
+
+    border-left: 4px solid #2563eb;
+
+}
+
+
+/* ======================================
+   MARKING
+====================================== */
+
+.marking-area {
+
+    margin-top: 18px;
+
+    padding: 18px;
+
+    background: #fff7ed;
+
+    border-radius: 10px;
+
+}
+
+
+.marking-area label {
+
+    display: block;
+
+    font-weight: bold;
+
+    margin-bottom: 7px;
+
+}
+
+
+.marks-input {
+
+    width: 120px;
+
+    padding: 10px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    font-size: 16px;
+
+}
+
+
+.remark-input {
+
+    width: 100%;
+
+    min-height: 80px;
+
+    padding: 10px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    resize: vertical;
+
+}
+
+
+/* ======================================
+   SCORE
+====================================== */
+
+.score-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(180px, 1fr)
+        );
+
+    gap: 15px;
+
+}
+
+
+.score-grid div {
+
+    background: #f8fafc;
+
+    padding: 18px;
+
+    border-radius: 8px;
+
+    text-align: center;
+
+}
+
+
+.score-grid strong {
+
+    display: block;
+
+    color: #555;
+
+    margin-bottom: 8px;
+
+}
+
+
+.score-grid span {
+
+    font-size: 24px;
+
+    font-weight: bold;
+
+    color: #001f5b;
+
+}
+
+
+/* ======================================
+   PUBLISH
+====================================== */
+
+.publish-card {
+
+    text-align: center;
+
+}
+
+
+.publish-card p {
+
+    margin-bottom: 15px;
+
+    color: #b45309;
+
+    font-weight: bold;
+
+}
+
+
+.publish-btn {
+
+    background: #16a34a;
+
+    color: white;
+
+    border: none;
+
+    padding: 13px 22px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-size: 15px;
+
+    font-weight: bold;
+
+}
+
+
+.publish-btn:hover {
+
+    background: #15803d;
+
+}
+
+
+/* ======================================
+   BACK
+====================================== */
+
+.back-btn {
+
+    background: #64748b;
+
+    color: white;
+
+    border: none;
+
+    padding: 10px 18px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+}
+
+
+.back-btn:hover {
+
+    background: #475569;
+
+}
+
+
+/* ======================================
+   FOOTER
+====================================== */
+
+.footer {
+
+    text-align: center;
+
+    color: #666;
+
+    padding: 25px;
+
+}
+
+
+/* ======================================
+   MOBILE
+====================================== */
+
+@media (
+    max-width: 600px
+) {
+
+    .container {
+
+        width: 92%;
+
+    }
+
+    .header h1 {
+
+        font-size: 21px;
+
+    }
+
+    .question-card {
+
+        padding: 16px;
+
+    }
+
+}
