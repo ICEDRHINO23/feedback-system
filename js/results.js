@@ -9,7 +9,7 @@ import {
 
 let allResults = [];
 let examMap = {};
-
+let displayedResults = [];
 // ======================================
 // LOAD ALL EXAMS
 // ======================================
@@ -138,13 +138,16 @@ async function loadResults() {
 
 function renderResults(results) {
 
+   function renderResults(results) {
+
+    displayedResults = results;
+
     const tbody =
         document.getElementById(
             "resultTable"
         );
 
     tbody.innerHTML = "";
-
   results.forEach((result,index) => {
 
         const exam =
@@ -654,6 +657,206 @@ function filterResults(){
     renderResults(filtered);
     updateDashboard(filtered);
 }
+    // ======================================
+// EXCEL EXPORT
+// ======================================
+
+window.exportExcel = function () {
+
+    if (
+        !displayedResults ||
+        displayedResults.length === 0
+    ) {
+
+        alert(
+            "No results available to export."
+        );
+
+        return;
+    }
+
+
+    let table = `
+        <table border="1">
+
+            <tr>
+                <th>Sr No</th>
+                <th>Student</th>
+                <th>Assessment</th>
+                <th>Subject</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Score</th>
+                <th>Total Marks</th>
+                <th>Percentage</th>
+                <th>Date</th>
+            </tr>
+    `;
+
+
+    displayedResults.forEach(
+        (result, index) => {
+
+            const exam =
+                examMap[result.examId] ||
+                {};
+
+
+            const studentName =
+                result.studentName ||
+                result.participantName ||
+                "-";
+
+
+            const examName =
+                exam.examName ||
+                result.examName ||
+                "-";
+
+
+            const subject =
+                exam.subject ||
+                result.subject ||
+                "-";
+
+
+            const className =
+                exam.examClass ||
+                result.examClass ||
+                result.studentClass ||
+                "-";
+
+
+            const section =
+                result.section ||
+                result.studentSection ||
+                "-";
+
+
+            const score =
+                Number(
+                    result.score || 0
+                );
+
+
+            const totalMarks =
+                Number(
+                    result.totalMarks || 0
+                );
+
+
+            const percentage =
+                Number(
+                    result.percentage || 0
+                ).toFixed(2);
+
+
+            const submittedDate =
+                result.submittedAt
+                    ? new Date(
+                        result.submittedAt
+                    ).toLocaleString()
+                    : "-";
+
+
+            table += `
+
+                <tr>
+
+                    <td>${index + 1}</td>
+
+                    <td>${studentName}</td>
+
+                    <td>${examName}</td>
+
+                    <td>${subject}</td>
+
+                    <td>${className}</td>
+
+                    <td>${section}</td>
+
+                    <td>${score}</td>
+
+                    <td>${totalMarks}</td>
+
+                    <td>${percentage}%</td>
+
+                    <td>${submittedDate}</td>
+
+                </tr>
+
+            `;
+
+        }
+    );
+
+
+    table += `
+        </table>
+    `;
+
+
+    const blob =
+        new Blob(
+            [
+                `
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                </head>
+                <body>
+
+                    <h2>
+                        AHPS Assessment Results
+                    </h2>
+
+                    <p>
+                        Academic Heights Public School
+                    </p>
+
+                    ${table}
+
+                </body>
+                </html>
+                `
+            ],
+            {
+                type:
+                    "application/vnd.ms-excel"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const link =
+        document.createElement("a");
+
+
+    link.href = url;
+
+
+    const date =
+        new Date()
+            .toISOString()
+            .slice(0, 10);
+
+
+    link.download =
+        `AHPS_Assessment_Results_${date}.xls`;
+
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+
+};
 // ======================================
 // EVENTS
 // ======================================
