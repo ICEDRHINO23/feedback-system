@@ -901,13 +901,190 @@ document
 
 });
 
+<script>
+
 document
-.getElementById("pdfBtn")
+.getElementById("printBtn")
 .addEventListener("click",()=>{
 
-    alert("PDF Export Coming Soon");
+    window.print();
 
 });
+
+
+/* =====================================
+   PDF EXPORT
+===================================== */
+
+document
+.getElementById("pdfBtn")
+.addEventListener("click", () => {
+
+    const { jsPDF } = window.jspdf;
+
+    const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4"
+    });
+
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+
+    doc.text(
+        "Academic Heights Public School",
+        148,
+        15,
+        { align: "center" }
+    );
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+
+    doc.text(
+        "Assessment Results",
+        148,
+        22,
+        { align: "center" }
+    );
+
+    doc.setFontSize(8);
+
+    doc.text(
+        "Generated: " +
+        new Date().toLocaleString(),
+        14,
+        30
+    );
+
+    const table =
+        document.querySelector(".results-table");
+
+    if (!table) {
+
+        alert("Results table not found.");
+
+        return;
+
+    }
+
+    const headers = [];
+    const rows = [];
+
+    table
+        .querySelectorAll("thead tr th")
+        .forEach((th, index) => {
+
+            if (index < 10) {
+
+                headers.push(
+                    th.innerText.trim()
+                );
+
+            }
+
+        });
+
+    table
+        .querySelectorAll("tbody tr")
+        .forEach(tr => {
+
+            const cells =
+                tr.querySelectorAll("td");
+
+            if (cells.length < 10) {
+                return;
+            }
+
+            const row = [];
+
+            for (
+                let i = 0;
+                i < 10;
+                i++
+            ) {
+
+                row.push(
+                    cells[i]
+                        .innerText
+                        .trim()
+                );
+
+            }
+
+            rows.push(row);
+
+        });
+
+    if (rows.length === 0) {
+
+        alert(
+            "No results available to export."
+        );
+
+        return;
+
+    }
+
+    doc.autoTable({
+
+        head: [headers],
+
+        body: rows,
+
+        startY: 35,
+
+        theme: "grid",
+
+        styles: {
+            fontSize: 7,
+            cellPadding: 2,
+            valign: "middle"
+        },
+
+        headStyles: {
+            fillColor: [0, 31, 91],
+            textColor: 255,
+            fontStyle: "bold",
+            halign: "center"
+        },
+
+        margin: {
+            left: 8,
+            right: 8
+        }
+
+    });
+
+    const date =
+        new Date()
+            .toISOString()
+            .slice(0, 10);
+
+    doc.save(
+        "AHPS_Assessment_Results_" +
+        date +
+        ".pdf"
+    );
+
+});
+
+
+/* =====================================
+   EXCEL EXPORT
+===================================== */
+
+document
+.getElementById("excelBtn")
+.addEventListener(
+    "click",
+    () => {
+
+        window.exportExcel();
+
+    }
+);
+
 
 document
 .getElementById("excelBtn")
