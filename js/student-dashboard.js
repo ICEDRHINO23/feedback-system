@@ -221,17 +221,17 @@ async function loadCompletedExams(){
 
                     </p>
 
-                    <button
-
-                    onclick="viewResult('${docSnap.id}')">
+                   <button
+                        class="result-btn"
+                        onclick="viewResult('${docSnap.id}')">
 
                         📄 Result
 
                     </button>
 
                     <button
-
-                    onclick="reviewAssessment('${docSnap.id}')">
+                        class="review-btn"
+                        onclick="reviewAssessment('${docSnap.id}')">
 
                         🔍 Review
 
