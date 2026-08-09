@@ -297,15 +297,7 @@ button {
         font-size: 20px;
     }
 
-    .performance-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-
-    .performance-card {
-        padding: 15px 8px;
-    }
-
+  
     .performance-value {
         font-size: 21px;
     }
