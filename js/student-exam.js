@@ -296,12 +296,8 @@ async function loadQuestions() {
 
 function showQuestion() {
 
-    if (
-        questions.length === 0
-    ) {
-
+    if (questions.length === 0) {
         return;
-
     }
 
 
@@ -334,7 +330,7 @@ function showQuestion() {
 
 
     // ==================================
-    // OPTIONS
+    // OPTIONS / ANSWER AREA
     // ==================================
 
     const optionsDiv =
@@ -344,14 +340,125 @@ function showQuestion() {
 
 
     if (!optionsDiv) {
+        return;
+    }
+
+
+    // Clear previous question
+
+    optionsDiv.innerHTML = "";
+
+
+    // ==================================
+    // DESCRIPTIVE QUESTION
+    // ==================================
+
+    if (
+        q.questionType === "sentence"
+    ) {
+
+        const label =
+            document.createElement(
+                "div"
+            );
+
+
+        label.innerText =
+            "Your Answer:";
+
+
+        label.style.fontWeight =
+            "bold";
+
+        label.style.marginBottom =
+            "10px";
+
+
+        optionsDiv.appendChild(
+            label
+        );
+
+
+        const textarea =
+            document.createElement(
+                "textarea"
+            );
+
+
+        textarea.id =
+            "descriptiveAnswer";
+
+
+        textarea.placeholder =
+            "Write your answer here...";
+
+
+        textarea.rows = 8;
+
+
+        textarea.style.width =
+            "100%";
+
+
+        textarea.style.padding =
+            "12px";
+
+
+        textarea.style.boxSizing =
+            "border-box";
+
+
+        textarea.style.borderRadius =
+            "8px";
+
+
+        textarea.style.border =
+            "1px solid #ccc";
+
+
+        textarea.style.resize =
+            "vertical";
+
+
+        // ==================================
+        // RESTORE PREVIOUS ANSWER
+        // ==================================
+
+        textarea.value =
+            answers[currentQuestion] ||
+            "";
+
+
+        // ==================================
+        // SAVE ANSWER WHILE TYPING
+        // ==================================
+
+        textarea.addEventListener(
+            "input",
+            function () {
+
+                answers[currentQuestion] =
+                    textarea.value;
+
+            }
+        );
+
+
+        optionsDiv.appendChild(
+            textarea
+        );
+
+
+        updateNavigation();
 
         return;
 
     }
 
 
-    optionsDiv.innerHTML = "";
-
+    // ==================================
+    // AUTOMATIC QUESTION
+    // ==================================
 
     const options = [
 
@@ -416,6 +523,32 @@ function showQuestion() {
 
             }
 
+
+            // ==================================
+            // SAVE ANSWER
+            // ==================================
+
+            button.onclick =
+                function () {
+
+                    saveAnswer(
+                        option.key
+                    );
+
+                };
+
+
+            optionsDiv.appendChild(
+                button
+            );
+
+        }
+    );
+
+
+    updateNavigation();
+
+}
 
             // ==================================
             // SAVE ANSWER
