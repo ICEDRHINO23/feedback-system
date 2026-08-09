@@ -56,416 +56,6 @@ window.nextQuestion =
     nextQuestion;
 
 // ======================================
-// SUBMIT EXAM
-// ======================================
-
-window.submitExam =
-async function () {
-
-    try {
-
-        let automaticMarks = 0;
-
-        let totalMarks = 0;
-
-        let correctAnswers = 0;
-
-        const subjectiveAnswers = [];
-
-        let hasDescriptiveQuestions = false;
-
-
-        // ==================================
-        // PROCESS QUESTIONS
-        // ==================================
-
-        questions.forEach(q => {
-
-            const marks =
-                Number(q.marks || 1);
-
-            totalMarks += marks;
-
-
-            // ==================================
-            // MCQ
-            // ==================================
-
-            if (
-                !q.questionType ||
-                q.questionType === "mcq"
-            ) {
-
-                const selected =
-                    document.querySelector(
-                        `input[name="${q.id}"]:checked`
-                    );
-
-
-                if (
-                    selected &&
-                    selected.value === q.answer
-                ) {
-
-                    automaticMarks += marks;
-
-                    correctAnswers++;
-
-                }
-
-            }
-
-
-            // ==================================
-            // MULTIPLE ANSWER
-            // ==================================
-
-            if (
-                q.questionType === "multiple"
-            ) {
-
-                const selectedAnswers = [];
-
-
-                document
-                    .querySelectorAll(
-                        `input[name="${q.id}"]:checked`
-                    )
-                    .forEach(box => {
-
-                        selectedAnswers.push(
-                            box.value
-                        );
-
-                    });
-
-
-                const correctOptions =
-                    q.answers || [];
-
-
-                const isCorrect =
-                    selectedAnswers.length ===
-                        correctOptions.length &&
-
-                    selectedAnswers.every(
-                        answer =>
-                            correctOptions.includes(answer)
-                    );
-
-
-                if (isCorrect) {
-
-                    automaticMarks += marks;
-
-                    correctAnswers++;
-
-                }
-
-            }
-
-
-            // ==================================
-            // DESCRIPTIVE / SENTENCE
-            // ==================================
-
-            if (
-                q.questionType === "sentence"
-            ) {
-
-                hasDescriptiveQuestions =
-                    true;
-
-
-                const answerBox =
-                    document.getElementById(
-                        `answer_${q.id}`
-                    );
-
-
-                subjectiveAnswers.push({
-
-                    questionId:
-                        q.id,
-
-                    question:
-                        q.question || "",
-
-                    modelAnswer:
-                        q.modelAnswer || "",
-
-                    studentAnswer:
-                        answerBox
-                            ? answerBox.value.trim()
-                            : "",
-
-                    maxMarks:
-                        marks,
-
-                    teacherMarks:
-                        null,
-
-                    teacherRemark:
-                        "",
-
-                    evaluationStatus:
-                        "pending"
-
-                });
-
-            }
-
-        });
-
-
-        // ==================================
-        // STUDENT DETAILS
-        // ==================================
-
-        const studentName =
-            localStorage.getItem(
-                "studentName"
-            ) || "";
-
-
-        const studentClass =
-            localStorage.getItem(
-                "studentClass"
-            ) || "";
-
-
-        const studentSection =
-            localStorage.getItem(
-                "studentSection"
-            ) || "";
-
-
-        const rollNo =
-            localStorage.getItem(
-                "rollNo"
-            ) || "";
-
-
-        // ==================================
-        // RESULT STATUS
-        // ==================================
-
-        let score = automaticMarks;
-
-        let percentage = 0;
-
-        let reviewStatus =
-            "not_required";
-
-        let resultPublished =
-            true;
-
-
-        // ==================================
-        // DESCRIPTIVE QUESTIONS EXIST
-        // ==================================
-
-        if (hasDescriptiveQuestions) {
-
-            reviewStatus =
-                "pending";
-
-            resultPublished =
-                false;
-
-            // Do NOT publish partial percentage
-            percentage = 0;
-
-        }
-
-
-        // ==================================
-        // NO DESCRIPTIVE QUESTIONS
-        // ==================================
-
-        else {
-
-            percentage =
-                totalMarks > 0
-                    ? (
-                        (score / totalMarks) *
-                        100
-                    ).toFixed(2)
-                    : 0;
-
-        }
-
-
-        // ==================================
-        // SAVE RESULT
-        // ==================================
-
-        await addDoc(
-            collection(db, "results"),
-            {
-
-                // --------------------------
-                // EXAM
-                // --------------------------
-
-                examId:
-                    examId,
-
-                examName:
-                    currentExam?.examName || "",
-
-                subject:
-                    currentExam?.subject || "",
-
-                examClass:
-                    currentExam?.examClass || "",
-
-
-                // --------------------------
-                // STUDENT
-                // --------------------------
-
-                studentName:
-                    studentName,
-
-                studentClass:
-                    studentClass,
-
-                section:
-                    studentSection,
-
-                rollNo:
-                    rollNo,
-
-
-                // --------------------------
-                // MARKS
-                // --------------------------
-
-                score:
-                    score,
-
-                automaticMarks:
-                    automaticMarks,
-
-                descriptiveMarks:
-                    hasDescriptiveQuestions
-                        ? 0
-                        : 0,
-
-                totalMarks:
-                    totalMarks,
-
-                correctAnswers:
-                    correctAnswers,
-
-                totalQuestions:
-                    questions.length,
-
-                percentage:
-                    percentage,
-
-
-                // --------------------------
-                // DESCRIPTIVE ANSWERS
-                // --------------------------
-
-                subjectiveAnswers:
-                    subjectiveAnswers,
-
-
-                hasDescriptiveQuestions:
-                    hasDescriptiveQuestions,
-
-
-                // --------------------------
-                // REVIEW STATUS
-                // --------------------------
-
-                reviewStatus:
-                    reviewStatus,
-
-                resultPublished:
-                    resultPublished,
-
-
-                // --------------------------
-                // TEACHER REVIEW
-                // --------------------------
-
-                reviewedBy:
-                    "",
-
-                reviewedAt:
-                    null,
-
-
-                // --------------------------
-                // TIMESTAMP
-                // --------------------------
-
-                submittedAt:
-                    new Date().toISOString()
-
-            }
-        );
-
-
-        // ==================================
-        // STUDENT MESSAGE
-        // ==================================
-
-        if (hasDescriptiveQuestions) {
-
-            alert(
-                "Assessment Submitted Successfully.\n\n" +
-
-                "Your descriptive answers are " +
-                "pending teacher evaluation.\n\n" +
-
-                "Your final marks and result will " +
-                "be published after teacher evaluation."
-            );
-
-        }
-
-        else {
-
-            alert(
-                "Assessment Submitted Successfully."
-            );
-
-        }
-
-
-        // ==================================
-        // RETURN TO DASHBOARD
-        // ==================================
-
-        window.location.href =
-            "dashboard.html";
-
-
-    }
-    catch (error) {
-
-        console.error(
-            "SUBMIT EXAM ERROR:",
-            error
-        );
-
-
-        alert(
-            "Failed To Submit Assessment\n\n" +
-            error.message
-        );
-
-    }
-
-};
-
-
-// ======================================
 // LOAD EXAM
 // ======================================
 
@@ -1052,7 +642,6 @@ function updateTimerDisplay() {
 
 }
 
-
 // ======================================
 // SUBMIT EXAM
 // ======================================
@@ -1062,22 +651,16 @@ async function submitExam(
 ) {
 
     if (submitting) {
-
         return;
-
     }
 
-
-    if (
-        questions.length === 0
-    ) {
+    if (questions.length === 0) {
 
         alert(
             "No questions available."
         );
 
         return;
-
     }
 
 
@@ -1092,11 +675,8 @@ async function submitExam(
                 "Are you sure you want to submit the assessment?"
             );
 
-
         if (!confirmed) {
-
             return;
-
         }
 
     }
@@ -1115,14 +695,19 @@ async function submitExam(
 
 
     // ==================================
-    // SCORE VARIABLES
+    // MARKING VARIABLES
     // ==================================
 
-    let score = 0;
+    let automaticMarks = 0;
 
     let totalMarks = 0;
 
     let correctAnswers = 0;
+
+    let hasDescriptiveQuestions =
+        false;
+
+    let subjectiveAnswers = [];
 
     let review = [];
 
@@ -1134,23 +719,102 @@ async function submitExam(
     questions.forEach(
         (q, index) => {
 
-            const studentAnswer =
-                answers[index] ||
-                "";
-
-
-            const correctAnswer =
-                q.answer || "";
-
-
             const marks =
                 Number(
                     q.marks || 1
                 );
 
+            totalMarks += marks;
 
-            totalMarks +=
-                marks;
+
+            const studentAnswer =
+                answers[index] || "";
+
+
+            // ==================================
+            // DESCRIPTIVE QUESTION
+            // ==================================
+
+            if (
+                q.questionType === "sentence"
+            ) {
+
+                hasDescriptiveQuestions =
+                    true;
+
+
+                subjectiveAnswers.push({
+
+                    questionId:
+                        q.id || "",
+
+                    question:
+                        q.question || "",
+
+                    studentAnswer:
+                        studentAnswer,
+
+                    maxMarks:
+                        marks,
+
+                    teacherMarks:
+                        null,
+
+                    teacherRemark:
+                        "",
+
+                    evaluationStatus:
+                        "pending"
+
+                });
+
+
+                // Descriptive questions
+                // are NOT automatically marked
+
+                review.push({
+
+                    questionId:
+                        q.id || "",
+
+                    question:
+                        q.question || "",
+
+                    questionType:
+                        "sentence",
+
+                    selectedAnswer:
+                        studentAnswer,
+
+                    correctAnswer:
+                        "",
+
+                    marks:
+                        0,
+
+                    totalMarks:
+                        marks,
+
+                    isCorrect:
+                        null,
+
+                    evaluationStatus:
+                        "pending"
+
+                });
+
+
+                return;
+
+            }
+
+
+            // ==================================
+            // AUTOMATIC QUESTION
+            // ==================================
+
+            const correctAnswer =
+                q.answer || "";
 
 
             const isCorrect =
@@ -1160,17 +824,13 @@ async function submitExam(
 
             if (isCorrect) {
 
-                score +=
+                automaticMarks +=
                     marks;
 
                 correctAnswers++;
 
             }
 
-
-            // ==================================
-            // REVIEW DATA
-            // ==================================
 
             review.push({
 
@@ -1179,6 +839,10 @@ async function submitExam(
 
                 question:
                     q.question || "",
+
+                questionType:
+                    q.questionType ||
+                    "mcq",
 
                 optionA:
                     q.optionA || "",
@@ -1211,7 +875,10 @@ async function submitExam(
                     marks,
 
                 isCorrect:
-                    isCorrect
+                    isCorrect,
+
+                evaluationStatus:
+                    "automatic"
 
             });
 
@@ -1220,37 +887,88 @@ async function submitExam(
 
 
     // ==================================
-    // PERCENTAGE
+    // RESULT STATUS
     // ==================================
 
-    const percentage =
-        totalMarks > 0
-            ? (
-                score /
-                totalMarks
-            ) * 100
-            : 0;
+    let score =
+        automaticMarks;
+
+    let percentage = 0;
+
+    let reviewStatus =
+        "not_required";
+
+    let resultPublished =
+        true;
 
 
-    console.log(
-        "Score:",
-        score
-    );
+    // ==================================
+    // DESCRIPTIVE QUESTIONS EXIST
+    // ==================================
 
-    console.log(
-        "Total Marks:",
-        totalMarks
-    );
+    if (
+        hasDescriptiveQuestions
+    ) {
 
-    console.log(
-        "Percentage:",
-        percentage
-    );
+        reviewStatus =
+            "pending";
 
-    console.log(
-        "Review:",
-        review
-    );
+        resultPublished =
+            false;
+
+        // Do not publish
+        // partial percentage
+
+        percentage = 0;
+
+    }
+
+
+    // ==================================
+    // NO DESCRIPTIVE QUESTIONS
+    // ==================================
+
+    else {
+
+        percentage =
+            totalMarks > 0
+                ? (
+                    (
+                        score /
+                        totalMarks
+                    ) * 100
+                )
+                : 0;
+
+    }
+
+
+    // ==================================
+    // STUDENT DETAILS
+    // ==================================
+
+    const studentName =
+        localStorage.getItem(
+            "studentName"
+        ) || "";
+
+
+    const studentClass =
+        localStorage.getItem(
+            "studentClass"
+        ) || "";
+
+
+    const studentSection =
+        localStorage.getItem(
+            "studentSection"
+        ) || "";
+
+
+    const rollNo =
+        localStorage.getItem(
+            "rollNo"
+        ) || "";
 
 
     // ==================================
@@ -1268,27 +986,24 @@ async function submitExam(
                 {
 
                     // ==========================
-                    // STUDENT DETAILS
+                    // STUDENT
                     // ==========================
 
                     studentName:
-                        localStorage.getItem(
-                            "studentName"
-                        ) || "",
+                        studentName,
 
                     studentClass:
-                        localStorage.getItem(
-                            "studentClass"
-                        ) || "",
+                        studentClass,
 
                     studentSection:
-                        localStorage.getItem(
-                            "studentSection"
-                        ) || "",
+                        studentSection,
+
+                    rollNo:
+                        rollNo,
 
 
                     // ==========================
-                    // EXAM DETAILS
+                    // EXAM
                     // ==========================
 
                     examId:
@@ -1302,13 +1017,23 @@ async function submitExam(
                         exam.subject ||
                         "",
 
+                    examClass:
+                        exam.examClass ||
+                        "",
+
 
                     // ==========================
-                    // RESULT
+                    // MARKS
                     // ==========================
 
                     score:
                         score,
+
+                    automaticMarks:
+                        automaticMarks,
+
+                    descriptiveMarks:
+                        0,
 
                     totalMarks:
                         totalMarks,
@@ -1320,17 +1045,45 @@ async function submitExam(
                         questions.length,
 
                     percentage:
-                        percentage.toFixed(
-                            2
+                        Number(
+                            percentage.toFixed(2)
                         ),
 
 
                     // ==========================
-                    // REVIEW
+                    // REVIEW DATA
                     // ==========================
 
                     review:
                         review,
+
+                    subjectiveAnswers:
+                        subjectiveAnswers,
+
+
+                    // ==========================
+                    // EVALUATION STATUS
+                    // ==========================
+
+                    hasDescriptiveQuestions:
+                        hasDescriptiveQuestions,
+
+                    reviewStatus:
+                        reviewStatus,
+
+                    resultPublished:
+                        resultPublished,
+
+
+                    // ==========================
+                    // TEACHER REVIEW
+                    // ==========================
+
+                    reviewedBy:
+                        "",
+
+                    reviewedAt:
+                        null,
 
 
                     // ==========================
@@ -1352,7 +1105,7 @@ async function submitExam(
 
 
         // ==================================
-        // SAVE LATEST RESULT LOCALLY
+        // SAVE LOCAL RESULT
         // ==================================
 
         localStorage.setItem(
@@ -1360,20 +1113,24 @@ async function submitExam(
             resultRef.id
         );
 
+
         localStorage.setItem(
             "latestScore",
             score
         );
+
 
         localStorage.setItem(
             "latestTotal",
             totalMarks
         );
 
+
         localStorage.setItem(
             "latestPercentage",
             percentage.toFixed(2)
         );
+
 
         localStorage.setItem(
             "latestCorrectAnswers",
@@ -1382,30 +1139,73 @@ async function submitExam(
 
 
         // ==================================
-        // SUCCESS
+        // STUDENT MESSAGE
         // ==================================
 
-        alert(
-            "Exam Submitted Successfully!\n\n" +
-            "Score: " +
-            score +
-            "/" +
-            totalMarks +
-            "\nPercentage: " +
-            percentage.toFixed(2) +
-            "%"
-        );
+        if (
+            hasDescriptiveQuestions
+        ) {
+
+            alert(
+
+                "Assessment Submitted Successfully!\n\n" +
+
+                "Your descriptive answers are " +
+                "pending teacher evaluation.\n\n" +
+
+                "Your final marks and result will " +
+                "be published after teacher evaluation."
+
+            );
+
+        }
+
+        else {
+
+            alert(
+
+                "Exam Submitted Successfully!\n\n" +
+
+                "Score: " +
+                score +
+                "/" +
+                totalMarks +
+
+                "\nPercentage: " +
+
+                percentage.toFixed(2) +
+                "%"
+
+            );
+
+        }
 
 
-        window.location.href =
-            "result.html?id=" +
-            resultRef.id;
+        // ==================================
+        // REDIRECT
+        // ==================================
+
+        if (
+            hasDescriptiveQuestions
+        ) {
+
+            window.location.href =
+                "dashboard.html";
+
+        }
+
+        else {
+
+            window.location.href =
+                "result.html?id=" +
+                resultRef.id;
+
+        }
 
     }
     catch (error) {
 
         submitting = false;
-
 
         console.error(
             "RESULT SAVE ERROR:",
@@ -1421,8 +1221,6 @@ async function submitExam(
     }
 
 }
-
-
 // ======================================
 // INITIALIZE
 // ======================================
