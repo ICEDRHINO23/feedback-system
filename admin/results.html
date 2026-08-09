@@ -886,6 +886,8 @@ body{
 <!-- PDF LIBRARY -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+
+
 <!-- PDF TABLE LIBRARY -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
@@ -905,229 +907,752 @@ document
 
 document
 .getElementById("printBtn")
-.addEventListener("click",()=>{
+.addEventListener("click", () => {
 
     window.print();
 
 });
 
 
-/* =====================================
-   PDF EXPORT
-===================================== */
+/* =========================================
+   P3.4 OFFICIAL AHPS PDF REPORT
+========================================= */
 
 document
 .getElementById("pdfBtn")
-.addEventListener("click", () => {
+.addEventListener("click", async () => {
 
-    const { jsPDF } = window.jspdf;
+    try {
 
-    const doc = new jsPDF({
-        orientation: "landscape",
-        unit: "mm",
-        format: "a4"
-    });
+        const { jsPDF } = window.jspdf;
 
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-
-    doc.text(
-        "Academic Heights Public School",
-        148,
-        15,
-        { align: "center" }
-    );
-
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-
-    doc.text(
-        "Assessment Results",
-        148,
-        22,
-        { align: "center" }
-    );
-
-    doc.setFontSize(8);
-
-    doc.text(
-        "Generated: " +
-        new Date().toLocaleString(),
-        14,
-        30
-    );
-
-    const table =
-        document.querySelector(".results-table");
-
-    if (!table) {
-
-        alert("Results table not found.");
-
-        return;
-
-    }
-
-    const headers = [];
-    const rows = [];
-
-    table
-        .querySelectorAll("thead tr th")
-        .forEach((th, index) => {
-
-            if (index < 10) {
-
-                headers.push(
-                    th.innerText.trim()
-                );
-
-            }
-
+        const pdf = new jsPDF({
+            orientation: "landscape",
+            unit: "mm",
+            format: "a4"
         });
 
-    table
-        .querySelectorAll("tbody tr")
-        .forEach(tr => {
 
-            const cells =
-                tr.querySelectorAll("td");
+        /* =====================================
+           LOGO LOADER
+        ===================================== */
 
-            if (cells.length < 10) {
-                return;
-            }
+        function loadImage(src) {
 
-            const row = [];
+            return new Promise((resolve, reject) => {
 
-            for (
-                let i = 0;
-                i < 10;
-                i++
-            ) {
+                const img = new Image();
 
-                row.push(
-                    cells[i]
-                        .innerText
-                        .trim()
-                );
+                img.onload = () => resolve(img);
 
-            }
+                img.onerror = () =>
+                    reject(
+                        new Error(
+                            "Unable to load image: " + src
+                        )
+                    );
 
-            rows.push(row);
+                img.src = src;
 
-        });
+            });
 
-    if (rows.length === 0) {
-
-        alert(
-            "No results available to export."
-        );
-
-        return;
-
-    }
-
-    doc.autoTable({
-
-        head: [headers],
-
-        body: rows,
-
-        startY: 35,
-
-        theme: "grid",
-
-        styles: {
-            fontSize: 7,
-            cellPadding: 2,
-            valign: "middle"
-        },
-
-        headStyles: {
-            fillColor: [0, 31, 91],
-            textColor: 255,
-            fontStyle: "bold",
-            halign: "center"
-        },
-
-        margin: {
-            left: 8,
-            right: 8
         }
 
-    });
 
-    const date =
-        new Date()
+        /* =====================================
+           LOAD LOGOS
+        ===================================== */
+
+        let ahpsLogo = null;
+        let rasLogo = null;
+
+        try {
+
+            ahpsLogo =
+                await loadImage(
+                    "../assets/ahps-logo.png"
+                );
+
+        }
+        catch(error) {
+
+            console.warn(
+                "AHPS logo unavailable",
+                error
+            );
+
+        }
+
+
+        try {
+
+            rasLogo =
+                await loadImage(
+                    "../assets/ras-logo.jpeg"
+                );
+
+        }
+        catch(error) {
+
+            console.warn(
+                "RAS logo unavailable",
+                error
+            );
+
+        }
+
+
+        /* =====================================
+           PAGE
+        ===================================== */
+
+        const pageWidth =
+            pdf.internal.pageSize.getWidth();
+
+        const pageHeight =
+            pdf.internal.pageSize.getHeight();
+
+
+        /* =====================================
+           HEADER
+        ===================================== */
+
+        pdf.setFillColor(
+            0,
+            31,
+            91
+        );
+
+        pdf.rect(
+            0,
+            0,
+            pageWidth,
+            32,
+            "F"
+        );
+
+
+        /* AHPS LOGO */
+
+        if (ahpsLogo) {
+
+            pdf.addImage(
+                ahpsLogo,
+                "PNG",
+                10,
+                4,
+                24,
+                24
+            );
+
+        }
+
+
+        /* RAS LOGO */
+
+        if (rasLogo) {
+
+            pdf.addImage(
+                rasLogo,
+                "JPEG",
+                pageWidth - 34,
+                4,
+                24,
+                24
+            );
+
+        }
+
+
+        /* SCHOOL NAME */
+
+        pdf.setTextColor(
+            255,
+            255,
+            255
+        );
+
+        pdf.setFont(
+            "helvetica",
+            "bold"
+        );
+
+        pdf.setFontSize(17);
+
+        pdf.text(
+            "ACADEMIC HEIGHTS PUBLIC SCHOOL",
+            pageWidth / 2,
+            11,
+            {
+                align: "center"
+            }
+        );
+
+
+        pdf.setFont(
+            "helvetica",
+            "normal"
+        );
+
+        pdf.setFontSize(9);
+
+        pdf.text(
+            "CBSE Affiliated",
+            pageWidth / 2,
+            17,
+            {
+                align: "center"
+            }
+        );
+
+
+        pdf.setFont(
+            "helvetica",
+            "bold"
+        );
+
+        pdf.setFontSize(11);
+
+        pdf.text(
+            "ASSESSMENT PERFORMANCE REPORT",
+            pageWidth / 2,
+            25,
+            {
+                align: "center"
+            }
+        );
+
+
+        /* =====================================
+           FILTER INFORMATION
+        ===================================== */
+
+        const assessment =
+            document
+            .getElementById("examFilter")
+            ?.value ||
+            "All Assessments";
+
+        const subject =
+            document
+            .getElementById("subjectFilter")
+            ?.value ||
+            "All Subjects";
+
+        const className =
+            document
+            .getElementById("classFilter")
+            ?.value ||
+            "All Classes";
+
+        const search =
+            document
+            .getElementById("searchBox")
+            ?.value ||
+            "";
+
+
+        pdf.setTextColor(
+            0,
+            0,
+            0
+        );
+
+        pdf.setFont(
+            "helvetica",
+            "normal"
+        );
+
+        pdf.setFontSize(9);
+
+
+        pdf.text(
+            "Assessment: " + assessment,
+            12,
+            40
+        );
+
+        pdf.text(
+            "Subject: " + subject,
+            85,
+            40
+        );
+
+        pdf.text(
+            "Class: " + className,
+            145,
+            40
+        );
+
+        pdf.text(
+            "Search: " +
+            (search || "All Students"),
+            205,
+            40
+        );
+
+
+        pdf.text(
+            "Generated: " +
+            new Date().toLocaleString(),
+            12,
+            47
+        );
+
+
+        /* =====================================
+           TABLE
+        ===================================== */
+
+        const table =
+            document.querySelector(
+                ".results-table"
+            );
+
+
+        if (!table) {
+
+            alert(
+                "Results table not found."
+            );
+
+            return;
+
+        }
+
+
+        const headers = [];
+
+        const rows = [];
+
+
+        table
+        .querySelectorAll(
+            "thead tr th"
+        )
+        .forEach(
+            (th, index) => {
+
+                /* Ignore Actions */
+
+                if (index < 10) {
+
+                    headers.push(
+                        th.innerText.trim()
+                    );
+
+                }
+
+            }
+        );
+
+
+        table
+        .querySelectorAll(
+            "tbody tr"
+        )
+        .forEach(
+            tr => {
+
+                const cells =
+                    tr.querySelectorAll(
+                        "td"
+                    );
+
+
+                if (
+                    cells.length < 10
+                ) {
+
+                    return;
+
+                }
+
+
+                const row = [];
+
+
+                for (
+                    let i = 0;
+                    i < 10;
+                    i++
+                ) {
+
+                    row.push(
+                        cells[i]
+                        .innerText
+                        .trim()
+                    );
+
+                }
+
+
+                rows.push(row);
+
+            }
+        );
+
+
+        if (
+            rows.length === 0
+        ) {
+
+            alert(
+                "No results available."
+            );
+
+            return;
+
+        }
+
+
+        /* =====================================
+           TABLE
+        ===================================== */
+
+        pdf.autoTable({
+
+            head: [headers],
+
+            body: rows,
+
+            startY: 52,
+
+            theme: "grid",
+
+            margin: {
+                left: 10,
+                right: 10,
+                bottom: 18
+            },
+
+            styles: {
+
+                fontSize: 7,
+
+                cellPadding: 2.2,
+
+                textColor: [
+                    40,
+                    40,
+                    40
+                ],
+
+                valign: "middle"
+
+            },
+
+            headStyles: {
+
+                fillColor: [
+                    0,
+                    31,
+                    91
+                ],
+
+                textColor: [
+                    255,
+                    255,
+                    255
+                ],
+
+                fontStyle: "bold",
+
+                halign: "center"
+
+            },
+
+            alternateRowStyles: {
+
+                fillColor: [
+                    245,
+                    247,
+                    250
+                ]
+
+            },
+
+            columnStyles: {
+
+                0: {
+                    cellWidth: 10
+                },
+
+                1: {
+                    cellWidth: 32
+                },
+
+                2: {
+                    cellWidth: 50
+                },
+
+                3: {
+                    cellWidth: 20
+                },
+
+                4: {
+                    cellWidth: 15
+                },
+
+                5: {
+                    cellWidth: 15
+                },
+
+                6: {
+                    cellWidth: 15
+                },
+
+                7: {
+                    cellWidth: 15
+                },
+
+                8: {
+                    cellWidth: 18
+                },
+
+                9: {
+                    cellWidth: 35
+                }
+
+            },
+
+
+            didDrawPage: function () {
+
+                const pageNumber =
+                    pdf.internal
+                    .getNumberOfPages();
+
+
+                /* FOOTER LINE */
+
+                pdf.setDrawColor(
+                    0,
+                    31,
+                    91
+                );
+
+                pdf.line(
+                    10,
+                    pageHeight - 13,
+                    pageWidth - 10,
+                    pageHeight - 13
+                );
+
+
+                /* FOOTER */
+
+                pdf.setFontSize(7);
+
+                pdf.setTextColor(
+                    80,
+                    80,
+                    80
+                );
+
+                pdf.text(
+                    "AHPS Online Examination System",
+                    10,
+                    pageHeight - 7
+                );
+
+
+                pdf.text(
+                    "Powered by RAS SYSTEMS",
+                    pageWidth / 2,
+                    pageHeight - 7,
+                    {
+                        align: "center"
+                    }
+                );
+
+
+                pdf.text(
+                    "Page " +
+                    pageNumber,
+                    pageWidth - 10,
+                    pageHeight - 7,
+                    {
+                        align: "right"
+                    }
+                );
+
+            }
+
+        });
+
+
+        /* =====================================
+           PERFORMANCE SUMMARY
+        ===================================== */
+
+        let finalY =
+            pdf.lastAutoTable.finalY;
+
+
+        if (
+            finalY >
+            pageHeight - 45
+        ) {
+
+            pdf.addPage();
+
+            finalY = 15;
+
+        }
+        else {
+
+            finalY += 8;
+
+        }
+
+
+        pdf.setFont(
+            "helvetica",
+            "bold"
+        );
+
+        pdf.setFontSize(10);
+
+        pdf.setTextColor(
+            0,
+            31,
+            91
+        );
+
+        pdf.text(
+            "Performance Summary",
+            10,
+            finalY
+        );
+
+
+        const stats = [
+
+            [
+                "Total Students",
+                document
+                .getElementById(
+                    "totalStudents"
+                )
+                ?.innerText || "0"
+            ],
+
+            [
+                "Total Attempts",
+                document
+                .getElementById(
+                    "totalAttempts"
+                )
+                ?.innerText || "0"
+            ],
+
+            [
+                "Average %",
+                document
+                .getElementById(
+                    "averagePercentage"
+                )
+                ?.innerText || "0%"
+            ],
+
+            [
+                "Highest %",
+                document
+                .getElementById(
+                    "highestPercentage"
+                )
+                ?.innerText || "0%"
+            ],
+
+            [
+                "Pass %",
+                document
+                .getElementById(
+                    "passPercentage"
+                )
+                ?.innerText || "0%"
+            ],
+
+            [
+                "Failed",
+                document
+                .getElementById(
+                    "failedStudents"
+                )
+                ?.innerText || "0"
+            ]
+
+        ];
+
+
+        pdf.autoTable({
+
+            body: [stats],
+
+            startY:
+                finalY + 4,
+
+            theme: "grid",
+
+            styles: {
+
+                fontSize: 8,
+
+                halign: "center",
+
+                cellPadding: 3
+
+            },
+
+            bodyStyles: {
+
+                fontStyle: "bold",
+
+                textColor: [
+                    0,
+                    31,
+                    91
+                ]
+
+            }
+
+        });
+
+
+        /* =====================================
+           SAVE
+        ===================================== */
+
+        const date =
+            new Date()
             .toISOString()
             .slice(0, 10);
 
-    doc.save(
-        "AHPS_Assessment_Results_" +
-        date +
-        ".pdf"
-    );
 
-});
+        pdf.save(
+            "AHPS_Assessment_Report_" +
+            date +
+            ".pdf"
+        );
 
-
-/* =====================================
-   EXCEL EXPORT
-===================================== */
-
-document
-.getElementById("excelBtn")
-.addEventListener(
-    "click",
-    () => {
-
-        window.exportExcel();
-
-    }
-);
-
-
-document
-.getElementById("excelBtn")
-.addEventListener(
-    "click",
-    () => {
-
-        window.exportExcel();
-
-    }
-);
-
-window.closeReport=function(){
-
-    document
-    .getElementById("reportModal")
-    .style.display="none";
-
-};
-
-window.onclick=function(event){
-
-    const modal=
-    document.getElementById("reportModal");
-
-    if(event.target===modal){
-
-        modal.style.display="none";
 
     }
 
-};
+    catch(error) {
 
-document
-.getElementById("printReportBtn")
-.addEventListener("click",()=>{
+        console.error(
+            "PDF ERROR:",
+            error
+        );
 
-    window.print();
+        alert(
+            "Unable to generate PDF.\n\n" +
+            error.message
+        );
+
+    }
 
 });
 
 </script>
-
-</body>
-
-</html>
