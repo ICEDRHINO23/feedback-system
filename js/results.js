@@ -136,8 +136,6 @@ async function loadResults() {
 // RENDER RESULTS
 // ======================================
 
-function renderResults(results) {
-
    function renderResults(results) {
 
     displayedResults = results;
