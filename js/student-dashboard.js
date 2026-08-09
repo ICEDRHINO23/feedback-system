@@ -144,7 +144,213 @@ window.startExam = function(examId){
         "student-exam.html";
 
 };
+// ======================================
+// LOAD PERFORMANCE SUMMARY
+// ======================================
 
+async function loadPerformanceSummary() {
+
+    try {
+
+        const studentName =
+            localStorage.getItem(
+                "studentName"
+            );
+
+
+        if (!studentName) {
+
+            return;
+
+        }
+
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "results"
+                )
+            );
+
+
+        let results = [];
+
+
+        snapshot.forEach(
+            docSnap => {
+
+                const result =
+                    docSnap.data();
+
+
+                if (
+
+                    (
+                        result.studentName ||
+
+                        result.participantName
+
+                    ) === studentName
+
+                ) {
+
+                    results.push(result);
+
+                }
+
+            }
+        );
+
+
+        // ==================================
+        // NO RESULTS
+        // ==================================
+
+        if (
+            results.length === 0
+        ) {
+
+            document.getElementById(
+                "completedCount"
+            ).innerText = "0";
+
+
+            document.getElementById(
+                "averagePercentage"
+            ).innerText = "0%";
+
+
+            document.getElementById(
+                "bestPercentage"
+            ).innerText = "0%";
+
+
+            document.getElementById(
+                "passedCount"
+            ).innerText = "0";
+
+
+            document.getElementById(
+                "failedCount"
+            ).innerText = "0";
+
+
+            return;
+
+        }
+
+
+        // ==================================
+        // CALCULATE
+        // ==================================
+
+        let totalPercentage = 0;
+
+        let bestPercentage = 0;
+
+        let passed = 0;
+
+        let failed = 0;
+
+
+        results.forEach(
+            result => {
+
+                const percentage =
+                    Number(
+                        result.percentage || 0
+                    );
+
+
+                totalPercentage +=
+                    percentage;
+
+
+                if (
+                    percentage >
+                    bestPercentage
+                ) {
+
+                    bestPercentage =
+                        percentage;
+
+                }
+
+
+                if (
+                    percentage >= 35
+                ) {
+
+                    passed++;
+
+                }
+                else {
+
+                    failed++;
+
+                }
+
+            }
+        );
+
+
+        const averagePercentage =
+            totalPercentage /
+            results.length;
+
+
+        // ==================================
+        // DISPLAY
+        // ==================================
+
+        document.getElementById(
+            "completedCount"
+        ).innerText =
+            results.length;
+
+
+        document.getElementById(
+            "averagePercentage"
+        ).innerText =
+
+            averagePercentage
+                .toFixed(2) +
+            "%";
+
+
+        document.getElementById(
+            "bestPercentage"
+        ).innerText =
+
+            bestPercentage
+                .toFixed(2) +
+            "%";
+
+
+        document.getElementById(
+            "passedCount"
+        ).innerText =
+            passed;
+
+
+        document.getElementById(
+            "failedCount"
+        ).innerText =
+            failed;
+
+
+    }
+    catch(error) {
+
+        console.error(
+            "Performance Error:",
+            error
+        );
+
+    }
+
+}
 // ======================================
 // LOAD COMPLETED EXAMS
 // ======================================
@@ -321,3 +527,5 @@ window.logout = function(){
 loadExams();
 
 loadCompletedExams();
+
+loadPerformanceSummary();
