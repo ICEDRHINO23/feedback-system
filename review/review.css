@@ -1,1 +1,447 @@
+*{
+    box-sizing:border-box;
+}
 
+body{
+
+    margin:0;
+
+    font-family:Arial,sans-serif;
+
+    background:#f4f6f9;
+
+    color:#222;
+
+}
+
+
+/* ================================
+   HEADER
+================================ */
+
+.header{
+
+    background:#001f5b;
+
+    color:white;
+
+    text-align:center;
+
+    padding:20px;
+
+}
+
+.header h1{
+
+    margin:0;
+
+    font-size:28px;
+
+}
+
+.header p{
+
+    margin:8px 0 0;
+
+}
+
+
+/* ================================
+   CONTAINER
+================================ */
+
+.container{
+
+    width:92%;
+
+    max-width:1000px;
+
+    margin:25px auto;
+
+}
+
+
+/* ================================
+   SUMMARY
+================================ */
+
+.summary-card{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:10px;
+
+    box-shadow:
+        0 3px 10px
+        rgba(0,0,0,.12);
+
+    margin-bottom:25px;
+
+}
+
+.summary-card h2{
+
+    margin:0;
+
+    color:#001f5b;
+
+}
+
+.summary-card p{
+
+    color:#666;
+
+}
+
+
+.summary-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:15px;
+
+    margin-top:20px;
+
+}
+
+
+.summary-grid div{
+
+    background:#f1f4f8;
+
+    padding:15px;
+
+    border-radius:8px;
+
+    text-align:center;
+
+}
+
+
+.summary-grid span{
+
+    display:block;
+
+    font-size:14px;
+
+    color:#666;
+
+    margin-bottom:8px;
+
+}
+
+
+.summary-grid strong{
+
+    font-size:22px;
+
+    color:#001f5b;
+
+}
+
+
+/* ================================
+   QUESTION CARD
+================================ */
+
+.question-card{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:10px;
+
+    margin-bottom:20px;
+
+    box-shadow:
+        0 3px 10px
+        rgba(0,0,0,.10);
+
+}
+
+
+.question-number{
+
+    color:#001f5b;
+
+    font-weight:bold;
+
+    font-size:18px;
+
+    margin-bottom:12px;
+
+}
+
+
+.question-text{
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    margin-bottom:18px;
+
+}
+
+
+/* ================================
+   OPTIONS
+================================ */
+
+.option{
+
+    padding:12px 15px;
+
+    margin:8px 0;
+
+    border-radius:6px;
+
+    border:1px solid #ddd;
+
+}
+
+
+.option.selected{
+
+    border:2px solid #001f5b;
+
+}
+
+
+.option.correct{
+
+    background:#e8f7e8;
+
+    border-color:#2e7d32;
+
+    color:#1b5e20;
+
+}
+
+
+.option.wrong{
+
+    background:#fdeaea;
+
+    border-color:#c62828;
+
+    color:#b71c1c;
+
+}
+
+
+.option-label{
+
+    font-weight:bold;
+
+}
+
+
+/* ================================
+   RESULT STATUS
+================================ */
+
+.answer-status{
+
+    margin-top:15px;
+
+    padding:12px;
+
+    border-radius:6px;
+
+    font-weight:bold;
+
+}
+
+
+.answer-status.correct{
+
+    background:#e8f7e8;
+
+    color:#1b5e20;
+
+}
+
+
+.answer-status.wrong{
+
+    background:#fdeaea;
+
+    color:#b71c1c;
+
+}
+
+
+/* ================================
+   EXPLANATION
+================================ */
+
+.explanation{
+
+    margin-top:15px;
+
+    padding:15px;
+
+    background:#f5f7fa;
+
+    border-left:4px solid #001f5b;
+
+}
+
+
+.explanation strong{
+
+    display:block;
+
+    margin-bottom:7px;
+
+    color:#001f5b;
+
+}
+
+
+/* ================================
+   MARKS
+================================ */
+
+.marks{
+
+    margin-top:15px;
+
+    font-weight:bold;
+
+    color:#001f5b;
+
+}
+
+
+/* ================================
+   BUTTONS
+================================ */
+
+.bottom-buttons{
+
+    text-align:center;
+
+    margin:30px 0;
+
+}
+
+
+.bottom-buttons button{
+
+    padding:12px 20px;
+
+    margin:5px;
+
+    border:none;
+
+    border-radius:6px;
+
+    background:#001f5b;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+}
+
+
+.bottom-buttons button:hover{
+
+    background:#00358f;
+
+}
+
+
+/* ================================
+   LOADING
+================================ */
+
+.loading{
+
+    text-align:center;
+
+    background:white;
+
+    padding:30px;
+
+    border-radius:10px;
+
+}
+
+
+/* ================================
+   MOBILE
+================================ */
+
+@media(max-width:700px){
+
+    .summary-grid{
+
+        grid-template-columns:
+            repeat(2,1fr);
+
+    }
+
+    .container{
+
+        width:95%;
+
+    }
+
+    .question-card{
+
+        padding:18px;
+
+    }
+
+}
+
+
+/* ================================
+   PRINT
+================================ */
+
+@media print{
+
+    body{
+
+        background:white;
+
+    }
+
+    .header{
+
+        background:white;
+
+        color:#001f5b;
+
+        border-bottom:2px solid #001f5b;
+
+    }
+
+    .bottom-buttons{
+
+        display:none;
+
+    }
+
+    .question-card,
+    .summary-card{
+
+        box-shadow:none;
+
+        border:1px solid #ddd;
+
+    }
+
+}
