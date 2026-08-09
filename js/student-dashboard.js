@@ -355,188 +355,260 @@ async function loadPerformanceSummary() {
 // LOAD COMPLETED EXAMS
 // ======================================
 
-async function loadCompletedExams(){
+async function loadCompletedExams() {
 
     const completedDiv =
-        document.getElementById(
-            "completedExamList"
-        );
+        document.getElementById("completedExamList");
 
-    try{
+    if (!completedDiv) {
+        console.error("completedExamList not found");
+        return;
+    }
+
+    try {
 
         const studentName =
-            localStorage.getItem(
-                "studentName"
-            );
+            localStorage.getItem("studentName");
+
+        if (!studentName) {
+
+            completedDiv.innerHTML = `
+                <div class="exam-card">
+                    <h3>Student Not Found</h3>
+                    <p>Please login again.</p>
+                </div>
+            `;
+
+            return;
+        }
 
         const snapshot =
             await getDocs(
-                collection(db,"results")
+                collection(db, "results")
             );
 
         let html = "";
+        let found = false;
 
-        snapshot.forEach(docSnap=>{
+        snapshot.forEach((docSnap) => {
 
             const result =
                 docSnap.data();
 
-           if(
+            const resultStudentName =
+                result.studentName ||
+                result.participantName ||
+                "";
 
-    (result.studentName ||
-    result.participantName)
-    ===
-    studentName
+            if (
+                String(resultStudentName).trim() ===
+                String(studentName).trim()
+            ) {
 
-){
+                found = true;
 
-    html += `
+                const percentage =
+                    Number(result.percentage || 0);
 
-    <div class="completed-card">
+                const score =
+                    result.score || 0;
 
-        <div class="completed-header">
+                const totalMarks =
+                    result.totalMarks || 0;
 
-            <div>
+                const correctAnswers =
+                    result.correctAnswers || 0;
 
-                <h3>
-                    ${result.examName || "-"}
-                </h3>
+                const status =
+                    percentage >= 35
+                        ? "PASS"
+                        : "FAIL";
 
-                <p class="completed-subject">
-                    Subject:
-                    <strong>
-                        ${result.subject || "-"}
-                    </strong>
-                </p>
-
-            </div>
-
-            <div class="percentage-badge
-                ${
-                    Number(result.percentage || 0) >= 35
+                const badgeClass =
+                    percentage >= 35
                         ? "pass-badge"
-                        : "fail-badge"
-                }">
+                        : "fail-badge";
 
-                ${Number(result.percentage || 0).toFixed(2)}%
+                const statusClass =
+                    percentage >= 35
+                        ? "pass-text"
+                        : "fail-text";
 
-            </div>
 
-        </div>
+                html += `
 
-        <div class="completed-info">
+                    <div class="completed-card">
 
-            <div class="info-item">
+                        <div class="completed-header">
 
-                <span class="info-label">
-                    Score
-                </span>
+                            <div>
 
-                <span class="info-value">
-                    ${result.score || 0}
-                    /
-                    ${result.totalMarks || 0}
-                </span>
+                                <h3>
+                                    ${result.examName || "-"}
+                                </h3>
 
-            </div>
+                                <p class="completed-subject">
 
-            <div class="info-item">
+                                    Subject:
+                                    <strong>
+                                        ${result.subject || "-"}
+                                    </strong>
 
-                <span class="info-label">
-                    Correct
-                </span>
+                                </p>
 
-                <span class="info-value">
-                    ${result.correctAnswers || 0}
-                </span>
+                            </div>
 
-            </div>
 
-            <div class="info-item">
+                            <div class="percentage-badge ${badgeClass}">
 
-                <span class="info-label">
-                    Status
-                </span>
+                                ${percentage.toFixed(2)}%
 
-                <span class="info-value
-                    ${
-                        Number(result.percentage || 0) >= 35
-                            ? "pass-text"
-                            : "fail-text"
-                    }">
+                            </div>
 
-                    ${
-                        Number(result.percentage || 0) >= 35
-                            ? "PASS"
-                            : "FAIL"
-                    }
+                        </div>
 
-                </span>
 
-            </div>
+                        <div class="completed-info">
 
-        </div>
 
-        <div class="completed-actions">
+                            <div class="info-item">
 
-            <button
-                class="result-btn"
-                onclick="viewResult('${docSnap.id}')">
+                                <span class="info-label">
+                                    Score
+                                </span>
 
-                📄 View Result
+                                <span class="info-value">
 
-            </button>
+                                    ${score}
+                                    /
+                                    ${totalMarks}
 
-            <button
-                class="review-btn"
-                onclick="reviewAssessment('${docSnap.id}')">
+                                </span>
 
-                🔍 Review
+                            </div>
 
-            </button>
 
-        </div>
+                            <div class="info-item">
 
-    </div>
+                                <span class="info-label">
+                                    Correct
+                                </span>
 
-    `;
+                                <span class="info-value">
 
-}
+                                    ${correctAnswers}
 
-        if(html===""){
+                                </span>
 
-            html=`
+                            </div>
 
-            <div class="exam-card">
 
-                <h3>
+                            <div class="info-item">
 
-                    No Completed Assessments
+                                <span class="info-label">
+                                    Status
+                                </span>
 
-                </h3>
+                                <span class="info-value ${statusClass}">
 
-            </div>
+                                    ${status}
+
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+
+                        <div class="completed-actions">
+
+
+                            <button
+                                type="button"
+                                class="result-btn"
+                                onclick="viewResult('${docSnap.id}')"
+                            >
+
+                                📄 View Result
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="review-btn"
+                                onclick="reviewAssessment('${docSnap.id}')"
+                            >
+
+                                🔍 Review
+
+                            </button>
+
+
+                        </div>
+
+
+                    </div>
+
+                `;
+
+            }
+
+        });
+
+
+        if (!found) {
+
+            html = `
+
+                <div class="exam-card">
+
+                    <h3>
+                        No Completed Assessments
+                    </h3>
+
+                    <p>
+                        Your completed assessments will appear here.
+                    </p>
+
+                </div>
 
             `;
 
         }
 
-        completedDiv.innerHTML =
-            html;
+
+        completedDiv.innerHTML = html;
+
 
     }
+    catch (error) {
 
-    catch(error){
+        console.error(
+            "Completed Exams Error:",
+            error
+        );
 
-        console.error(error);
+        completedDiv.innerHTML = `
 
-        completedDiv.innerHTML =
-            "Unable To Load Results";
+            <div class="exam-card">
+
+                <h3>
+                    Unable To Load Results
+                </h3>
+
+                <p>
+                    Please refresh the page.
+                </p>
+
+            </div>
+
+        `;
 
     }
 
 }
-
 // ======================================
 // RESULT
 // ======================================
