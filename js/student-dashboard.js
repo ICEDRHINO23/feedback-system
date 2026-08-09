@@ -381,75 +381,127 @@ async function loadCompletedExams(){
             const result =
                 docSnap.data();
 
-            if(
+           if(
 
-                (result.studentName ||
+    (result.studentName ||
+    result.participantName)
+    ===
+    studentName
 
-                result.participantName)
+){
 
-                ===
+    html += `
 
-                studentName
+    <div class="completed-card">
 
-            ){
+        <div class="completed-header">
 
-                html += `
+            <div>
 
-                <div class="exam-card">
+                <h3>
+                    ${result.examName || "-"}
+                </h3>
 
-                    <h3>
-
-                        ${result.examName || "-"}
-
-                    </h3>
-
-                    <p>
-
-                        Subject :
-
+                <p class="completed-subject">
+                    Subject:
+                    <strong>
                         ${result.subject || "-"}
+                    </strong>
+                </p>
 
-                    </p>
+            </div>
 
-                    <p>
+            <div class="percentage-badge
+                ${
+                    Number(result.percentage || 0) >= 35
+                        ? "pass-badge"
+                        : "fail-badge"
+                }">
 
-                        Score :
+                ${Number(result.percentage || 0).toFixed(2)}%
 
-                        ${result.score}/${result.totalMarks}
+            </div>
 
-                    </p>
+        </div>
 
-                    <p>
+        <div class="completed-info">
 
-                        Percentage :
+            <div class="info-item">
 
-                        ${result.percentage}%
+                <span class="info-label">
+                    Score
+                </span>
 
-                    </p>
+                <span class="info-value">
+                    ${result.score || 0}
+                    /
+                    ${result.totalMarks || 0}
+                </span>
 
-                   <button
-                        class="result-btn"
-                        onclick="viewResult('${docSnap.id}')">
+            </div>
 
-                        📄 Result
+            <div class="info-item">
 
-                    </button>
+                <span class="info-label">
+                    Correct
+                </span>
 
-                    <button
-                        class="review-btn"
-                        onclick="reviewAssessment('${docSnap.id}')">
+                <span class="info-value">
+                    ${result.correctAnswers || 0}
+                </span>
 
-                        🔍 Review
+            </div>
 
-                    </button>
+            <div class="info-item">
 
-                </div>
+                <span class="info-label">
+                    Status
+                </span>
 
-                `;
+                <span class="info-value
+                    ${
+                        Number(result.percentage || 0) >= 35
+                            ? "pass-text"
+                            : "fail-text"
+                    }">
 
-            }
+                    ${
+                        Number(result.percentage || 0) >= 35
+                            ? "PASS"
+                            : "FAIL"
+                    }
 
-        });
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="completed-actions">
+
+            <button
+                class="result-btn"
+                onclick="viewResult('${docSnap.id}')">
+
+                📄 View Result
+
+            </button>
+
+            <button
+                class="review-btn"
+                onclick="reviewAssessment('${docSnap.id}')">
+
+                🔍 Review
+
+            </button>
+
+        </div>
+
+    </div>
+
+    `;
+
+}
 
         if(html===""){
 
