@@ -3,87 +3,477 @@ import { db } from "./firebase-config.js";
 import {
     collection,
     getDocs,
-    addDoc
+    addDoc,
+    doc,
+    getDoc,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+// ======================================
+// GLOBAL VARIABLES
+// ======================================
+
 let questions = [];
+
 let currentQuestion = 0;
+
 let answers = {};
 
-window.previousQuestion = previousQuestion;
-window.nextQuestion = nextQuestion;
-window.submitExam = submitExam;
+let exam = {};
+
+let examId =
+    localStorage.getItem("currentExamId");
+
+let timerInterval = null;
+
+let remainingSeconds = 0;
+
+let submitting = false;
+
+
+// ======================================
+// CHECK EXAM ID
+// ======================================
+
+if (!examId) {
+
+    alert("Assessment not selected.");
+
+    window.location.href = "dashboard.html";
+
+}
+
+
+// ======================================
+// BUTTON FUNCTIONS
+// ======================================
+
+window.previousQuestion =
+    previousQuestion;
+
+window.nextQuestion =
+    nextQuestion;
+
+window.submitExam =
+    submitExam;
+
+
+// ======================================
+// LOAD EXAM
+// ======================================
+
+async function loadExam() {
+
+    try {
+
+        console.log(
+            "Current Exam ID:",
+            examId
+        );
+
+        const examRef =
+            doc(
+                db,
+                "exams",
+                examId
+            );
+
+        const examSnap =
+            await getDoc(examRef);
+
+        if (!examSnap.exists()) {
+
+            alert(
+                "Assessment not found."
+            );
+
+            window.location.href =
+                "dashboard.html";
+
+            return false;
+        }
+
+        exam =
+            examSnap.data();
+
+        console.log(
+            "Exam Data:",
+            exam
+        );
+
+
+        // ==================================
+        // EXAM TITLE
+        // ==================================
+
+        const titleElement =
+            document.getElementById(
+                "examTitle"
+            );
+
+        if (titleElement) {
+
+            titleElement.innerText =
+                exam.examName ||
+                "Online Examination";
+
+        }
+
+
+        // ==================================
+        // LOADING TITLE FALLBACK
+        // ==================================
+
+        const loadingElement =
+            document.getElementById(
+                "loadingTitle"
+            );
+
+        if (loadingElement) {
+
+            loadingElement.innerText =
+                exam.examName ||
+                "Online Examination";
+
+        }
+
+
+        // ==================================
+        // TIMER
+        // ==================================
+
+        const duration =
+            Number(
+                exam.duration || 0
+            );
+
+        if (duration > 0) {
+
+            remainingSeconds =
+                duration * 60;
+
+            startTimer();
+
+        }
+        else {
+
+            console.warn(
+                "Exam duration not found."
+            );
+
+            updateTimerDisplay();
+
+        }
+
+        return true;
+
+    }
+    catch (error) {
+
+        console.error(
+            "Exam Loading Error:",
+            error
+        );
+
+        alert(
+            "Unable to load assessment."
+        );
+
+        return false;
+
+    }
+
+}
+
+
+// ======================================
+// LOAD QUESTIONS
+// ======================================
 
 async function loadQuestions() {
 
-    const snapshot = await getDocs(
-        collection(db, "questions")
-    );
+    try {
 
-    snapshot.forEach(doc => {
+        console.log(
+            "Loading questions for:",
+            examId
+        );
 
-        questions.push({
-            id: doc.id,
-            ...doc.data()
-        });
 
-    });
+        const questionsQuery =
+            query(
+                collection(
+                    db,
+                    "questions"
+                ),
+                where(
+                    "examId",
+                    "==",
+                    examId
+                )
+            );
 
-    if (questions.length === 0) {
 
-        document.getElementById(
-            "questionText"
-        ).innerHTML = "No Questions Found";
+        const snapshot =
+            await getDocs(
+                questionsQuery
+            );
 
-        return;
+
+        questions = [];
+
+
+        snapshot.forEach(
+            (docSnap) => {
+
+                questions.push({
+
+                    id:
+                        docSnap.id,
+
+                    ...docSnap.data()
+
+                });
+
+            }
+        );
+
+
+        console.log(
+            "Questions Loaded:",
+            questions.length
+        );
+
+
+        if (
+            questions.length === 0
+        ) {
+
+            const questionText =
+                document.getElementById(
+                    "questionText"
+                );
+
+            if (questionText) {
+
+                questionText.innerText =
+                    "No Questions Found";
+
+            }
+
+            return;
+
+        }
+
+
+        showQuestion();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Question Loading Error:",
+            error
+        );
+
+        const questionText =
+            document.getElementById(
+                "questionText"
+            );
+
+        if (questionText) {
+
+            questionText.innerText =
+                "Unable to load questions.";
+
+        }
+
     }
 
-    showQuestion();
 }
+
+
+// ======================================
+// SHOW QUESTION
+// ======================================
 
 function showQuestion() {
 
-    let q = questions[currentQuestion];
+    if (
+        questions.length === 0
+    ) {
 
-    document.getElementById(
-        "questionText"
-    ).innerHTML =
-        (currentQuestion + 1) +
-        ". " +
-        q.question;
+        return;
 
-    let optionsDiv =
-        document.getElementById("options");
+    }
 
-    optionsDiv.innerHTML = `
-<button class="option"
-onclick="saveAnswer('A')">
-A. ${q.optionA}
-</button>
 
-<button class="option"
-onclick="saveAnswer('B')">
-B. ${q.optionB}
-</button>
+    const q =
+        questions[currentQuestion];
 
-<button class="option"
-onclick="saveAnswer('C')">
-C. ${q.optionC}
-</button>
 
-<button class="option"
-onclick="saveAnswer('D')">
-D. ${q.optionD}
-</button>
-`;
+    // ==================================
+    // QUESTION NUMBER + TEXT
+    // ==================================
+
+    const questionText =
+        document.getElementById(
+            "questionText"
+        );
+
+
+    if (questionText) {
+
+        questionText.innerText =
+            (
+                currentQuestion + 1
+            ) +
+            ". " +
+            (
+                q.question || ""
+            );
+
+    }
+
+
+    // ==================================
+    // OPTIONS
+    // ==================================
+
+    const optionsDiv =
+        document.getElementById(
+            "options"
+        );
+
+
+    if (!optionsDiv) {
+
+        return;
+
+    }
+
+
+    optionsDiv.innerHTML = "";
+
+
+    const options = [
+
+        {
+            key: "A",
+            text: q.optionA || ""
+        },
+
+        {
+            key: "B",
+            text: q.optionB || ""
+        },
+
+        {
+            key: "C",
+            text: q.optionC || ""
+        },
+
+        {
+            key: "D",
+            text: q.optionD || ""
+        }
+
+    ];
+
+
+    options.forEach(
+        (option) => {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.type =
+                "button";
+
+
+            button.className =
+                "option-btn";
+
+
+            button.innerText =
+                option.key +
+                ". " +
+                option.text;
+
+
+            // ==================================
+            // RESTORE SELECTED ANSWER
+            // ==================================
+
+            if (
+                answers[currentQuestion] ===
+                option.key
+            ) {
+
+                button.classList.add(
+                    "selected"
+                );
+
+            }
+
+
+            // ==================================
+            // SAVE ANSWER
+            // ==================================
+
+            button.onclick =
+                function () {
+
+                    saveAnswer(
+                        option.key
+                    );
+
+                };
+
+
+            optionsDiv.appendChild(
+                button
+            );
+
+        }
+    );
+
+
+    updateNavigation();
+
 }
 
-window.saveAnswer = function(answer) {
 
-    answers[currentQuestion] = answer;
+// ======================================
+// SAVE ANSWER
+// ======================================
 
-    alert("Answer Saved");
-};
+function saveAnswer(answer) {
+
+    answers[currentQuestion] =
+        answer;
+
+
+    console.log(
+        "Question:",
+        currentQuestion + 1,
+        "Answer:",
+        answer
+    );
+
+
+    showQuestion();
+
+}
+
+
+// ======================================
+// NEXT QUESTION
+// ======================================
 
 function nextQuestion() {
 
@@ -93,123 +483,504 @@ function nextQuestion() {
     ) {
 
         currentQuestion++;
+
         showQuestion();
+
     }
+
 }
+
+
+// ======================================
+// PREVIOUS QUESTION
+// ======================================
 
 function previousQuestion() {
 
-    if (currentQuestion > 0) {
+    if (
+        currentQuestion > 0
+    ) {
 
         currentQuestion--;
+
         showQuestion();
+
     }
+
 }
 
-async function submitExam() {
 
-    let score = 0;
-    let review = [];
-    let totalMarks = 0;
-    let correctAnswers = 0;
-questions.forEach((q, index) => {
+// ======================================
+// NAVIGATION BUTTONS
+// ======================================
 
-    const studentAnswer =
-        answers[index] || "";
+function updateNavigation() {
 
-    const correctAnswer =
-        q.answer;
+    const previousBtn =
+        document.querySelector(
+            ".previous-btn"
+        );
 
-    const marks =
-        Number(q.marks || 1);
 
-    totalMarks += marks;
+    const nextBtn =
+        document.querySelector(
+            ".next-btn"
+        );
 
-    const isCorrect =
-        studentAnswer === correctAnswer;
 
-    if (isCorrect) {
+    if (previousBtn) {
 
-        score += marks;
-
-        correctAnswers++;
+        previousBtn.disabled =
+            currentQuestion === 0;
 
     }
 
-   review.push({
 
-    questionId: q.id || "",
+    if (nextBtn) {
 
-    question: q.question || "",
+        nextBtn.disabled =
+            currentQuestion ===
+            questions.length - 1;
 
-    optionA: q.optionA || "",
+    }
 
-    optionB: q.optionB || "",
+}
 
-    optionC: q.optionC || "",
 
-    optionD: q.optionD || "",
+// ======================================
+// TIMER
+// ======================================
 
-    selectedAnswer: studentAnswer,
+function startTimer() {
 
-    correctAnswer: correctAnswer,
+    clearInterval(
+        timerInterval
+    );
 
-    explanation: q.explanation || "",
 
-    marks: isCorrect ? marks : 0,
+    updateTimerDisplay();
 
-    totalMarks: marks,
 
-    isCorrect: isCorrect
+    timerInterval =
+        setInterval(
+            () => {
 
-});   
-    });
+                remainingSeconds--;
+
+
+                updateTimerDisplay();
+
+
+                if (
+                    remainingSeconds <= 0
+                ) {
+
+                    clearInterval(
+                        timerInterval
+                    );
+
+
+                    alert(
+                        "Time is over. Your assessment will be submitted automatically."
+                    );
+
+
+                    submitExam(
+                        true
+                    );
+
+                }
+
+            },
+            1000
+        );
+
+}
+
+
+// ======================================
+// UPDATE TIMER
+// ======================================
+
+function updateTimerDisplay() {
+
+    const timer =
+        document.getElementById(
+            "timer"
+        );
+
+
+    if (!timer) {
+
+        return;
+
+    }
+
+
+    const minutes =
+        Math.floor(
+            remainingSeconds / 60
+        );
+
+
+    const seconds =
+        remainingSeconds % 60;
+
+
+    timer.innerText =
+        String(minutes)
+            .padStart(2, "0") +
+        ":" +
+        String(seconds)
+            .padStart(2, "0");
+
+
+    if (
+        remainingSeconds <= 60
+    ) {
+
+        timer.style.color =
+            "red";
+
+    }
+
+}
+
+
+// ======================================
+// SUBMIT EXAM
+// ======================================
+
+async function submitExam(
+    autoSubmit = false
+) {
+
+    if (submitting) {
+
+        return;
+
+    }
+
+
+    if (
+        questions.length === 0
+    ) {
+
+        alert(
+            "No questions available."
+        );
+
+        return;
+
+    }
+
+
+    // ==================================
+    // CONFIRM SUBMISSION
+    // ==================================
+
+    if (!autoSubmit) {
+
+        const confirmed =
+            confirm(
+                "Are you sure you want to submit the assessment?"
+            );
+
+
+        if (!confirmed) {
+
+            return;
+
+        }
+
+    }
+
+
+    submitting = true;
+
+
+    if (timerInterval) {
+
+        clearInterval(
+            timerInterval
+        );
+
+    }
+
+
+    // ==================================
+    // SCORE VARIABLES
+    // ==================================
+
+    let score = 0;
+
+    let totalMarks = 0;
+
+    let correctAnswers = 0;
+
+    let review = [];
+
+
+    // ==================================
+    // PROCESS QUESTIONS
+    // ==================================
+
+    questions.forEach(
+        (q, index) => {
+
+            const studentAnswer =
+                answers[index] ||
+                "";
+
+
+            const correctAnswer =
+                q.answer || "";
+
+
+            const marks =
+                Number(
+                    q.marks || 1
+                );
+
+
+            totalMarks +=
+                marks;
+
+
+            const isCorrect =
+                studentAnswer ===
+                correctAnswer;
+
+
+            if (isCorrect) {
+
+                score +=
+                    marks;
+
+                correctAnswers++;
+
+            }
+
+
+            // ==================================
+            // REVIEW DATA
+            // ==================================
+
+            review.push({
+
+                questionId:
+                    q.id || "",
+
+                question:
+                    q.question || "",
+
+                optionA:
+                    q.optionA || "",
+
+                optionB:
+                    q.optionB || "",
+
+                optionC:
+                    q.optionC || "",
+
+                optionD:
+                    q.optionD || "",
+
+                selectedAnswer:
+                    studentAnswer,
+
+                correctAnswer:
+                    correctAnswer,
+
+                explanation:
+                    q.explanation ||
+                    "Not Available",
+
+                marks:
+                    isCorrect
+                        ? marks
+                        : 0,
+
+                totalMarks:
+                    marks,
+
+                isCorrect:
+                    isCorrect
+
+            });
+
+        }
+    );
+
+
+    // ==================================
+    // PERCENTAGE
+    // ==================================
+
     const percentage =
-        (
-            score /
-            totalMarks
-        ) * 100;
+        totalMarks > 0
+            ? (
+                score /
+                totalMarks
+            ) * 100
+            : 0;
+
+
+    console.log(
+        "Score:",
+        score
+    );
+
+    console.log(
+        "Total Marks:",
+        totalMarks
+    );
+
+    console.log(
+        "Percentage:",
+        percentage
+    );
+
+    console.log(
+        "Review:",
+        review
+    );
+
+
+    // ==================================
+    // SAVE RESULT
+    // ==================================
 
     try {
 
-     await addDoc(
-    collection(db, "results"),
-    {
+        const resultRef =
+            await addDoc(
+                collection(
+                    db,
+                    "results"
+                ),
+                {
 
-        // Student Details
-        studentName:
-            localStorage.getItem("studentName") || "",
+                    // ==========================
+                    // STUDENT DETAILS
+                    // ==========================
 
-        studentClass:
-            localStorage.getItem("studentClass") || "",
+                    studentName:
+                        localStorage.getItem(
+                            "studentName"
+                        ) || "",
 
-        studentSection:
-            localStorage.getItem("studentSection") || "",
+                    studentClass:
+                        localStorage.getItem(
+                            "studentClass"
+                        ) || "",
 
-        // Exam Details
-        examId: examId,
-        examName: exam.examName,
-        subject: exam.subject,
+                    studentSection:
+                        localStorage.getItem(
+                            "studentSection"
+                        ) || "",
 
-        // Marks
-        score: score,
-        totalMarks: totalMarks,
-        correctAnswers: correctAnswers,
-        totalQuestions: questions.length,
-        percentage: percentage.toFixed(2),
 
-        // ⭐ Review Data
-        review: review,
+                    // ==========================
+                    // EXAM DETAILS
+                    // ==========================
 
-        // Time
-        submittedAt:
-            new Date().toISOString()
+                    examId:
+                        examId,
 
-    }
-);
+                    examName:
+                        exam.examName ||
+                        "",
+
+                    subject:
+                        exam.subject ||
+                        "",
+
+
+                    // ==========================
+                    // RESULT
+                    // ==========================
+
+                    score:
+                        score,
+
+                    totalMarks:
+                        totalMarks,
+
+                    correctAnswers:
+                        correctAnswers,
+
+                    totalQuestions:
+                        questions.length,
+
+                    percentage:
+                        percentage.toFixed(
+                            2
+                        ),
+
+
+                    // ==========================
+                    // REVIEW
+                    // ==========================
+
+                    review:
+                        review,
+
+
+                    // ==========================
+                    // SUBMISSION
+                    // ==========================
+
+                    submittedAt:
+                        new Date()
+                            .toISOString()
+
+                }
+            );
+
+
+        console.log(
+            "Result Saved:",
+            resultRef.id
+        );
+
+
+        // ==================================
+        // SAVE LATEST RESULT LOCALLY
+        // ==================================
+
+        localStorage.setItem(
+            "latestResultId",
+            resultRef.id
+        );
+
+        localStorage.setItem(
+            "latestScore",
+            score
+        );
+
+        localStorage.setItem(
+            "latestTotal",
+            totalMarks
+        );
+
+        localStorage.setItem(
+            "latestPercentage",
+            percentage.toFixed(2)
+        );
+
+        localStorage.setItem(
+            "latestCorrectAnswers",
+            correctAnswers
+        );
+
+
+        // ==================================
+        // SUCCESS
+        // ==================================
 
         alert(
-            "Exam Submitted!\n\n" +
+            "Exam Submitted Successfully!\n\n" +
             "Score: " +
             score +
             "/" +
@@ -219,21 +990,57 @@ questions.forEach((q, index) => {
             "%"
         );
 
- localStorage.setItem("latestScore", score);
-localStorage.setItem("latestTotal", totalMarks);
-localStorage.setItem("latestPercentage", percentage.toFixed(2));
-localStorage.setItem("latestCorrectAnswers", correctAnswers);
 
-window.location.href = "result.html";
+        window.location.href =
+            "result.html?id=" +
+            resultRef.id;
 
-    } catch (error) {
+    }
+    catch (error) {
 
-        console.error(error);
+        submitting = false;
+
+
+        console.error(
+            "RESULT SAVE ERROR:",
+            error
+        );
+
 
         alert(
-            "Failed to save result"
+            "Failed to save result.\n\n" +
+            error.message
         );
+
     }
+
 }
 
-loadQuestions();
+
+// ======================================
+// INITIALIZE
+// ======================================
+
+async function initializeExam() {
+
+    const examLoaded =
+        await loadExam();
+
+
+    if (!examLoaded) {
+
+        return;
+
+    }
+
+
+    await loadQuestions();
+
+}
+
+
+// ======================================
+// START
+// ======================================
+
+initializeExam();
