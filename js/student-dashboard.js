@@ -4,7 +4,71 @@ import {
     collection,
     getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+// ======================================
+// LOAD STUDENT DETAILS
+// ======================================
 
+function loadStudentDetails() {
+
+    const studentName =
+        localStorage.getItem("studentName") ||
+        localStorage.getItem("name") ||
+        "Student";
+
+    const studentClass =
+        localStorage.getItem("studentClass") ||
+        localStorage.getItem("class") ||
+        "-";
+
+    const studentSection =
+        localStorage.getItem("studentSection") ||
+        localStorage.getItem("section") ||
+        "-";
+
+
+    const nameElement =
+        document.getElementById("studentName");
+
+    const classElement =
+        document.getElementById("studentClass");
+
+    const sectionElement =
+        document.getElementById("studentSection");
+
+
+    if (nameElement) {
+
+        nameElement.textContent =
+            studentName;
+
+    }
+
+
+    if (classElement) {
+
+        classElement.textContent =
+            studentClass;
+
+    }
+
+
+    if (sectionElement) {
+
+        sectionElement.textContent =
+            studentSection;
+
+    }
+
+
+    console.log(
+        "Student Details:",
+        {
+            studentName,
+            studentClass,
+            studentSection
+        }
+    );
+}
 // ======================================
 // LOAD AVAILABLE EXAMS
 // ======================================
@@ -647,6 +711,7 @@ window.logout = function(){
 // ======================================
 // START
 // ======================================
+loadStudentDetails();
 
 loadExams();
 
