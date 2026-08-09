@@ -180,36 +180,52 @@ async function loadReview(){
         // REVIEW ARRAY
         // ==================================
 
-        const review =
-            Array.isArray(
-                result.review
-            )
-            ? result.review
-            : [];
+       const review =
+    Array.isArray(result.review)
+        ? result.review
+        : [];
 
 
-        if(review.length === 0){
+if(review.length === 0){
 
-            container.innerHTML = `
-                <div class="question-card">
+    container.innerHTML = `
 
-                    <h3>
-                        Review Not Available
-                    </h3>
+        <div class="question-card">
 
-                    <p>
-                        No question review data
-                        was saved for this assessment.
-                    </p>
+            <h3>
+                📋 Detailed Review Not Available
+            </h3>
 
-                </div>
-            `;
+            <p>
+                This assessment was completed
+                before detailed answer review
+                was enabled.
+            </p>
 
-            return;
+            <p>
+                Your result has been saved
+                successfully, but the answers
+                selected during the assessment
+                were not stored.
+            </p>
 
-        }
+            <div class="bottom-buttons">
 
+                <button
+                    onclick="window.location.href='../dashboard.html'">
 
+                    ← Back to Dashboard
+
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+    return;
+}
         // ==================================
         // BUILD REVIEW
         // ==================================
