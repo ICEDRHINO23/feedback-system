@@ -695,3 +695,177 @@ button {
     }
 
 }
+/* =========================================
+   COMMON BRAND HEADER
+========================================= */
+
+.brand-header {
+
+    width: 100%;
+
+    min-height: 100px;
+
+    background: #001f5b;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 12px 30px;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================
+   AHPS LOGO
+========================================= */
+
+.brand-left {
+
+    width: 150px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-start;
+
+}
+
+
+.ahps-logo {
+
+    width: 120px;
+
+    height: 75px;
+
+    object-fit: contain;
+
+    background: white;
+
+    border-radius: 8px;
+
+    padding: 5px;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================
+   TITLE
+========================================= */
+
+.brand-title {
+
+    flex: 1;
+
+    text-align: center;
+
+}
+
+
+.brand-title h1 {
+
+    margin: 0;
+
+    font-size: 28px;
+
+    font-weight: 700;
+
+}
+
+
+.brand-title p {
+
+    margin: 5px 0 0;
+
+    font-size: 15px;
+
+}
+
+
+/* =========================================
+   RAS LOGO
+========================================= */
+
+.brand-right {
+
+    width: 150px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+}
+
+
+.ras-logo {
+
+    width: 85px;
+
+    height: 85px;
+
+    object-fit: contain;
+
+    border-radius: 12px;
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .brand-header {
+
+        padding: 10px;
+
+    }
+
+    .brand-left,
+    .brand-right {
+
+        width: 80px;
+
+    }
+
+    .ahps-logo {
+
+        width: 70px;
+
+        height: 55px;
+
+    }
+
+    .ras-logo {
+
+        width: 55px;
+
+        height: 55px;
+
+    }
+
+    .brand-title h1 {
+
+        font-size: 18px;
+
+    }
+
+    .brand-title p {
+
+        font-size: 11px;
+
+    }
+
+}
