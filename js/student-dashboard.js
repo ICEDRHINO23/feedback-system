@@ -15,6 +15,12 @@ function loadStudentDetails() {
         localStorage.getItem("name") ||
         "Student";
 
+    const studentRollNo =
+        localStorage.getItem("rollNo") ||
+        localStorage.getItem("studentRollNo") ||
+        localStorage.getItem("rollNumber") ||
+        "-";
+
     const studentClass =
         localStorage.getItem("studentClass") ||
         localStorage.getItem("class") ||
@@ -29,6 +35,9 @@ function loadStudentDetails() {
     const nameElement =
         document.getElementById("studentName");
 
+    const rollNoElement =
+        document.getElementById("studentRollNo");
+
     const classElement =
         document.getElementById("studentClass");
 
@@ -40,6 +49,14 @@ function loadStudentDetails() {
 
         nameElement.textContent =
             studentName;
+
+    }
+
+
+    if (rollNoElement) {
+
+        rollNoElement.textContent =
+            studentRollNo;
 
     }
 
@@ -64,6 +81,7 @@ function loadStudentDetails() {
         "Student Details:",
         {
             studentName,
+            studentRollNo,
             studentClass,
             studentSection
         }
