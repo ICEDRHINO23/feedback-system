@@ -78,23 +78,35 @@ async function loadTeachers() {
     const table =
         document.getElementById("teacherTable");
 
+    if (!table) {
+        console.error("teacherTable element not found");
+        return;
+    }
+
     try {
+
+        console.log("Loading teachers...");
 
         const snapshot =
             await getDocs(
                 collection(db, "teachers")
             );
 
+        console.log(
+            "Teachers loaded:",
+            snapshot.size
+        );
+
         table.innerHTML = "";
 
         if (snapshot.empty) {
 
             table.innerHTML = `
-            <tr>
-                <td colspan="6">
-                    No Teachers Found
-                </td>
-            </tr>
+                <tr>
+                    <td colspan="6">
+                        No Teachers Found
+                    </td>
+                </tr>
             `;
 
             return;
@@ -105,52 +117,100 @@ async function loadTeachers() {
             const teacher =
                 teacherDoc.data();
 
+            const teacherName =
+                teacher.teacherName || "-";
+
+            const employeeId =
+                teacher.employeeId || "-";
+
+            const subject =
+                teacher.subject || "-";
+
+            const status =
+                teacher.status || "inactive";
+
+            const password =
+                teacher.password || "-";
+
+
             table.innerHTML += `
 
-            <tr>
+                <tr>
 
-                <td>${teacher.teacherName}</td>
+                    <td>
+                        ${teacherName}
+                    </td>
 
-                <td>${teacher.employeeId}</td>
+                    <td>
+                        ${employeeId}
+                    </td>
 
-                <td>${teacher.subject}</td>
+                    <td>
+                        ${subject}
+                    </td>
 
-                <td>${teacher.status}</td>
+                    <td>
+                        ${status}
+                    </td>
 
-                <td>${teacher.password}</td>
+                    <td>
+                        ${password}
+                    </td>
 
-                <td>
+                    <td>
 
-                    <button
-                    class="reset-btn"
-                    onclick="resetPassword('${teacherDoc.id}','${teacher.employeeId}')">
-                    Reset
-                    </button>
+                        <button
+                            class="reset-btn"
+                            onclick="resetPassword(
+                                '${teacherDoc.id}',
+                                '${employeeId}'
+                            )">
+                            Reset
+                        </button>
 
-                    <button
-                    class="delete-btn"
-                    onclick="deleteTeacher('${teacherDoc.id}')">
-                    Delete
-                    </button>
+                        <button
+                            class="delete-btn"
+                            onclick="deleteTeacher(
+                                '${teacherDoc.id}'
+                            )">
+                            Delete
+                        </button>
 
-                </td>
+                    </td>
 
-            </tr>
+                </tr>
 
             `;
         });
 
-    } catch (error) {
+    }
+    catch (error) {
 
-        console.error(error);
+        console.error(
+            "TEACHER LOAD ERROR:",
+            error
+        );
 
         table.innerHTML = `
-        <tr>
-            <td colspan="6">
-                Failed To Load Teachers
-            </td>
-        </tr>
+            <tr>
+                <td colspan="6">
+
+                    <strong>
+                        Failed To Load Teachers
+                    </strong>
+
+                    <br><br>
+
+                    ${error.code || "Unknown Error"}
+
+                    <br>
+
+                    ${error.message || error}
+
+                </td>
+            </tr>
         `;
+
     }
 }
 
