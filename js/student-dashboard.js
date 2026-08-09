@@ -82,12 +82,12 @@ async function loadExams() {
                     </p>
 
                     <button
-                    onclick="startExam('${docSnap.id}')">
-
+                        class="start-btn"
+                        onclick="startExam('${docSnap.id}')">
+    
                         Start Assessment
 
                     </button>
-
                 </div>
 
                 `;
