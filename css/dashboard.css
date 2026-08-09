@@ -1,1 +1,329 @@
+/* ======================================
+   AHPS STUDENT DASHBOARD
+   ====================================== */
 
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f9;
+    color: #222;
+}
+
+
+/* ======================================
+   HEADER
+   ====================================== */
+
+.header {
+    background: #001f5b;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.header p {
+    margin: 6px 0 0;
+    font-size: 15px;
+    opacity: 0.9;
+}
+
+
+/* ======================================
+   MAIN CONTAINER
+   ====================================== */
+
+.container {
+    width: 92%;
+    max-width: 1100px;
+    margin: 25px auto;
+}
+
+
+/* ======================================
+   WELCOME
+   ====================================== */
+
+.welcome {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
+}
+
+.welcome h2 {
+    margin: 0 0 8px;
+    color: #001f5b;
+    font-size: 24px;
+}
+
+.welcome p {
+    margin: 0;
+    color: #555;
+    font-size: 16px;
+}
+
+
+/* ======================================
+   SECTION TITLE
+   ====================================== */
+
+.exam-title {
+    font-size: 21px;
+    font-weight: bold;
+    color: #001f5b;
+    margin: 25px 0 15px;
+}
+
+
+/* ======================================
+   PERFORMANCE SECTION
+   ====================================== */
+
+.performance-section {
+    margin-bottom: 30px;
+}
+
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+}
+
+.performance-card {
+    background: white;
+    border-radius: 12px;
+    padding: 18px 10px;
+    text-align: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    border-top: 4px solid #001f5b;
+}
+
+.performance-icon {
+    font-size: 27px;
+    margin-bottom: 8px;
+}
+
+.performance-value {
+    font-size: 25px;
+    font-weight: bold;
+    color: #001f5b;
+}
+
+.performance-label {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #666;
+}
+
+
+/* ======================================
+   EXAM CARD
+   ====================================== */
+
+.exam-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+.exam-card h3 {
+    margin: 0 0 12px;
+    color: #001f5b;
+    font-size: 20px;
+}
+
+.exam-card p {
+    margin: 7px 0;
+    color: #555;
+}
+
+
+/* ======================================
+   BUTTON BASE
+   ====================================== */
+
+button {
+    border: none;
+    border-radius: 7px;
+    padding: 11px 18px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+
+/* ======================================
+   START ASSESSMENT
+   ====================================== */
+
+.start-btn {
+    background: #001f5b;
+    color: white;
+    margin-top: 12px;
+}
+
+.start-btn:hover {
+    background: #003a8c;
+    transform: translateY(-1px);
+}
+
+
+/* ======================================
+   RESULT BUTTON
+   ====================================== */
+
+.result-btn {
+    background: #0b6e4f;
+    color: white;
+    margin-top: 12px;
+    margin-right: 8px;
+}
+
+.result-btn:hover {
+    background: #095b42;
+}
+
+
+/* ======================================
+   REVIEW BUTTON
+   ====================================== */
+
+.review-btn {
+    background: #d97706;
+    color: white;
+    margin-top: 12px;
+}
+
+.review-btn:hover {
+    background: #b45309;
+}
+
+
+/* ======================================
+   LOGOUT
+   ====================================== */
+
+.logout {
+    display: block;
+    margin: 30px auto;
+    background: #b91c1c;
+    color: white;
+    padding: 12px 28px;
+}
+
+.logout:hover {
+    background: #991b1b;
+}
+
+
+/* ======================================
+   FOOTER
+   ====================================== */
+
+.footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 35px;
+    color: #777;
+    font-size: 13px;
+}
+
+
+/* ======================================
+   LOADING / EMPTY MESSAGE
+   ====================================== */
+
+#examList,
+#completedExamList {
+    min-height: 20px;
+}
+
+#examList > p,
+#completedExamList > p {
+    background: white;
+    padding: 18px;
+    border-radius: 10px;
+    color: #666;
+}
+
+
+/* ======================================
+   MOBILE
+   ====================================== */
+
+@media (max-width: 800px) {
+
+    .performance-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .container {
+        width: 94%;
+        margin: 15px auto;
+    }
+
+    .header {
+        padding: 16px;
+    }
+
+    .header h1 {
+        font-size: 22px;
+    }
+
+    .welcome {
+        padding: 18px;
+    }
+
+    .welcome h2 {
+        font-size: 20px;
+    }
+
+    .performance-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .performance-card {
+        padding: 15px 8px;
+    }
+
+    .performance-value {
+        font-size: 21px;
+    }
+
+    .exam-card {
+        padding: 17px;
+    }
+
+    .exam-card h3 {
+        font-size: 18px;
+    }
+
+    .result-btn,
+    .review-btn,
+    .start-btn {
+        width: 100%;
+        margin-right: 0;
+        margin-top: 10px;
+    }
+
+}
