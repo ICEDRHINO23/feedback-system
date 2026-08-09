@@ -123,44 +123,138 @@ async function loadReport() {
         );
 
 
-        // ==================================
-        // STUDENT DETAILS
-        // ==================================
+       // ==================================
+// STUDENT DETAILS
+// ==================================
 
-        document.getElementById(
-            "studentName"
-        ).innerText =
-
-            result.studentName ||
-            result.participantName ||
-            "-";
+const studentName =
+    result.studentName ||
+    result.participantName ||
+    "-";
 
 
-        document.getElementById(
-            "rollNo"
-        ).innerText =
-
-            result.rollNo ||
-            "-";
-
-
-        document.getElementById(
-            "studentClass"
-        ).innerText =
-
-            result.studentClass ||
-            result.examClass ||
-            exam.examClass ||
-            "-";
+const studentClass =
+    result.studentClass ||
+    result.examClass ||
+    exam.examClass ||
+    "-";
 
 
-        document.getElementById(
-            "section"
-        ).innerText =
+const studentSection =
+    result.section ||
+    result.studentSection ||
+    "-";
 
-            result.section ||
-            result.studentSection ||
-            "-";
+
+// ----------------------------------
+// FIND ROLL NUMBER
+// ----------------------------------
+
+let studentRollNo =
+    result.rollNo || "";
+
+
+if (!studentRollNo) {
+
+    const studentsSnapshot =
+        await getDocs(
+            collection(
+                db,
+                "students"
+            )
+        );
+
+
+    const targetName =
+        String(studentName)
+            .trim()
+            .toLowerCase();
+
+
+    const targetClass =
+        String(studentClass)
+            .trim();
+
+
+    const targetSection =
+        String(studentSection)
+            .trim()
+            .toLowerCase();
+
+
+    studentsSnapshot.forEach(
+        studentDoc => {
+
+            const student =
+                studentDoc.data();
+
+
+            const dbName =
+                String(
+                    student.name || ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const dbClass =
+                String(
+                    student.class || ""
+                )
+                .trim();
+
+
+            const dbSection =
+                String(
+                    student.section || ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            if (
+                dbName === targetName &&
+                dbClass === targetClass &&
+                dbSection === targetSection
+            ) {
+
+                studentRollNo =
+                    student.rollNo || "";
+
+            }
+
+        }
+    );
+
+}
+
+
+// ----------------------------------
+// DISPLAY STUDENT DETAILS
+// ----------------------------------
+
+document.getElementById(
+    "studentName"
+).innerText =
+    studentName;
+
+
+document.getElementById(
+    "rollNo"
+).innerText =
+    studentRollNo || "-";
+
+
+document.getElementById(
+    "studentClass"
+).innerText =
+    studentClass;
+
+
+document.getElementById(
+    "section"
+).innerText =
+    studentSection;
 
 
         // ==================================
