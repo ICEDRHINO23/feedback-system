@@ -9,9 +9,31 @@ const params = new URLSearchParams(window.location.search);
 const resultId = params.get("id");
 
 function cleanOptionText(value){
-    let text = String(value ?? "").trim();
-    text = text.replace(/^\s*[A-Da-d]\s*[.)]\s*/, "");
-    return text;
+    return String(value ?? "")
+        .trim()
+        .replace(/^\s*[A-Da-d]\s*[.)]\s*/, "");
+}
+
+function normalizeAnswer(value, options){
+
+    const raw = String(value ?? "").trim();
+
+    if(!raw){
+        return "";
+    }
+
+    const keyMatch = raw.match(/^([A-Da-d])(?:[.)]|\s|$)/);
+    if(keyMatch){
+        return keyMatch[1].toUpperCase();
+    }
+
+    const cleaned = cleanOptionText(raw).toLowerCase();
+
+    const found = options.find(option =>
+        cleanOptionText(option.text).toLowerCase() === cleaned
+    );
+
+    return found ? found.key : raw.toUpperCase();
 }
 
 async function loadReview(){
@@ -24,6 +46,7 @@ async function loadReview(){
     }
 
     try{
+
         const resultRef = doc(db, "results", resultId);
         const resultSnap = await getDoc(resultRef);
 
@@ -37,21 +60,14 @@ async function loadReview(){
         document.getElementById("examName").innerText = result.examName || "Assessment";
         document.getElementById("subject").innerText = "Subject: " + (result.subject || "-");
 
-        const score = Number(result.score || 0);
-        const totalMarks = Number(result.totalMarks || 0);
-        const percentage = Number(result.percentage || 0);
-        const correct = Number(result.correctAnswers || 0);
-        const totalQuestions = Number(result.totalQuestions || 0);
-        const wrong = totalQuestions - correct;
-
-        document.getElementById("score").innerText = score + "/" + totalMarks;
-        document.getElementById("percentage").innerText = percentage.toFixed(2) + "%";
-        document.getElementById("correct").innerText = correct;
-        document.getElementById("wrong").innerText = wrong;
-
         const review = Array.isArray(result.review) ? result.review : [];
 
         if(review.length === 0){
+            document.getElementById("score").innerText = (result.score || 0) + "/" + (result.totalMarks || 0);
+            document.getElementById("percentage").innerText = Number(result.percentage || 0).toFixed(2) + "%";
+            document.getElementById("correct").innerText = result.correctAnswers || 0;
+            document.getElementById("wrong").innerText = Math.max(0, Number(result.totalQuestions || 0) - Number(result.correctAnswers || 0));
+
             container.innerHTML = `
                 <div class="question-card">
                     <h3>📋 Detailed Review Not Available</h3>
@@ -62,15 +78,13 @@ async function loadReview(){
             return;
         }
 
+        let calculatedScore = 0;
+        let calculatedCorrect = 0;
+        let calculatedTotalMarks = 0;
+        let hasPending = false;
         let html = "";
 
         review.forEach((q,index) => {
-
-            const selected = q.selectedAnswer || "";
-            const correctAnswer = q.correctAnswer || "";
-            const isCorrect = q.isCorrect === true;
-
-            let optionsHTML = "";
 
             const options = [
                 { key:"A", text:cleanOptionText(q.optionA) },
@@ -79,23 +93,60 @@ async function loadReview(){
                 { key:"D", text:cleanOptionText(q.optionD) }
             ];
 
+            const selectedKey = normalizeAnswer(q.selectedAnswer, options);
+            const correctKey = normalizeAnswer(q.correctAnswer, options);
+            const maxMarks = Number(q.totalMarks ?? q.maxMarks ?? 0);
+            const storedMarks = Number(q.marks || 0);
+            const isDescriptive = q.questionType === "sentence" || q.evaluationStatus === "pending";
+
+            let isCorrect = false;
+
+            if(isDescriptive){
+                hasPending = true;
+            } else {
+                // Determine correctness from the actual stored answers rather than
+                // trusting a stale/inconsistent isCorrect flag in older results.
+                isCorrect = !!selectedKey && !!correctKey && selectedKey === correctKey;
+                calculatedTotalMarks += maxMarks;
+
+                if(isCorrect){
+                    calculatedCorrect++;
+                    calculatedScore += maxMarks;
+                }
+            }
+
+            let optionsHTML = "";
+
             options.forEach(option => {
+
+                if(!option.text){
+                    return;
+                }
 
                 let classes = "option";
 
-                if(option.key === correctAnswer) classes += " correct";
-                if(option.key === selected && option.key !== correctAnswer) classes += " wrong";
-                if(option.key === selected) classes += " selected";
+                if(option.key === correctKey){
+                    classes += " correct";
+                }
+
+                if(option.key === selectedKey && option.key !== correctKey){
+                    classes += " wrong";
+                }
+
+                if(option.key === selectedKey){
+                    classes += " selected";
+                }
 
                 let marker = "";
-                if(option.key === selected) marker += " Your Answer";
-                if(option.key === correctAnswer) marker += " ✓ Correct Answer";
 
-                /*
-                 * The inline !important rules are intentional here.
-                 * They guarantee compact review options even if an older
-                 * cached stylesheet or another rule sets a fixed height.
-                 */
+                if(option.key === selectedKey){
+                    marker += " Your Answer";
+                }
+
+                if(option.key === correctKey && !isDescriptive){
+                    marker += " ✓ Correct Answer";
+                }
+
                 optionsHTML += `
                     <div class="${classes}"
                          style="display:block !important;width:100% !important;height:auto !important;min-height:0 !important;max-height:none !important;padding:8px 12px !important;margin:5px 0 !important;line-height:1.3 !important;font-size:15px !important;box-sizing:border-box !important;overflow:visible !important;">
@@ -106,8 +157,11 @@ async function loadReview(){
                 `;
             });
 
-            const statusClass = isCorrect ? "correct" : "wrong";
-            const statusText = isCorrect ? "✓ Correct Answer" : "✗ Incorrect Answer";
+            const displayMarks = isDescriptive ? storedMarks : (isCorrect ? maxMarks : 0);
+            const statusClass = isDescriptive ? "pending" : (isCorrect ? "correct" : "wrong");
+            const statusText = isDescriptive
+                ? "🟠 Under Teacher Evaluation"
+                : (isCorrect ? "✓ Correct Answer" : "✗ Incorrect Answer");
 
             html += `
                 <div class="question-card">
@@ -116,7 +170,7 @@ async function loadReview(){
                     ${optionsHTML}
                     <div class="answer-status ${statusClass}">${statusText}</div>
                     <div class="marks">
-                        Marks: ${q.marks || 0} / ${q.totalMarks || 0}
+                        Marks: ${displayMarks} / ${maxMarks}
                     </div>
                     <div class="explanation">
                         <strong>Explanation</strong>
@@ -126,18 +180,25 @@ async function loadReview(){
             `;
         });
 
-        container.innerHTML = html;
+        // For automatic-only assessments, use the detailed review as the source
+        // of truth. This fixes older result documents where summary counts were stale.
+        if(!hasPending){
+            const percentage = calculatedTotalMarks > 0
+                ? (calculatedScore / calculatedTotalMarks) * 100
+                : 0;
 
-        // Final enforcement after dynamic HTML insertion.
-        container.querySelectorAll(".option").forEach(option => {
-            option.style.setProperty("height", "auto", "important");
-            option.style.setProperty("min-height", "0", "important");
-            option.style.setProperty("max-height", "none", "important");
-            option.style.setProperty("padding", "8px 12px", "important");
-            option.style.setProperty("margin", "5px 0", "important");
-            option.style.setProperty("display", "block", "important");
-            option.style.setProperty("box-sizing", "border-box", "important");
-        });
+            document.getElementById("score").innerText = calculatedScore + "/" + calculatedTotalMarks;
+            document.getElementById("percentage").innerText = percentage.toFixed(2) + "%";
+            document.getElementById("correct").innerText = calculatedCorrect;
+            document.getElementById("wrong").innerText = Math.max(0, review.filter(q => q.questionType !== "sentence").length - calculatedCorrect);
+        } else {
+            document.getElementById("score").innerText = (result.score || 0) + "/" + (result.totalMarks || 0);
+            document.getElementById("percentage").innerText = "Pending";
+            document.getElementById("correct").innerText = result.correctAnswers || 0;
+            document.getElementById("wrong").innerText = "Pending";
+        }
+
+        container.innerHTML = html;
 
     }
     catch(error){
