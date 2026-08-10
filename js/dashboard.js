@@ -1,67 +1,33 @@
 import { db } from "./firebase-config.js";
+import { collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-    collection,
-    getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+async function getCollectionCount(name) {
+    try {
+        const snap = await getCountFromServer(collection(db, name));
+        return snap.data().count || 0;
+    } catch (error) {
+        console.error(`Count error for ${name}:`, error);
+        return 0;
+    }
+}
 
 async function loadDashboardStats() {
-
     try {
-        // Total Students
-        const studentsSnap = await getDocs(
-            collection(db, "students")
-        );
+        // Aggregation queries return counts without downloading every document.
+        const [studentCount, teacherCount, examCount, resultCount] = await Promise.all([
+            getCollectionCount("students"),
+            getCollectionCount("teachers"),
+            getCollectionCount("exams"),
+            getCollectionCount("results")
+        ]);
 
-        const studentCount = studentsSnap.size;
-
-        document.getElementById("studentCount").innerText = studentCount;
-        document.getElementById("overviewStudents").innerText = studentCount;
-
-        // Total Teachers
-        let teacherCount = 0;
-
-        try {
-            const teachersSnap = await getDocs(
-                collection(db, "teachers")
-            );
-            teacherCount = teachersSnap.size;
-        } catch (e) {
-            teacherCount = 0;
-        }
-
-        document.getElementById("teacherCount").innerText = teacherCount;
-
-        // Total Exams / Assessments
-        let examCount = 0;
-
-        try {
-            const examsSnap = await getDocs(
-                collection(db, "exams")
-            );
-            examCount = examsSnap.size;
-        } catch (e) {
-            examCount = 0;
-        }
-
-        document.getElementById("examCount").innerText = examCount;
-        document.getElementById("overviewExams").innerText = examCount;
-
-        // Total Results
-        let resultCount = 0;
-
-        try {
-            const resultsSnap = await getDocs(
-                collection(db, "results")
-            );
-            resultCount = resultsSnap.size;
-        } catch (e) {
-            resultCount = 0;
-        }
-
-        document.getElementById("resultCount").innerText = resultCount;
-        document.getElementById("overviewResults").innerText = resultCount;
-
+        document.getElementById("studentCount")?.replaceChildren(document.createTextNode(studentCount));
+        document.getElementById("overviewStudents")?.replaceChildren(document.createTextNode(studentCount));
+        document.getElementById("teacherCount")?.replaceChildren(document.createTextNode(teacherCount));
+        document.getElementById("examCount")?.replaceChildren(document.createTextNode(examCount));
+        document.getElementById("overviewExams")?.replaceChildren(document.createTextNode(examCount));
+        document.getElementById("resultCount")?.replaceChildren(document.createTextNode(resultCount));
+        document.getElementById("overviewResults")?.replaceChildren(document.createTextNode(resultCount));
     } catch (error) {
         console.error("Dashboard Error:", error);
     }
