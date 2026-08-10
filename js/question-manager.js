@@ -1,127 +1,24 @@
 import { db } from "./firebase-config.js";
-import { collection, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-let allQuestions = [];
-let currentQuestionId = "";
-let examMap = {};
-
-function normalize(value) { return String(value ?? "").trim().toLowerCase().replace(/\s+/g, " "); }
-function escapeHTML(value) { return String(value ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c])); }
-function normalizeQuestionType(value) {
-    const type = normalize(value);
-    if (!type || ["mcq", "multiple choice", "multiple-choice"].includes(type)) return "mcq";
-    if (["multiple", "multiple answer", "multiple-answer", "multiple answers"].includes(type)) return "multiple";
-    if (["sentence", "subjective", "descriptive", "descriptive answer"].includes(type)) return "sentence";
-    return type;
-}
-
-async function loadExamMap() {
-    try {
-        const snapshot = await getDocs(collection(db, "exams"));
-        examMap = {};
-        snapshot.forEach(docSnap => { examMap[docSnap.id] = docSnap.data(); });
-    } catch (error) { console.warn("Exam metadata could not be loaded:", error); examMap = {}; }
-}
-function getQuestionExamId(q) { return String(q.examId ?? q.examID ?? q.assessmentId ?? q.assessmentID ?? "").trim(); }
-function getAssessmentName(exam, id) { return String(exam?.examName ?? exam?.assessmentName ?? exam?.name ?? exam?.title ?? id ?? "Unknown Assessment").trim(); }
-function getQuestionClass(q) { const direct=String(q.class ?? q.examClass ?? q.className ?? "").trim(); if(direct)return direct; const exam=examMap[getQuestionExamId(q)]; return exam?String(exam.examClass ?? exam.class ?? exam.className ?? "").trim():""; }
-function getQuestionSubject(q) { const direct=String(q.subject ?? q.examSubject ?? "").trim(); if(direct)return direct; const exam=examMap[getQuestionExamId(q)]; return exam?String(exam.subject ?? exam.examSubject ?? "").trim():""; }
-
-function updateStats() {
-    const subjects = new Set(allQuestions.map(q => normalize(q._subject)).filter(Boolean));
-    const assessments = new Set(allQuestions.map(q => q._examId).filter(Boolean));
-    const total = document.getElementById("totalQuestions");
-    const subjectCount = document.getElementById("totalSubjects");
-    const assessmentCount = document.getElementById("totalAssessments");
-    if(total) total.textContent = allQuestions.length;
-    if(subjectCount) subjectCount.textContent = subjects.size;
-    if(assessmentCount) assessmentCount.textContent = assessments.size;
-}
-
-async function loadQuestions() {
-    const table = document.getElementById("questionTable");
-    try {
-        table.innerHTML = `<tr><td colspan="6" class="no-data"><i class="fas fa-spinner fa-spin"></i> Loading Questions...</td></tr>`;
-        await loadExamMap();
-        const snapshot = await getDocs(collection(db, "questions"));
-        allQuestions = [];
-        snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            const examId = getQuestionExamId(data);
-            allQuestions.push({ id: docSnap.id, ...data, _examId: examId, _assessment: getAssessmentName(examMap[examId], examId), _class: getQuestionClass(data), _subject: getQuestionSubject(data), _type: normalizeQuestionType(data.questionType ?? data.type) });
-        });
-        allQuestions.sort((a,b) => (a.question || "").localeCompare(b.question || ""));
-        updateStats();
-        loadFilters();
-        filterQuestions();
-    } catch (error) {
-        console.error(error);
-        table.innerHTML = `<tr><td colspan="6" class="no-data"><i class="fas fa-triangle-exclamation"></i> Unable to load questions</td></tr>`;
-    }
-}
-
-function renderQuestions(list) {
-    const table = document.getElementById("questionTable");
-    table.innerHTML = "";
-    if (!list.length) {
-        table.innerHTML = `<tr><td colspan="6" class="no-data"><i class="fas fa-inbox" style="font-size:24px;display:block;margin-bottom:8px"></i>No Questions Found</td></tr>`;
-        return;
-    }
-    list.forEach(q => {
-        const typeLabel = q._type === "sentence" ? "Subjective" : q._type === "multiple" ? "Multiple" : "MCQ";
-        table.innerHTML += `<tr>
-            <td class="question-cell">${escapeHTML(q.question || "-")}</td>
-            <td><span class="subject-badge">${escapeHTML(q._subject || q.subject || "-")}</span></td>
-            <td><span class="class-badge">Class ${escapeHTML(q._class || q.class || "-")}</span></td>
-            <td><span class="type-badge">${typeLabel}</span></td>
-            <td class="marks">${escapeHTML(q.marks || 1)}</td>
-            <td><div class="actions">
-                <button class="action-btn edit-btn" onclick="editQuestion('${q.id}')" title="Edit Question"><i class="fas fa-pen"></i></button>
-                <button class="action-btn delete-btn" onclick="deleteQuestion('${q.id}')" title="Delete Question"><i class="fas fa-trash"></i></button>
-            </div></td>
-        </tr>`;
-    });
-}
-
-function loadFilters() {
-    const classFilter=document.getElementById("classFilter"), subjectFilter=document.getElementById("subjectFilter"), assessmentFilter=document.getElementById("assessmentFilter"), typeFilter=document.getElementById("typeFilter");
-    if(!classFilter||!subjectFilter||!assessmentFilter||!typeFilter)return;
-    const previousClass=classFilter.value, previousSubject=subjectFilter.value, previousAssessment=assessmentFilter.value, previousType=typeFilter.value;
-    classFilter.innerHTML=`<option value="">All Classes</option>`; subjectFilter.innerHTML=`<option value="">All Subjects</option>`; assessmentFilter.innerHTML=`<option value="">All Assessments</option>`; typeFilter.innerHTML=`<option value="">All Question Types</option><option value="mcq">MCQ</option><option value="multiple">Multiple Answer</option><option value="sentence">Subjective</option>`;
-    [...new Set(allQuestions.map(q=>q._class).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true})).forEach(cls=>{const o=document.createElement("option");o.value=cls;o.textContent=`Class ${cls}`;classFilter.appendChild(o);});
-    [...new Set(allQuestions.map(q=>q._subject).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b))).forEach(subject=>{const o=document.createElement("option");o.value=subject;o.textContent=subject;subjectFilter.appendChild(o);});
-    [...new Map(allQuestions.filter(q=>q._examId).map(q=>[q._examId,q._assessment])).entries()].sort((a,b)=>String(a[1]).localeCompare(String(b[1]))).forEach(([examId,name])=>{const o=document.createElement("option");o.value=examId;o.textContent=name||examId;assessmentFilter.appendChild(o);});
-    if([...classFilter.options].some(o=>o.value===previousClass))classFilter.value=previousClass;
-    if([...subjectFilter.options].some(o=>o.value===previousSubject))subjectFilter.value=previousSubject;
-    if([...assessmentFilter.options].some(o=>o.value===previousAssessment))assessmentFilter.value=previousAssessment;
-    if([...typeFilter.options].some(o=>o.value===previousType))typeFilter.value=previousType;
-}
-
-function filterQuestions() {
-    const search=normalize(document.getElementById("searchBox")?.value), classValue=normalize(document.getElementById("classFilter")?.value), subjectValue=normalize(document.getElementById("subjectFilter")?.value), assessmentValue=String(document.getElementById("assessmentFilter")?.value??"").trim(), typeRaw=normalize(document.getElementById("typeFilter")?.value), typeSelected=typeRaw!=="", typeValue=normalizeQuestionType(typeRaw);
-    const filtered=allQuestions.filter(q=>normalize(q.question).includes(search)&&(!classValue||normalize(q._class)===classValue)&&(!subjectValue||normalize(q._subject)===subjectValue)&&(!assessmentValue||q._examId===assessmentValue)&&(!typeSelected||q._type===typeValue));
-    renderQuestions(filtered);
-}
-
-function updateEditOptionsVisibility(type) { const section=document.getElementById("editOptionsSection"); if(section)section.style.display=type==="sentence"?"none":"block"; }
-window.editQuestion=function(id){const q=allQuestions.find(x=>x.id===id);if(!q)return;currentQuestionId=id;document.getElementById("editAssessment").value=q._assessment||"Unknown Assessment";document.getElementById("editQuestion").value=q.question||"";document.getElementById("editOptionA").value=q.optionA||"";document.getElementById("editOptionB").value=q.optionB||"";document.getElementById("editOptionC").value=q.optionC||"";document.getElementById("editOptionD").value=q.optionD||"";document.getElementById("editAnswer").value=q.answer||"A";document.getElementById("editMarks").value=q.marks??1;updateEditOptionsVisibility(q._type);document.getElementById("editModal").style.display="block";};
-window.closeEdit=function(){document.getElementById("editModal").style.display="none";};
-
-async function updateQuestion(){
-    if(!currentQuestionId){alert("No Question Selected");return;}
-    const questionText=document.getElementById("editQuestion").value.trim(), marks=Number(document.getElementById("editMarks").value);
-    if(!questionText){alert("Please enter the question.");document.getElementById("editQuestion").focus();return;}
-    if(!Number.isFinite(marks)||marks<0){alert("Please enter valid marks.");document.getElementById("editMarks").focus();return;}
-    try{
-        const existing=allQuestions.find(q=>q.id===currentQuestionId);
-        const updateData={question:questionText,answer:document.getElementById("editAnswer").value,marks};
-        if(!existing||existing._type!=="sentence"){updateData.optionA=document.getElementById("editOptionA").value.trim();updateData.optionB=document.getElementById("editOptionB").value.trim();updateData.optionC=document.getElementById("editOptionC").value.trim();updateData.optionD=document.getElementById("editOptionD").value.trim();}
-        await updateDoc(doc(db,"questions",currentQuestionId),updateData);closeEdit();await loadQuestions();alert("Question Updated Successfully");
-    }catch(error){console.error(error);alert("Unable To Update Question");}
-}
-
-window.deleteQuestion=async function(id){const q=allQuestions.find(x=>x.id===id);if(!q)return;if(!confirm("Delete this question?\n\n"+q.question+"\n\nThis action cannot be undone."))return;try{await deleteDoc(doc(db,"questions",id));allQuestions=allQuestions.filter(x=>x.id!==id);updateStats();loadFilters();filterQuestions();alert("Question Deleted Successfully.");}catch(error){console.error(error);alert("Unable To Delete Question.");}};
-
-document.addEventListener("click",e=>{const edit=document.getElementById("editModal");if(e.target===edit)closeEdit();});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeEdit();});
-document.addEventListener("DOMContentLoaded",()=>{document.getElementById("searchBox")?.addEventListener("input",filterQuestions);document.getElementById("classFilter")?.addEventListener("change",filterQuestions);document.getElementById("subjectFilter")?.addEventListener("change",filterQuestions);document.getElementById("assessmentFilter")?.addEventListener("change",filterQuestions);document.getElementById("typeFilter")?.addEventListener("change",filterQuestions);document.getElementById("updateBtn")?.addEventListener("click",updateQuestion);loadQuestions();});
+import { collection,getDocs,deleteDoc,updateDoc,doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+let allQuestions=[],currentQuestionId="",examMap={};
+function normalize(v){return String(v??"").trim().toLowerCase().replace(/\s+/g," ");}
+function escapeHTML(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]));}
+function normalizeQuestionType(v){const t=normalize(v);if(!t||["mcq","multiple choice","multiple-choice"].includes(t))return"mcq";if(["multiple","multiple answer","multiple-answer","multiple answers"].includes(t))return"multiple";if(["truefalse","true/false","true false","tf"].includes(t))return"truefalse";if(["fillblank","fill in the blanks","fill-in-the-blanks","blank"].includes(t))return"fillblank";if(["sentence","subjective","descriptive","descriptive answer"].includes(t))return"sentence";return t;}
+async function loadExamMap(){try{const s=await getDocs(collection(db,"exams"));examMap={};s.forEach(d=>examMap[d.id]=d.data());}catch(e){console.warn(e);examMap={};}}
+function getExamId(q){return String(q.examId??q.examID??q.assessmentId??q.assessmentID??"").trim();}
+function getAssessmentName(exam,id){return String(exam?.examName??exam?.assessmentName??exam?.name??exam?.title??id??"Unknown Assessment").trim();}
+function getClass(q){const direct=String(q.class??q.examClass??q.className??"").trim();if(direct)return direct;const e=examMap[getExamId(q)];return e?String(e.examClass??e.class??e.className??"").trim():"";}
+function getSection(q){const direct=String(q.section??q.examSection??q.sectionName??"").trim();if(direct)return direct;const e=examMap[getExamId(q)];return e?String(e.section??e.examSection??e.sectionName??"").trim():"";}
+function getSubject(q){const direct=String(q.subject??q.examSubject??"").trim();if(direct)return direct;const e=examMap[getExamId(q)];return e?String(e.subject??e.examSubject??"").trim():"";}
+function updateStats(){const subjects=new Set(allQuestions.map(q=>normalize(q._subject)).filter(Boolean));const assessments=new Set(allQuestions.map(q=>q._examId).filter(Boolean));document.getElementById("totalQuestions").textContent=allQuestions.length;document.getElementById("totalSubjects").textContent=subjects.size;document.getElementById("totalAssessments").textContent=assessments.size;}
+async function loadQuestions(){const table=document.getElementById("questionTable");try{table.innerHTML='<tr><td colspan="7" class="no-data">Loading Questions...</td></tr>';await loadExamMap();const s=await getDocs(collection(db,"questions"));allQuestions=[];s.forEach(d=>{const q=d.data(),id=getExamId(q);allQuestions.push({id:d.id,...q,_examId:id,_assessment:getAssessmentName(examMap[id],id),_class:getClass(q),_section:getSection(q),_subject:getSubject(q),_type:normalizeQuestionType(q.questionType??q.type)});});allQuestions.sort((a,b)=>(a.question||"").localeCompare(b.question||""));updateStats();loadFilters();filterQuestions();}catch(e){console.error(e);table.innerHTML='<tr><td colspan="7" class="no-data">Unable to load questions</td></tr>';}}
+function renderQuestions(list){const table=document.getElementById("questionTable");table.innerHTML="";if(!list.length){table.innerHTML='<tr><td colspan="7" class="no-data">No Questions Found</td></tr>';return;}list.forEach(q=>{const label=q._type==="sentence"?"Descriptive":q._type==="multiple"?"Multiple":q._type==="truefalse"?"True / False":q._type==="fillblank"?"Fill in the Blanks":"MCQ";table.innerHTML+=`<tr><td class="question-cell">${escapeHTML(q.question||"-")}</td><td><span class="subject-badge">${escapeHTML(q._subject||"-")}</span></td><td><span class="class-badge">Class ${escapeHTML(q._class||"-")}</span></td><td><span class="section-badge">${escapeHTML(q._section||"-")}</span></td><td><span class="type-badge">${label}</span></td><td class="marks">${escapeHTML(q.marks||1)}</td><td><div class="actions"><button class="action-btn edit-btn" onclick="editQuestion('${q.id}')" title="Edit"><i class="fas fa-pen"></i></button><button class="action-btn delete-btn" onclick="deleteQuestion('${q.id}')" title="Delete"><i class="fas fa-trash"></i></button></div></td></tr>`;});}
+function loadFilters(){const cf=document.getElementById("classFilter"),sf=document.getElementById("subjectFilter"),af=document.getElementById("assessmentFilter"),tf=document.getElementById("typeFilter");const pc=cf.value,ps=sf.value,pa=af.value,pt=tf.value;cf.innerHTML='<option value="">All Classes</option>';sf.innerHTML='<option value="">All Subjects</option>';af.innerHTML='<option value="">All Assessments</option>';tf.innerHTML='<option value="">All Question Types</option><option value="mcq">MCQ</option><option value="multiple">Multiple Answer</option><option value="truefalse">True / False</option><option value="fillblank">Fill in the Blanks</option><option value="sentence">Descriptive</option>';[...new Set(allQuestions.map(q=>q._class).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true})).forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=`Class ${v}`;cf.appendChild(o);});[...new Set(allQuestions.map(q=>q._subject).filter(Boolean))].sort().forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;sf.appendChild(o);});[...new Map(allQuestions.filter(q=>q._examId).map(q=>[q._examId,q._assessment])).entries()].sort((a,b)=>String(a[1]).localeCompare(String(b[1]))).forEach(([id,name])=>{const o=document.createElement("option");o.value=id;o.textContent=name;af.appendChild(o);});if([...cf.options].some(o=>o.value===pc))cf.value=pc;if([...sf.options].some(o=>o.value===ps))sf.value=ps;if([...af.options].some(o=>o.value===pa))af.value=pa;if([...tf.options].some(o=>o.value===pt))tf.value=pt;}
+function filterQuestions(){const search=normalize(document.getElementById("searchBox").value),c=normalize(document.getElementById("classFilter").value),s=normalize(document.getElementById("subjectFilter").value),a=document.getElementById("assessmentFilter").value,t=normalizeQuestionType(document.getElementById("typeFilter").value),hasType=normalize(document.getElementById("typeFilter").value)!=="";renderQuestions(allQuestions.filter(q=>normalize(q.question).includes(search)&&(!c||normalize(q._class)===c)&&(!s||normalize(q._subject)===s)&&(!a||q._examId===a)&&(!hasType||q._type===t)));}
+async function loadEditSettings(){try{const s=await getDocs(collection(db,"settings"));let data=null;s.forEach(d=>{if(d.id==="config")data=d.data();});const classes=Array.isArray(data?.classes)?data.classes:[],sections=Array.isArray(data?.sections)?data.sections:[];const cf=document.getElementById("editClass"),sf=document.getElementById("editSection");cf.innerHTML='<option value="">Select Class</option>'+classes.map(v=>`<option value="${escapeHTML(v)}">Class ${escapeHTML(v)}</option>`).join("");sf.innerHTML='<option value="">Select Section</option>'+sections.map(v=>`<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`).join("");}catch(e){console.error("Edit settings error",e);}}
+function updateEditTypeUI(type){type=normalizeQuestionType(type);document.getElementById("editOptionsSection").classList.toggle("hidden",!["mcq","multiple"].includes(type));document.getElementById("editMultipleSection").classList.toggle("hidden",type!=="multiple");document.getElementById("editTrueFalseSection").classList.toggle("hidden",type!=="truefalse");document.getElementById("editBlankSection").classList.toggle("hidden",type!=="fillblank");document.getElementById("editDescriptiveSection").classList.toggle("hidden",type!=="sentence");document.getElementById("editAnswer").parentElement.classList.toggle("hidden",type!=="mcq");if(type==="truefalse"){document.getElementById("editOptionA").value="True";document.getElementById("editOptionB").value="False";}}
+window.editQuestion=async function(id){const q=allQuestions.find(x=>x.id===id);if(!q)return;currentQuestionId=id;await loadEditSettings();document.getElementById("editAssessment").value=q._assessment||"Unknown Assessment";document.getElementById("editClass").value=q._class||"";document.getElementById("editSection").value=q._section||"";document.getElementById("editType").value=q._type;document.getElementById("editQuestion").value=q.question||"";document.getElementById("editOptionA").value=q.optionA||"";document.getElementById("editOptionB").value=q.optionB||"";document.getElementById("editOptionC").value=q.optionC||"";document.getElementById("editOptionD").value=q.optionD||"";document.getElementById("editAnswer").value=q.answer||"A";document.getElementById("editTrueFalseAnswer").value=q.answer||"True";document.getElementById("editBlankAnswer").value=q.answer||"";document.getElementById("editModelAnswer").value=q.modelAnswer||"";const answers=Array.isArray(q.answers)?q.answers:[];["A","B","C","D"].forEach(k=>document.getElementById("editAns"+k).checked=answers.includes(k));document.getElementById("editMarks").value=q.marks??1;updateEditTypeUI(q._type);document.getElementById("editModal").style.display="block";};
+window.closeEdit=function(){document.getElementById("editModal").style.display="none";currentQuestionId="";};
+async function updateQuestion(){if(!currentQuestionId)return;const existing=allQuestions.find(q=>q.id===currentQuestionId);const type=normalizeQuestionType(document.getElementById("editType").value),question=document.getElementById("editQuestion").value.trim(),marks=Number(document.getElementById("editMarks").value),classValue=document.getElementById("editClass").value,section=document.getElementById("editSection").value;if(!classValue||!section||!question||!Number.isFinite(marks)||marks<=0){alert("Please select Class and Section and enter valid question text and marks.");return;}const data={class:classValue,section,questionType:type,question,marks};if(type==="mcq"){data.optionA=document.getElementById("editOptionA").value.trim();data.optionB=document.getElementById("editOptionB").value.trim();data.optionC=document.getElementById("editOptionC").value.trim();data.optionD=document.getElementById("editOptionD").value.trim();data.answer=document.getElementById("editAnswer").value;if(!data.optionA||!data.optionB||!data.optionC||!data.optionD||!data.answer){alert("Complete all four options and select the correct answer.");return;}}else if(type==="multiple"){data.optionA=document.getElementById("editOptionA").value.trim();data.optionB=document.getElementById("editOptionB").value.trim();data.optionC=document.getElementById("editOptionC").value.trim();data.optionD=document.getElementById("editOptionD").value.trim();data.answers=[];["A","B","C","D"].forEach(k=>{if(document.getElementById("editAns"+k).checked)data.answers.push(k);});if(!data.optionA||!data.optionB||!data.optionC||!data.optionD||!data.answers.length){alert("Complete all options and select at least one correct answer.");return;}}else if(type==="truefalse"){data.optionA="True";data.optionB="False";data.answer=document.getElementById("editTrueFalseAnswer").value;}else if(type==="fillblank"){data.answer=document.getElementById("editBlankAnswer").value.trim();if(!data.answer){alert("Enter the expected answer.");return;}}else if(type==="sentence"){data.modelAnswer=document.getElementById("editModelAnswer").value.trim();}try{await updateDoc(doc(db,"questions",currentQuestionId),data);closeEdit();await loadQuestions();alert("Question Updated Successfully");}catch(e){console.error(e);alert("Unable To Update Question\n\n"+e.message);}}
+window.deleteQuestion=async function(id){const q=allQuestions.find(x=>x.id===id);if(!q)return;if(!confirm("Delete this question?\n\n"+(q.question||"")+"\n\nThis action cannot be undone."))return;try{await deleteDoc(doc(db,"questions",id));await loadQuestions();alert("Question Deleted Successfully.");}catch(e){console.error(e);alert("Unable To Delete Question.");}};
+document.addEventListener("click",e=>{if(e.target===document.getElementById("editModal"))closeEdit();});document.addEventListener("keydown",e=>{if(e.key==="Escape")closeEdit();});document.addEventListener("DOMContentLoaded",()=>{document.getElementById("searchBox")?.addEventListener("input",filterQuestions);document.getElementById("classFilter")?.addEventListener("change",filterQuestions);document.getElementById("subjectFilter")?.addEventListener("change",filterQuestions);document.getElementById("assessmentFilter")?.addEventListener("change",filterQuestions);document.getElementById("typeFilter")?.addEventListener("change",filterQuestions);document.getElementById("editType")?.addEventListener("change",e=>updateEditTypeUI(e.target.value));document.getElementById("updateBtn")?.addEventListener("click",updateQuestion);loadQuestions();});
