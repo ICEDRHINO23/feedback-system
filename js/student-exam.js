@@ -550,32 +550,7 @@ function showQuestion() {
 
 }
 
-            // ==================================
-            // SAVE ANSWER
-            // ==================================
-
-            button.onclick =
-                function () {
-
-                    saveAnswer(
-                        option.key
-                    );
-
-                };
-
-
-            optionsDiv.appendChild(
-                button
-            );
-
-        }
-    );
-
-
-    updateNavigation();
-
-}
-
+  
 
 // ======================================
 // SAVE ANSWER
@@ -1374,6 +1349,14 @@ async function initializeExam() {
     await loadQuestions();
 
 }
+
+
+// ======================================
+// EXPOSE BUTTON FUNCTIONS
+// ======================================
+
+window.submitExam =
+    submitExam;
 
 
 // ======================================
