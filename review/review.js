@@ -22,18 +22,38 @@ function normalizeAnswer(value, options){
         return "";
     }
 
+    // A / B / C / D
     const keyMatch = raw.match(/^([A-Da-d])(?:[.)]|\s|$)/);
     if(keyMatch){
         return keyMatch[1].toUpperCase();
     }
 
-    const cleaned = cleanOptionText(raw).toLowerCase();
+    // optionA / optionB / optionC / optionD
+    const optionMatch = raw.match(/^option\s*([A-Da-d])$/i);
+    if(optionMatch){
+        return optionMatch[1].toUpperCase();
+    }
 
-    const found = options.find(option =>
-        cleanOptionText(option.text).toLowerCase() === cleaned
-    );
+    // Compare the stored answer with the actual option text.
+    const cleaned = cleanOptionText(raw)
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
 
-    return found ? found.key : raw.toUpperCase();
+    const found = options.find(option => {
+        const optionText = cleanOptionText(option.text)
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+
+        return optionText === cleaned;
+    });
+
+    if(found){
+        return found.key;
+    }
+
+    return raw.toUpperCase();
 }
 
 async function loadReview(){
@@ -104,9 +124,10 @@ async function loadReview(){
             if(isDescriptive){
                 hasPending = true;
             } else {
-                // Determine correctness from the actual stored answers rather than
-                // trusting a stale/inconsistent isCorrect flag in older results.
+                // The stored answer and correct answer are the source of truth.
+                // The normalizer supports A/B/C/D, A./A), optionA, and full option text.
                 isCorrect = !!selectedKey && !!correctKey && selectedKey === correctKey;
+
                 calculatedTotalMarks += maxMarks;
 
                 if(isCorrect){
@@ -180,8 +201,6 @@ async function loadReview(){
             `;
         });
 
-        // For automatic-only assessments, use the detailed review as the source
-        // of truth. This fixes older result documents where summary counts were stale.
         if(!hasPending){
             const percentage = calculatedTotalMarks > 0
                 ? (calculatedScore / calculatedTotalMarks) * 100
