@@ -1,5 +1,5 @@
-import { db } from "./firebase-config.js";
-import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { db } from "./supabase-config.js";
+import { collection, getDocs, query, where } from "./supabase-firestore.js";
 
 const attemptedExamIds = new Set();
 

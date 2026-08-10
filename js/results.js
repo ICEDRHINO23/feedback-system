@@ -1,5 +1,5 @@
-import { db } from "./firebase-config.js";
-import { collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { db } from "./supabase-config.js";
+import { collection, getDocs, deleteDoc, doc } from "./supabase-firestore.js";
 
 let allResults = [], displayedResults = [];
 const escapeHtml = v => String(v ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]));

@@ -1,5 +1,5 @@
-import { db } from "./firebase-config.js";
-import { collection, getDocs, doc, getDoc, query, where, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { db } from "./supabase-config.js";
+import { collection, getDocs, doc, getDoc, query, where, runTransaction } from "./supabase-firestore.js";
 let questions=[],currentQuestion=0,answers={},exam={},examId=localStorage.getItem("currentExamId"),timerInterval=null,remainingSeconds=0,submitting=false;
 if(!examId){alert("Assessment not selected.");window.location.href="dashboard.html";}
 window.previousQuestion=previousQuestion;window.nextQuestion=nextQuestion;window.submitExam=submitExam;

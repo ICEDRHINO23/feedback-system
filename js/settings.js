@@ -1,11 +1,11 @@
-import { db } from "./firebase-config.js";
+import { db } from "./supabase-config.js";
 
 import {
     doc,
     getDoc,
     setDoc
 }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+from "./supabase-firestore.js";
 
 const academicYear =
     document.getElementById("academicYear");

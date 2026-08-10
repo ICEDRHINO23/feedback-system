@@ -1,9 +1,9 @@
-import { db } from "../js/firebase-config.js";
+import { db } from "../js/supabase-config.js";
 
 import {
     doc,
     getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "../js/supabase-firestore.js";
 
 const params = new URLSearchParams(window.location.search);
 const resultId = params.get("id");

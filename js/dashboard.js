@@ -1,5 +1,5 @@
-import { db } from "./firebase-config.js";
-import { collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { db } from "./supabase-config.js";
+import { collection, getCountFromServer } from "./supabase-firestore.js";
 
 async function getCollectionCount(name) {
     try {

@@ -1,5 +1,5 @@
-import { db } from "./firebase-config.js";
-import { collection,addDoc,getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { db } from "./supabase-config.js";
+import { collection,addDoc,getDocs } from "./supabase-firestore.js";
 const examSelect=document.getElementById("examSelect"),classSelect=document.getElementById("examClass"),sectionSelect=document.getElementById("questionSection");
 function escapeHTML(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]));}function value(id){return document.getElementById(id)?.value.trim()||"";}
 async function loadQuestionSettings(){try{const s=await getDocs(collection(db,"settings"));let settings=null;s.forEach(d=>{if(d.id==="config")settings=d.data()});if(!settings)s.forEach(d=>{const x=d.data();if(Array.isArray(x.classes)||Array.isArray(x.sections))settings=x});const classes=Array.isArray(settings?.classes)?settings.classes:[],sections=Array.isArray(settings?.sections)?settings.sections:[];classSelect.innerHTML='<option value="">Select Class</option>'+classes.map(c=>`<option value="${escapeHTML(c)}">Class ${escapeHTML(c)}</option>`).join("");sectionSelect.innerHTML='<option value="">Select Section</option>'+sections.map(s=>`<option value="${escapeHTML(s)}">${escapeHTML(s)}</option>`).join("");localStorage.setItem("questionSettings",JSON.stringify({classes,sections}));}catch(e){console.error(e);alert("Unable to load Class/Section settings. Please check Admin Settings.")}}
