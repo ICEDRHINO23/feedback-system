@@ -1,20 +1,31 @@
 import { db } from "./firebase-config.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-function studentIdentity(){return {name:String(localStorage.getItem("studentName")||"").trim(),roll:String(localStorage.getItem("rollNo")||"").trim()};}
-function belongs(r,s){const rr=String(r.rollNo||r.studentRollNo||"").trim(),rn=String(r.studentName||r.participantName||"").trim();if(s.roll&&rr)return rr===s.roll;return !!s.name&&rn.toLowerCase()===s.name.toLowerCase();}
-function pct(r){const t=Number(r.totalMarks||0),m=Number(r.score??r.automaticMarks??0);return Number(r.percentage??(t?m/t*100:0));}
+function studentIdentity(){return {name:String(localStorage.getItem("studentName")||"").trim(),roll:String(localStorage.getItem("rollNo")||localStorage.getItem("studentRollNo")||"").trim(),admission:String(localStorage.getItem("admissionNo")||"").trim()};}
+function belongs(r,s){const roll=String(r.rollNo||r.studentRollNo||r.rollNumber||"").trim(),name=String(r.studentName||r.participantName||r.name||"").trim(),admission=String(r.admissionNo||r.studentAdmissionNo||"").trim();if(s.roll&&roll)return roll===s.roll;if(s.admission&&admission)return admission===s.admission;return !!s.name&&name.toLowerCase()===s.name.toLowerCase();}
+function timeValue(v){if(!v)return 0;if(typeof v?.toDate==="function")return v.toDate().getTime();if(typeof v==="object"&&v.seconds)return Number(v.seconds)*1000;const n=Number(v);if(Number.isFinite(n)&&n>0)return n;const d=new Date(v).getTime();return Number.isFinite(d)?d:0;}
+function pct(r){const t=Number(r.totalMarks||r.maxMarks||0),m=Number(r.score??r.marksObtained??r.automaticMarks??0);return Number(r.percentage??(t?m/t*100:0));}
 function esc(v){return String(v??"").replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));}
+function statusOf(r,p){const pending=r.reviewStatus==="pending"||r.resultPublished===false||r.status==="pending";if(pending)return{label:"UNDER EVALUATION",cls:"pending"};return p>=35?{label:"PASSED",cls:"passed"}:{label:"NEEDS IMPROVEMENT",cls:"failed"};}
 
 async function render(){
- const mount=document.getElementById("marksMotion"); if(!mount)return;
+ const mount=document.getElementById("marksMotion");if(!mount)return;
  try{
-  const s=studentIdentity(); const snap=await getDocs(collection(db,"results")); const rows=[];
-  snap.forEach(d=>{const r=d.data();if(belongs(r,s))rows.push({id:d.id,...r});});
-  rows.sort((a,b)=>new Date(b.reviewedAt||b.submittedAt||0)-new Date(a.reviewedAt||a.submittedAt||0));
+  const s=studentIdentity(),snap=await getDocs(collection(db,"results")),map=new Map();
+  snap.forEach(d=>{const r=d.data();if(belongs(r,s))map.set(d.id,{id:d.id,...r});});
+  const rows=[...map.values()].sort((a,b)=>timeValue(b.reviewedAt||b.submittedAt||b.completedAt||b.createdAt)-timeValue(a.reviewedAt||a.submittedAt||a.completedAt||a.createdAt));
   if(!rows.length){mount.innerHTML=`<div class="marks-motion-empty"><span>📊</span><strong>No completed exam marks yet</strong><small>Your marks will appear here after you submit an assessment.</small></div>`;return;}
-  mount.innerHTML=`<div class="marks-motion-head"><div><span class="marks-kicker">PERFORMANCE</span><h2>My Exam Marks</h2><p>Swipe through your completed assessments</p></div><div class="marks-live-dot">● Live</div></div><div class="marks-track">${rows.map((r,i)=>{const p=pct(r),total=Number(r.totalMarks||0),score=Number(r.score??r.automaticMarks??0),pending=r.reviewStatus==="pending"||r.resultPublished===false;return `<article class="marks-motion-card" style="--delay:${i*70}ms"><div class="marks-card-top"><span>${esc(r.subject||"Assessment")}</span><span>${pending?'UNDER REVIEW':p.toFixed(1)+'%'}</span></div><h3>${esc(r.examName||'Assessment')}</h3><div class="marks-score"><strong class="count-mark" data-value="${score}">0</strong><b>/ ${total}</b></div><div class="marks-progress"><i style="width:${Math.min(100,Math.max(0,p))}%"></i></div><div class="marks-meta"><span>${pending?'Teacher evaluation pending':p>=35?'✓ Passed':'✕ Needs improvement'}</span><button onclick="window.location.href='result.html?id=${r.id}'">View Result</button></div></article>`}).join('')}</div>`;
-  mount.querySelectorAll('.count-mark').forEach(el=>{const target=Number(el.dataset.value||0),start=performance.now();const tick=now=>{const n=Math.min(1,(now-start)/850);el.textContent=Math.round(target*(1-Math.pow(1-n,3)));if(n<1)requestAnimationFrame(tick)};requestAnimationFrame(tick);});
- }catch(e){console.error('Marks motion:',e);mount.innerHTML='<div class="marks-motion-empty">Unable to load exam marks.</div>';}
+  const cards=rows.map((r,i)=>{const p=pct(r),total=Number(r.totalMarks||r.maxMarks||0),score=Number(r.score??r.marksObtained??r.automaticMarks??0),status=statusOf(r,p),subject=r.subject||"Assessment",exam=r.examName||r.assessmentName||"Assessment",date=timeValue(r.reviewedAt||r.submittedAt||r.completedAt||r.createdAt),dateText=date?new Date(date).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}):"Completed";return `<article class="marks-orbit-card" style="--i:${i}"><div class="marks-card-shine"></div><div class="marks-card-top"><span>${esc(subject)}</span><span class="status-pill ${status.cls}">${status.label}</span></div><div class="marks-card-date">${dateText}</div><h3>${esc(exam)}</h3><div class="marks-score"><strong class="count-mark" data-value="${score}">0</strong><b>/ ${total}</b></div><div class="marks-percent">${status.cls==='pending'?'--':p.toFixed(1)+'%'}</div><div class="marks-progress"><i style="width:${Math.min(100,Math.max(0,p))}%"></i></div><div class="marks-card-footer"><span>${status.cls==='pending'?'Teacher evaluation pending':p>=35?'✓ Completed successfully':'Keep improving'}</span><button onclick="window.location.href='result.html?id=${encodeURIComponent(r.id)}'">View Result</button></div></article>`;}).join("");
+  mount.innerHTML=`<div class="marks-motion-head"><div><span class="marks-kicker">ACADEMIC PERFORMANCE</span><h2>My Exam Marks</h2><p>Every completed assessment is shown below. Swipe or drag to explore all results.</p></div><div class="marks-count"><strong>${rows.length}</strong><span>EXAMS</span></div></div><div class="marks-orbit-shell"><div class="marks-orbit-track">${cards}</div></div><div class="marks-scroll-control"><button class="orbit-prev" aria-label="Previous marks">‹</button><input class="marks-scroll" type="range" min="0" max="100" value="0" aria-label="Scroll exam marks"><button class="orbit-next" aria-label="Next marks">›</button></div><div class="marks-scroll-hint"><span>↔</span> Swipe / drag to see all ${rows.length} completed exams</div>`;
+  const track=mount.querySelector('.marks-orbit-track'),range=mount.querySelector('.marks-scroll');
+  const scrollAmount=()=>Math.max(260,track.clientWidth*.72);
+  const sync=()=>{const max=track.scrollWidth-track.clientWidth;range.value=max?Math.round(track.scrollLeft/max*100):0;};
+  track.addEventListener('scroll',sync,{passive:true});
+  range.addEventListener('input',()=>{const max=track.scrollWidth-track.clientWidth;track.scrollTo({left:max*Number(range.value)/100,behavior:'smooth'});});
+  mount.querySelector('.orbit-prev').onclick=()=>track.scrollBy({left:-scrollAmount(),behavior:'smooth'});
+  mount.querySelector('.orbit-next').onclick=()=>track.scrollBy({left:scrollAmount(),behavior:'smooth'});
+  mount.querySelectorAll('.count-mark').forEach(el=>{const target=Number(el.dataset.value||0),start=performance.now();const tick=now=>{const n=Math.min(1,(now-start)/850);el.textContent=Math.round(target*(1-Math.pow(1-n,3)));if(n<1)requestAnimationFrame(tick);};requestAnimationFrame(tick);});
+  sync();
+ }catch(e){console.error('Marks motion:',e);mount.innerHTML='<div class="marks-motion-empty"><span>⚠️</span><strong>Unable to load exam marks</strong><small>Please refresh the dashboard.</small></div>';}
 }
 render();
