@@ -1,7 +1,10 @@
-// RAS branding intro shown once after a successful login.
+// RAS branding intro: exactly 6 seconds, once per login session.
 (function(){
     try {
-        const key = "rasIntroShown_" + (localStorage.getItem("participantRole") || "user");
+        const role = localStorage.getItem("role") || localStorage.getItem("participantRole") || "user";
+        const loginSession = localStorage.getItem("loginSessionId") || sessionStorage.getItem("loginSessionId") || (role + "-" + Date.now());
+        sessionStorage.setItem("loginSessionId", loginSession);
+        const key = "rasIntroShown_" + loginSession;
         if (sessionStorage.getItem(key) === "1") return;
         sessionStorage.setItem(key, "1");
 
@@ -17,11 +20,17 @@
                 <div class="ras-intro-title">RAS SYSTEMS</div>
                 <div class="ras-intro-subtitle">Technology • Innovation • Excellence</div>
                 <div class="ras-intro-loader"><span></span></div>
+                <div class="ras-intro-powered">POWERING AHPS DIGITAL ASSESSMENT</div>
             </div>`;
         document.body.appendChild(overlay);
+        document.documentElement.classList.add("ras-intro-active");
         requestAnimationFrame(() => overlay.classList.add("show"));
-        setTimeout(() => overlay.classList.add("hide"), 2100);
-        setTimeout(() => overlay.remove(), 2700);
+        // Keep the splash completely visible for 6 seconds.
+        setTimeout(() => overlay.classList.add("hide"), 5550);
+        setTimeout(() => {
+            overlay.remove();
+            document.documentElement.classList.remove("ras-intro-active");
+        }, 6000);
     } catch (e) {
         console.warn("RAS intro skipped:", e);
     }
