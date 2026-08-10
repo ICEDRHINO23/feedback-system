@@ -1,5 +1,5 @@
 import { db } from "./firebase-config.js";
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, getDocs, getCountFromServer, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 function parseExamDate(value, endOfDay = false) {
     if (!value) return null;
@@ -16,42 +16,28 @@ function parseExamDate(value, endOfDay = false) {
     const d = new Date(text);
     return Number.isNaN(d.getTime()) ? null : d;
 }
-
-function formatDate(value, endOfDay = false) {
-    const d = parseExamDate(value, endOfDay);
-    return d ? d.toLocaleString("en-IN", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }) : "Not specified";
-}
-
-function getExamWindow(exam) {
-    const now = new Date();
-    const start = parseExamDate(exam.startDate, false);
-    const end = parseExamDate(exam.endDate, true);
-    if (end && now > end) return "ended";
-    if (start && now < start) return "upcoming";
-    return "live";
-}
+function formatDate(value, endOfDay = false) { const d = parseExamDate(value, endOfDay); return d ? d.toLocaleString("en-IN", {day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "Not specified"; }
+function getExamWindow(exam) { const now = new Date(), start = parseExamDate(exam.startDate, false), end = parseExamDate(exam.endDate, true); if (end && now > end) return "ended"; if (start && now < start) return "upcoming"; return "live"; }
 
 const teacherName = localStorage.getItem("teacherName");
 const teacherSubject = localStorage.getItem("teacherSubject");
-const welcomeText = document.getElementById("teacherName");
-const subjectText = document.getElementById("teacherSubject");
-if (welcomeText) welcomeText.textContent = teacherName || "Teacher";
-if (subjectText) subjectText.textContent = teacherSubject || "";
+document.getElementById("teacherName")?.replaceChildren(document.createTextNode(teacherName || "Teacher"));
+document.getElementById("teacherSubject")?.replaceChildren(document.createTextNode(teacherSubject || ""));
 
 async function loadAssessments() {
     try {
         const assessmentList = document.getElementById("assessmentList");
         const examCount = document.getElementById("examCount");
         const notificationList = document.getElementById("examNotifications");
-        const snapshot = await getDocs(collection(db, "exams"));
+        // Only fetch assessments intended for teachers.
+        const snapshot = await getDocs(query(collection(db, "exams"), where("targetType", "==", "teacher")));
         assessmentList.innerHTML = "";
         let totalAssessments = 0;
         const notifications = [];
         const now = new Date();
-
         snapshot.forEach(docSnap => {
             const exam = docSnap.data();
-            if (exam.targetType !== "teacher" || exam.status !== "active") return;
+            if (exam.status !== "active") return;
             const windowState = getExamWindow(exam);
             if (windowState === "ended") return;
             totalAssessments++;
@@ -63,17 +49,13 @@ async function loadAssessments() {
             const buttonText = isUpcoming ? "Assessment Not Started" : "Start Assessment";
             assessmentList.innerHTML += `<div class="assessment-card"><h3>${exam.examName || "Assessment"}</h3><p>Subject: ${exam.subject || "-"}</p><p>Duration: ${exam.duration || 0} Minutes</p><p><strong>Total Marks: ${exam.totalMarks || 0}</strong></p><p>Start Date: ${formatDate(exam.startDate)}</p><p>End Date: ${formatDate(exam.endDate, true)}</p><span class="exam-window ${badge}"><i class="fas fa-clock"></i> ${badgeText}</span><button class="start-btn" ${isUpcoming ? "disabled" : ""} onclick="startAssessment('${docSnap.id}')">${buttonText}</button></div>`;
         });
-
         examCount.textContent = totalAssessments;
         if (totalAssessments === 0) assessmentList.innerHTML = `<div class="empty-state"><i class="fas fa-calendar-xmark"></i><h3>No Assessments Available</h3><p>No active assessments are currently available.</p></div>`;
-
         if (notificationList) {
-            if (!notifications.length) {
-                notificationList.innerHTML = `<h3><i class="fas fa-bell"></i> Upcoming & Active Assessments</h3><div class="notification-empty">No upcoming or active assessments at the moment.</div>`;
-            } else {
-                notifications.sort((a,b) => (a.start?.getTime() || now.getTime()) - (b.start?.getTime() || now.getTime()));
-                notificationList.innerHTML = `<h3><i class="fas fa-bell"></i> Upcoming & Active Assessments</h3>` + notifications.map(({exam,state}) => `<div class="notification-item"><div><strong>${exam.examName || "Assessment"}</strong><div class="notification-meta">${state === "upcoming" ? `Starts: ${formatDate(exam.startDate)}` : `Ends: ${formatDate(exam.endDate, true)}`} • Subject: ${exam.subject || "-"}</div></div><div class="notification-marks">Marks: ${exam.totalMarks || 0}</div></div>`).join("");
-            }
+            notifications.sort((a,b) => (a.start?.getTime() || now.getTime()) - (b.start?.getTime() || now.getTime()));
+            notificationList.innerHTML = notifications.length
+                ? `<h3><i class="fas fa-bell"></i> Upcoming & Active Assessments</h3>` + notifications.map(({exam,state}) => `<div class="notification-item"><div><strong>${exam.examName || "Assessment"}</strong><div class="notification-meta">${state === "upcoming" ? `Starts: ${formatDate(exam.startDate)}` : `Ends: ${formatDate(exam.endDate, true)}`} • Subject: ${exam.subject || "-"}</div></div><div class="notification-marks">Marks: ${exam.totalMarks || 0}</div></div>`).join("")
+                : `<h3><i class="fas fa-bell"></i> Upcoming & Active Assessments</h3><div class="notification-empty">No upcoming or active assessments at the moment.</div>`;
         }
     } catch (error) {
         console.error("Assessment Load Error:", error);
@@ -90,10 +72,10 @@ window.startAssessment = function(examId) {
 async function loadTeacherResults() {
     try {
         const resultCount = document.getElementById("resultCount");
-        const snapshot = await getDocs(collection(db, "results"));
-        let completed = 0;
-        snapshot.forEach(docSnap => { const result = docSnap.data(); if (result.teacherName === teacherName) completed++; });
-        resultCount.textContent = completed;
+        if (!teacherName) { resultCount.textContent = "0"; return; }
+        // Count only this teacher's results instead of downloading every result document.
+        const snap = await getCountFromServer(query(collection(db, "results"), where("teacherName", "==", teacherName)));
+        resultCount.textContent = snap.data().count || 0;
     } catch(error) { console.error("Result Load Error:", error); }
 }
 
@@ -102,11 +84,12 @@ async function loadPendingEvaluations() {
     if (!pendingList) return;
     try {
         const currentSubject = String(teacherSubject || "").trim().toLowerCase();
-        const snapshot = await getDocs(collection(db, "results"));
+        // Only fetch pending descriptive evaluations; subject is filtered locally.
+        const snapshot = await getDocs(query(collection(db, "results"), where("reviewStatus", "==", "pending")));
         let html = "", pendingCount = 0;
         snapshot.forEach(docSnap => {
             const result = docSnap.data();
-            if (result.hasDescriptiveQuestions !== true || result.reviewStatus !== "pending") return;
+            if (result.hasDescriptiveQuestions !== true) return;
             const resultSubject = String(result.subject || "").trim().toLowerCase();
             if (currentSubject && resultSubject !== currentSubject) return;
             pendingCount++;
