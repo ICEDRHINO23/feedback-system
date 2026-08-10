@@ -2,9 +2,7 @@ import { db } from "./firebase-config.js";
 
 import {
     doc,
-    getDoc,
-    collection,
-    getDocs
+    getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -23,31 +21,23 @@ const resultId =
 
 if (!resultId) {
 
-    alert("Result ID not found");
+    alert(
+        "Result ID not found."
+    );
 
     window.location.href =
-        "results.html";
+        "dashboard.html";
 
 }
 
 
 // ======================================
-// LOAD REPORT
+// LOAD STUDENT REPORT
 // ======================================
 
-async function loadReport() {
+async function loadStudentReport() {
 
     try {
-
-        console.log(
-            "Result ID:",
-            resultId
-        );
-
-
-        // ==================================
-        // LOAD RESULT
-        // ==================================
 
         const resultRef =
             doc(
@@ -66,7 +56,7 @@ async function loadReport() {
         if (!resultSnap.exists()) {
 
             alert(
-                "Result Not Found"
+                "Result not found."
             );
 
             return;
@@ -79,219 +69,181 @@ async function loadReport() {
 
 
         console.log(
-            "Result Data:",
+            "Student Report:",
             result
         );
 
 
         // ==================================
-        // LOAD EXAM
+        // TEACHER EVALUATION PROTECTION
         // ==================================
 
-        let exam = {};
-
-
-        if (result.examId) {
-
-            const examRef =
-                doc(
-                    db,
-                    "exams",
-                    result.examId
-                );
-
-
-            const examSnap =
-                await getDoc(
-                    examRef
-                );
-
-
-            if (examSnap.exists()) {
-
-                exam =
-                    examSnap.data();
-
-            }
-
-        }
-
-
-        console.log(
-            "Exam Data:",
-            exam
-        );
-
-
-       // ==================================
-// STUDENT DETAILS
-// ==================================
-
-const studentName =
-    result.studentName ||
-    result.participantName ||
-    "-";
-
-
-const studentClass =
-    result.studentClass ||
-    result.examClass ||
-    exam.examClass ||
-    "-";
-
-
-const studentSection =
-    result.section ||
-    result.studentSection ||
-    "-";
-
-
-// ----------------------------------
-// FIND ROLL NUMBER
-// ----------------------------------
-
-let studentRollNo =
-    result.rollNo || "";
-
-
-if (!studentRollNo) {
-
-    const studentsSnapshot =
-        await getDocs(
-            collection(
-                db,
-                "students"
-            )
-        );
-
-
-    const targetName =
-        String(studentName)
-            .trim()
-            .toLowerCase();
-
-
-    const targetClass =
-        String(studentClass)
-            .trim();
-
-
-    const targetSection =
-        String(studentSection)
-            .trim()
-            .toLowerCase();
-
-
-    studentsSnapshot.forEach(
-        studentDoc => {
-
-            const student =
-                studentDoc.data();
-
-
-            const dbName =
-                String(
-                    student.name || ""
-                )
-                .trim()
-                .toLowerCase();
-
-
-            const dbClass =
-                String(
-                    student.class || ""
-                )
-                .trim();
-
-
-            const dbSection =
-                String(
-                    student.section || ""
-                )
-                .trim()
-                .toLowerCase();
-
-
-            if (
-                dbName === targetName &&
-                dbClass === targetClass &&
-                dbSection === targetSection
-            ) {
-
-                studentRollNo =
-                    student.rollNo || "";
-
-            }
-
-        }
-    );
-
-}
-
-
-// ----------------------------------
-// DISPLAY STUDENT DETAILS
-// ----------------------------------
-
-document.getElementById(
-    "studentName"
-).innerText =
-    studentName;
-
-
-document.getElementById(
-    "rollNo"
-).innerText =
-    studentRollNo || "-";
-
-
-document.getElementById(
-    "studentClass"
-).innerText =
-    studentClass;
-
-
-document.getElementById(
-    "section"
-).innerText =
-    studentSection;
+        const evaluationPending =
+            result.hasDescriptiveQuestions === true &&
+            (
+                result.reviewStatus === "pending" ||
+                result.resultPublished !== true
+            );
 
 
         // ==================================
-        // EXAM DETAILS
+        // STUDENT DETAILS
         // ==================================
 
-        document.getElementById(
-            "examName"
-        ).innerText =
+        const studentName =
+            document.getElementById(
+                "studentName"
+            );
 
-            exam.examName ||
+        const studentClass =
+            document.getElementById(
+                "studentClass"
+            );
+
+        const examName =
+            document.getElementById(
+                "examName"
+            );
+
+        const subject =
+            document.getElementById(
+                "subject"
+            );
+
+        const correctAnswers =
+            document.getElementById(
+                "correctAnswers"
+            );
+
+        const totalQuestions =
+            document.getElementById(
+                "totalQuestions"
+            );
+
+        const percentage =
+            document.getElementById(
+                "percentage"
+            );
+
+        const scoreText =
+            document.getElementById(
+                "scoreText"
+            );
+
+
+        studentName.textContent =
+            result.studentName ||
+            result.participantName ||
+            "-";
+
+
+        studentClass.textContent =
+            result.studentClass ||
+            result.examClass ||
+            "-";
+
+
+        examName.textContent =
             result.examName ||
             "-";
 
 
-        document.getElementById(
-            "subject"
-        ).innerText =
-
-            exam.subject ||
+        subject.textContent =
             result.subject ||
             "-";
 
 
-        document.getElementById(
-            "submittedDate"
-        ).innerText =
-
-            result.submittedAt
-                ? new Date(
-                    result.submittedAt
-                ).toLocaleString()
-                : "-";
+        totalQuestions.textContent =
+            result.totalQuestions ||
+            0;
 
 
         // ==================================
-        // SCORE
+        // PENDING EVALUATION
+        // ==================================
+
+        if (
+            evaluationPending
+        ) {
+
+            scoreText.textContent =
+                "UNDER TEACHER EVALUATION";
+
+
+            scoreText.style.color =
+                "#d97706";
+
+
+            scoreText.style.fontSize =
+                "20px";
+
+
+            correctAnswers.textContent =
+                "Pending";
+
+
+            percentage.textContent =
+                "Pending";
+
+
+            // ==================================
+            // PENDING MESSAGE
+            // ==================================
+
+            const message =
+                document.createElement(
+                    "div"
+                );
+
+
+            message.className =
+                "evaluation-pending-message";
+
+
+            message.innerHTML = `
+
+                <strong>
+                    🟠 Under Teacher Evaluation
+                </strong>
+
+                <p>
+                    Your assessment contains
+                    descriptive questions that
+                    require teacher evaluation.
+                </p>
+
+                <p>
+                    Your final marks and result
+                    will be published after the
+                    teacher completes the evaluation.
+                </p>
+
+            `;
+
+
+            const resultBox =
+                document.querySelector(
+                    ".result-box"
+                );
+
+
+            if (resultBox) {
+
+                resultBox.insertAdjacentElement(
+                    "afterend",
+                    message
+                );
+
+            }
+
+
+            return;
+
+        }
+
+
+        // ==================================
+        // PUBLISHED RESULT
         // ==================================
 
         const score =
@@ -306,207 +258,44 @@ document.getElementById(
             );
 
 
-        const percentage =
+        const percentageValue =
             Number(
                 result.percentage || 0
             );
 
 
-        document.getElementById(
-            "score"
-        ).innerText =
-            score;
+        const automaticCorrect =
+            Number(
+                result.correctAnswers || 0
+            );
 
 
-        document.getElementById(
-            "totalMarks"
-        ).innerText =
+        scoreText.textContent =
+            score +
+            " / " +
             totalMarks;
 
 
-        document.getElementById(
-            "percentage"
-        ).innerText =
+        correctAnswers.textContent =
+            automaticCorrect;
 
-            percentage.toFixed(2) +
+
+        percentage.textContent =
+            percentageValue.toFixed(2) +
             "%";
 
-
-        document.getElementById(
-            "summaryPercentage"
-        ).innerText =
-
-            percentage.toFixed(2) +
-            "%";
-
-
-        // ==================================
-        // PASS / FAIL
-        // ==================================
-
-        const status =
-            percentage >= 35
-                ? "PASS"
-                : "FAIL";
-
-
-        document.getElementById(
-            "status"
-        ).innerText =
-            status;
-
-
-        document.getElementById(
-            "resultStatus"
-        ).innerText =
-            status;
-
-
-        // ==================================
-        // QUESTIONS
-        // ==================================
-
-        const totalQuestions =
-            Number(
-                result.totalQuestions ||
-                totalMarks
-            );
-
-
-        const correctAnswers =
-            Number(
-                result.correctAnswers ||
-                score
-            );
-
-
-        const wrongAnswers =
-            Math.max(
-                0,
-                totalQuestions -
-                correctAnswers
-            );
-
-
-        document.getElementById(
-            "totalQuestions"
-        ).innerText =
-            totalQuestions;
-
-
-        document.getElementById(
-            "correctAnswers"
-        ).innerText =
-            correctAnswers;
-
-
-        document.getElementById(
-            "wrongAnswers"
-        ).innerText =
-            wrongAnswers;
-
-
-        // ==================================
-        // RANK CALCULATION
-        // ==================================
-
-        if (result.examId) {
-
-            const resultsSnapshot =
-                await getDocs(
-                    collection(
-                        db,
-                        "results"
-                    )
-                );
-
-
-            let resultList = [];
-
-
-            resultsSnapshot.forEach(
-                docSnap => {
-
-                    const r =
-                        docSnap.data();
-
-
-                    if (
-                        (r.examId || "") ===
-                        (result.examId || "")
-                    ) {
-
-                        resultList.push({
-                            id: docSnap.id,
-                            ...r
-                        });
-
-                    }
-
-                }
-            );
-
-
-            // Sort highest percentage first
-
-            resultList.sort(
-                (a, b) =>
-
-                    Number(
-                        b.percentage || 0
-                    ) -
-
-                    Number(
-                        a.percentage || 0
-                    )
-            );
-
-
-            // ==================================
-            // FIND CURRENT RESULT
-            // ==================================
-
-            const rank =
-                resultList.findIndex(
-                    r =>
-                        r.id === resultId
-                ) + 1;
-
-
-            document.getElementById(
-                "rank"
-            ).innerText =
-
-                rank > 0
-                    ? rank
-                    : "-";
-
-        }
-        else {
-
-            document.getElementById(
-                "rank"
-            ).innerText =
-                "-";
-
-        }
-
-
-        console.log(
-            "Report Loaded Successfully"
-        );
 
     }
     catch (error) {
 
         console.error(
-            "REPORT ERROR:",
+            "STUDENT REPORT ERROR:",
             error
         );
 
 
         alert(
-            "Unable To Load Report\n\n" +
+            "Unable to load student report.\n\n" +
             error.message
         );
 
@@ -519,4 +308,4 @@ document.getElementById(
 // START
 // ======================================
 
-loadReport();
+loadStudentReport();
