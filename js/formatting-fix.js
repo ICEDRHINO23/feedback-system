@@ -19,24 +19,12 @@
         return text;
     }
 
-
     function cleanOptionLabel(value) {
-
         let text = String(value ?? "");
-
-        // Remove labels stored together with the option text:
-        // A. text / A) text / a. text / a) text
-        text = text.replace(
-            /^\s*[A-Da-d]\s*[.)]\s*/,
-            ""
-        );
-
-        return text;
+        return text.replace(/^\s*[A-Da-d]\s*[.)]\s*/, "");
     }
 
-
     function needsFormatting(text) {
-
         return (
             /<\/?(?:sup|sub)\b/i.test(text) ||
             /\^\{[^}]+\}/.test(text) ||
@@ -47,43 +35,56 @@
         );
     }
 
-
     function formatElement(element) {
 
         if (!element || element.nodeType !== 1) {
             return;
         }
 
-        const isOption = element.matches(
-            "#options .option-btn, #reviewContainer .option"
+        // IMPORTANT: Do not rewrite the complete review option element.
+        // It contains child spans for A/B/C/D labels and status markers.
+        // Format only the option content span so those elements remain intact.
+        const isReviewOptionContent = element.matches(
+            "#reviewContainer .option-content"
         );
 
-        const isAllowed = element.matches(
-            "#questionText, #options .option-btn, " +
-            "#reviewContainer .question-text, " +
-            "#reviewContainer .option, #reviewContainer .explanation"
+        const isExamOption = element.matches(
+            "#options .option-btn"
         );
 
-        if (!isAllowed) {
+        const isQuestionText = element.matches(
+            "#questionText, #reviewContainer .question-text"
+        );
+
+        const isExplanation = element.matches(
+            "#reviewContainer .explanation"
+        );
+
+        if (
+            !isReviewOptionContent &&
+            !isExamOption &&
+            !isQuestionText &&
+            !isExplanation
+        ) {
             return;
         }
 
         let text = element.textContent || "";
-        const cleanedText = isOption
-            ? cleanOptionLabel(text)
-            : text;
 
-        const changedLabel = isOption && cleanedText !== text;
-        const changedFormatting = needsFormatting(cleanedText);
-
-        // Do nothing when the element is already clean.
-        if (!changedLabel && !changedFormatting) {
-            return;
+        if (isReviewOptionContent || isExamOption) {
+            text = cleanOptionLabel(text);
         }
 
-        element.innerHTML = formatText(cleanedText);
-    }
+        if (!needsFormatting(text)) {
+            // Still remove a stored a)/b)/c)/d) prefix if present.
+            const original = element.textContent || "";
+            if (text === original) {
+                return;
+            }
+        }
 
+        element.innerHTML = formatText(text);
+    }
 
     function scan(root) {
 
@@ -96,16 +97,14 @@
         }
 
         if (root.querySelectorAll) {
-
             root.querySelectorAll(
                 "#questionText, #options .option-btn, " +
-                "#reviewContainer .question-text, #reviewContainer .option, " +
+                "#reviewContainer .question-text, " +
+                "#reviewContainer .option-content, " +
                 "#reviewContainer .explanation"
             ).forEach(formatElement);
-
         }
     }
-
 
     function start() {
 
@@ -117,13 +116,10 @@
 
                 mutation.addedNodes.forEach(function (node) {
 
-                    // Dynamically-created elements such as option buttons.
                     if (node.nodeType === 1) {
                         scan(node);
                     }
 
-                    // innerText/textContent updates replace the text node
-                    // inside an existing element such as #questionText.
                     if (node.nodeType === 3) {
                         const parent = node.parentElement;
                         if (parent) {
@@ -133,7 +129,6 @@
 
                 });
 
-                // Also handle direct character-data changes.
                 if (mutation.type === "characterData") {
                     const parent = mutation.target.parentElement;
                     if (parent) {
@@ -153,7 +148,6 @@
 
         window.AHPSFormatText = formatText;
     }
-
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", start);
