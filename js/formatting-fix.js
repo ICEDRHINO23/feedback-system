@@ -99,8 +99,8 @@
 
             root.querySelectorAll(
                 "#questionText, #options .option-btn, " +
-                "#reviewContainer .question-text, " +
-                "#reviewContainer .option, #reviewContainer .explanation"
+                "#reviewContainer .question-text, #reviewContainer .option, " +
+                "#reviewContainer .explanation"
             ).forEach(formatElement);
 
         }
@@ -117,11 +117,29 @@
 
                 mutation.addedNodes.forEach(function (node) {
 
+                    // Dynamically-created elements such as option buttons.
                     if (node.nodeType === 1) {
                         scan(node);
                     }
 
+                    // innerText/textContent updates replace the text node
+                    // inside an existing element such as #questionText.
+                    if (node.nodeType === 3) {
+                        const parent = node.parentElement;
+                        if (parent) {
+                            formatElement(parent);
+                        }
+                    }
+
                 });
+
+                // Also handle direct character-data changes.
+                if (mutation.type === "characterData") {
+                    const parent = mutation.target.parentElement;
+                    if (parent) {
+                        formatElement(parent);
+                    }
+                }
 
             });
 
@@ -129,7 +147,8 @@
 
         observer.observe(document.body, {
             childList: true,
-            subtree: true
+            subtree: true,
+            characterData: true
         });
 
         window.AHPSFormatText = formatText;
