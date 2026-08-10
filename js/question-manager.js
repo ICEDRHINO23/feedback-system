@@ -116,19 +116,24 @@ function renderQuestions(list) {
             <td>${q._type}</td>
             <td>${q.marks || 1}</td>
             <td>
-                <button class="action-btn edit-btn" onclick="editQuestion('${q.id}')"><i class="fas fa-edit"></i></button>
-                <button class="action-btn preview-btn" onclick="previewQuestion('${q.id}')"><i class="fas fa-eye"></i></button>
-                <button class="action-btn delete-btn" onclick="deleteQuestion('${q.id}')"><i class="fas fa-trash"></i></button>
+                <button class="action-btn edit-btn" onclick="editQuestion('${q.id}')" title="Edit Question"><i class="fas fa-edit"></i></button>
+                <button class="action-btn preview-btn" onclick="previewQuestion('${q.id}')" title="Preview Question"><i class="fas fa-eye"></i></button>
+                <button class="action-btn delete-btn" onclick="deleteQuestion('${q.id}')" title="Delete Question"><i class="fas fa-trash"></i></button>
             </td>
         </tr>`;
     });
 }
+
+// ======================================
+// DYNAMIC FILTERS
+// ======================================
 
 function loadFilters() {
     const classFilter = document.getElementById("classFilter");
     const subjectFilter = document.getElementById("subjectFilter");
     const assessmentFilter = document.getElementById("assessmentFilter");
     const typeFilter = document.getElementById("typeFilter");
+
     if (!classFilter || !subjectFilter || !assessmentFilter || !typeFilter) return;
 
     const previousClass = classFilter.value;
@@ -206,64 +211,124 @@ function filterQuestions() {
     renderQuestions(filtered);
 }
 
+// ======================================
+// PREVIEW
+// ======================================
+
 window.previewQuestion = function (id) {
     const question = allQuestions.find(q => q.id === id);
     if (!question) return;
+
     document.getElementById("previewQuestion").innerHTML = question.question || "";
+
     let optionsHTML = "";
     if (question.optionA) optionsHTML += `<p>A. ${question.optionA}</p>`;
     if (question.optionB) optionsHTML += `<p>B. ${question.optionB}</p>`;
     if (question.optionC) optionsHTML += `<p>C. ${question.optionC}</p>`;
     if (question.optionD) optionsHTML += `<p>D. ${question.optionD}</p>`;
-    document.getElementById("previewOptions").innerHTML = optionsHTML;
+
+    document.getElementById("previewOptions").innerHTML = optionsHTML || "<p>No options</p>";
     document.getElementById("previewAnswer").innerHTML = question.answer || "-";
     document.getElementById("previewMarks").innerHTML = question.marks || 1;
     document.getElementById("previewModal").style.display = "block";
 };
 
-window.closePreview = function () { document.getElementById("previewModal").style.display = "none"; };
+window.closePreview = function () {
+    document.getElementById("previewModal").style.display = "none";
+};
+
+// ======================================
+// EDIT QUESTION
+// ======================================
+
+function updateEditOptionsVisibility(type) {
+    const optionsSection = document.getElementById("editOptionsSection");
+    if (!optionsSection) return;
+    optionsSection.style.display = type === "sentence" ? "none" : "block";
+}
 
 window.editQuestion = function (id) {
     const question = allQuestions.find(q => q.id === id);
     if (!question) return;
+
     currentQuestionId = id;
+
+    document.getElementById("editAssessment").value = question._assessment || "Unknown Assessment";
     document.getElementById("editQuestion").value = question.question || "";
     document.getElementById("editOptionA").value = question.optionA || "";
     document.getElementById("editOptionB").value = question.optionB || "";
     document.getElementById("editOptionC").value = question.optionC || "";
     document.getElementById("editOptionD").value = question.optionD || "";
     document.getElementById("editAnswer").value = question.answer || "A";
-    document.getElementById("editMarks").value = question.marks || 1;
+    document.getElementById("editMarks").value = question.marks ?? 1;
+
+    updateEditOptionsVisibility(question._type);
     document.getElementById("editModal").style.display = "block";
 };
 
-window.closeEdit = function () { document.getElementById("editModal").style.display = "none"; };
+window.closeEdit = function () {
+    document.getElementById("editModal").style.display = "none";
+};
 
 async function updateQuestion() {
-    if (!currentQuestionId) { alert("No Question Selected"); return; }
+    if (!currentQuestionId) {
+        alert("No Question Selected");
+        return;
+    }
+
+    const questionText = document.getElementById("editQuestion").value.trim();
+    const marks = Number(document.getElementById("editMarks").value);
+
+    if (!questionText) {
+        alert("Please enter the question.");
+        document.getElementById("editQuestion").focus();
+        return;
+    }
+
+    if (!Number.isFinite(marks) || marks < 0) {
+        alert("Please enter valid marks.");
+        document.getElementById("editMarks").focus();
+        return;
+    }
+
     try {
-        await updateDoc(doc(db, "questions", currentQuestionId), {
-            question: document.getElementById("editQuestion").value,
-            optionA: document.getElementById("editOptionA").value,
-            optionB: document.getElementById("editOptionB").value,
-            optionC: document.getElementById("editOptionC").value,
-            optionD: document.getElementById("editOptionD").value,
+        const existingQuestion = allQuestions.find(q => q.id === currentQuestionId);
+        const updateData = {
+            question: questionText,
             answer: document.getElementById("editAnswer").value,
-            marks: Number(document.getElementById("editMarks").value)
-        });
+            marks: marks
+        };
+
+        // Preserve the existing behaviour for objective questions.
+        if (!existingQuestion || existingQuestion._type !== "sentence") {
+            updateData.optionA = document.getElementById("editOptionA").value.trim();
+            updateData.optionB = document.getElementById("editOptionB").value.trim();
+            updateData.optionC = document.getElementById("editOptionC").value.trim();
+            updateData.optionD = document.getElementById("editOptionD").value.trim();
+        }
+
+        await updateDoc(doc(db, "questions", currentQuestionId), updateData);
+
         closeEdit();
         await loadQuestions();
         alert("Question Updated Successfully");
+
     } catch (error) {
         console.error(error);
         alert("Unable To Update Question");
     }
 }
 
+// ======================================
+// DELETE QUESTION
+// ======================================
+
 window.deleteQuestion = async function (id) {
     const question = allQuestions.find(q => q.id === id);
     if (!question) return;
+
     if (!confirm("Delete this question?\n\n" + question.question + "\n\nThis action cannot be undone.")) return;
+
     try {
         await deleteDoc(doc(db, "questions", id));
         allQuestions = allQuestions.filter(q => q.id !== id);
@@ -276,15 +341,23 @@ window.deleteQuestion = async function (id) {
     }
 };
 
+// ======================================
+// MODAL / KEYBOARD EVENTS
+// ======================================
+
 document.addEventListener("click", function (event) {
     const preview = document.getElementById("previewModal");
     const edit = document.getElementById("editModal");
+
     if (event.target === preview) closePreview();
     if (event.target === edit) closeEdit();
 });
 
 document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") { closePreview(); closeEdit(); }
+    if (event.key === "Escape") {
+        closePreview();
+        closeEdit();
+    }
 });
 
 document.addEventListener("DOMContentLoaded", () => {
