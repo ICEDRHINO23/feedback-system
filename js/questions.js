@@ -1,23 +1,16 @@
-
 import { db } from "./firebase-config.js";
 
 import {
     collection,
     addDoc,
-    getDocs,
-    deleteDoc,
-    doc,
-    getDoc,
-    updateDoc
+    getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const examSelect =
-    document.getElementById(
-        "examSelect"
-    );
+    document.getElementById("examSelect");
 
 // ============================
-// LOAD EXAMS
+// LOAD ASSESSMENTS
 // ============================
 
 async function loadExams() {
@@ -30,19 +23,16 @@ async function loadExams() {
             );
 
         examSelect.innerHTML =
-            '<option value="">Select Exam</option>';
+            '<option value="">Select Assessment</option>';
 
         snapshot.forEach(examDoc => {
 
-            const exam =
-                examDoc.data();
+            const exam = examDoc.data();
 
             examSelect.innerHTML += `
-
-            <option value="${examDoc.id}">
-                ${exam.examName}
-            </option>
-
+                <option value="${examDoc.id}">
+                    ${exam.examName || "Unnamed Assessment"}
+                </option>
             `;
 
         });
@@ -50,12 +40,15 @@ async function loadExams() {
     }
     catch(error){
 
-        console.error(error);
+        console.error("Assessment Load Error:", error);
+
+        examSelect.innerHTML =
+            '<option value="">Unable to load assessments</option>';
     }
 }
 
 // ============================
-// SAVE / UPDATE QUESTION
+// CREATE QUESTION ONLY
 // ============================
 
 window.saveQuestion =
@@ -63,92 +56,74 @@ async function () {
 
     try {
 
-        const questionId =
-            document.getElementById(
-                "questionId"
-            ).value;
-
         const examId =
-            document.getElementById(
-                "examSelect"
-            ).value;
+            document.getElementById("examSelect").value;
 
         const questionType =
-            document.getElementById(
-                "questionType"
-            ).value;
+            document.getElementById("questionType").value;
 
         const question =
-            document.getElementById(
-                "question"
-            ).value.trim();
+            document.getElementById("question").value.trim();
 
-        const marks =
-            document.getElementById(
-                "marks"
-            ).value;
+        const marksValue =
+            document.getElementById("marks").value;
 
-        if (
-            !examId ||
-            !question ||
-            !marks
-        ) {
+        if (!examId || !question || !marksValue) {
 
-            alert(
-                "Please fill all required fields"
-            );
-
+            alert("Please fill all required fields");
             return;
         }
 
-        let data = {
+        const marks = Number(marksValue);
 
+        if (!Number.isFinite(marks) || marks < 0) {
+
+            alert("Please enter valid marks");
+            return;
+        }
+
+        const data = {
             examId,
             questionType,
             question,
-            marks: Number(marks)
-
+            marks
         };
 
         // ====================
         // SINGLE MCQ
         // ====================
 
-        if (
-            questionType === "mcq"
-        ) {
+        if (questionType === "mcq") {
 
             data.optionA =
-                document.getElementById(
-                    "optionA"
-                ).value;
+                document.getElementById("optionA").value.trim();
 
             data.optionB =
-                document.getElementById(
-                    "optionB"
-                ).value;
+                document.getElementById("optionB").value.trim();
 
             data.optionC =
-                document.getElementById(
-                    "optionC"
-                ).value;
+                document.getElementById("optionC").value.trim();
 
             data.optionD =
-                document.getElementById(
-                    "optionD"
-                ).value;
+                document.getElementById("optionD").value.trim();
 
             data.answer =
-                document.getElementById(
-                    "answer"
-                ).value;
+                document.getElementById("answer").value;
+
+            if (
+                !data.optionA ||
+                !data.optionB ||
+                !data.optionC ||
+                !data.optionD
+            ) {
+
+                alert("Please enter all four options");
+                return;
+            }
 
             if (!data.answer) {
 
-                alert(
-                    "Select Correct Answer"
-                );
-
+                alert("Select Correct Answer");
                 return;
             }
         }
@@ -157,437 +132,83 @@ async function () {
         // MULTIPLE ANSWERS
         // ====================
 
-        if (
-            questionType === "multiple"
-        ) {
+        if (questionType === "multiple") {
 
             data.optionA =
-                document.getElementById(
-                    "optionA"
-                ).value;
+                document.getElementById("optionA").value.trim();
 
             data.optionB =
-                document.getElementById(
-                    "optionB"
-                ).value;
+                document.getElementById("optionB").value.trim();
 
             data.optionC =
-                document.getElementById(
-                    "optionC"
-                ).value;
+                document.getElementById("optionC").value.trim();
 
             data.optionD =
-                document.getElementById(
-                    "optionD"
-                ).value;
+                document.getElementById("optionD").value.trim();
+
+            if (
+                !data.optionA ||
+                !data.optionB ||
+                !data.optionC ||
+                !data.optionD
+            ) {
+
+                alert("Please enter all four options");
+                return;
+            }
 
             data.answers = [];
 
-            if (
-                document.getElementById(
-                    "ansA"
-                ).checked
-            ) {
-
+            if (document.getElementById("ansA").checked) {
                 data.answers.push("A");
             }
 
-            if (
-                document.getElementById(
-                    "ansB"
-                ).checked
-            ) {
-
+            if (document.getElementById("ansB").checked) {
                 data.answers.push("B");
             }
 
-            if (
-                document.getElementById(
-                    "ansC"
-                ).checked
-            ) {
-
+            if (document.getElementById("ansC").checked) {
                 data.answers.push("C");
             }
 
-            if (
-                document.getElementById(
-                    "ansD"
-                ).checked
-            ) {
-
+            if (document.getElementById("ansD").checked) {
                 data.answers.push("D");
             }
 
-            if (
-                data.answers.length === 0
-            ) {
+            if (data.answers.length === 0) {
 
-                alert(
-                    "Select At Least One Correct Answer"
-                );
-
+                alert("Select At Least One Correct Answer");
                 return;
             }
         }
 
         // ====================
-        // SENTENCE ANSWER
+        // DESCRIPTIVE ANSWER
         // ====================
 
-        if (
-            questionType === "sentence"
-        ) {
+        if (questionType === "sentence") {
 
             data.modelAnswer =
-                document.getElementById(
-                    "modelAnswer"
-                ).value.trim();
+                document.getElementById("modelAnswer").value.trim();
         }
 
-        // ====================
-        // UPDATE
-        // ====================
+        await addDoc(
+            collection(db, "questions"),
+            data
+        );
 
-        if (questionId) {
-
-            await updateDoc(
-                doc(
-                    db,
-                    "questions",
-                    questionId
-                ),
-                data
-            );
-
-            alert(
-                "Question Updated Successfully"
-            );
-        }
-
-        // ====================
-        // NEW QUESTION
-        // ====================
-
-        else {
-
-            await addDoc(
-                collection(
-                    db,
-                    "questions"
-                ),
-                data
-            );
-
-            alert(
-                "Question Saved Successfully"
-            );
-        }
+        alert("Question Saved Successfully");
 
         clearForm();
 
-        loadQuestions();
-
     }
     catch(error){
 
-        console.error(error);
+        console.error("Question Save Error:", error);
 
         alert(
-            "Unable To Save Question"
-        );
-    }
-};
-
-// ============================
-// LOAD QUESTIONS
-// ============================
-
-async function loadQuestions() {
-
-    try {
-
-        const tbody =
-            document.getElementById(
-                "questionTable"
-            );
-
-        const snapshot =
-            await getDocs(
-                collection(
-                    db,
-                    "questions"
-                )
-            );
-
-        tbody.innerHTML = "";
-
-        if (
-            snapshot.empty
-        ) {
-
-            tbody.innerHTML = `
-
-            <tr>
-
-                <td colspan="5">
-
-                    No Questions Found
-
-                </td>
-
-            </tr>
-
-            `;
-
-            return;
-        }
-
-        snapshot.forEach(questionDoc => {
-
-            const q =
-                questionDoc.data();
-
-            let answerText = "-";
-
-            if (
-                !q.questionType ||
-                 q.questionType === "mcq"
-          ) {
-
-                answerText =
-                    q.answer;
-            }
-
-            if (
-                q.questionType === "multiple"
-            ) {
-
-                answerText =
-                    q.answers
-                    ? q.answers.join(", ")
-                    : "-";
-            }
-
-            if (
-                q.questionType === "sentence"
-            ) {
-
-                answerText =
-                    "Sentence Answer";
-            }
-
-            tbody.innerHTML += `
-
-            <tr>
-
-                <td>
-
-                    ${q.question}
-
-                </td>
-
-                <td>
-
-                ${q.questionType || "mcq"}
-                </td>
-
-                <td>
-
-                    ${answerText}
-
-                </td>
-
-                <td>
-
-                    ${q.marks}
-
-                </td>
-
-                <td>
-
-                    <button
-                    class="edit-btn"
-                    onclick="editQuestion('${questionDoc.id}')">
-
-                    Edit
-
-                    </button>
-
-                    <button
-                    class="delete-btn"
-                    onclick="deleteQuestion('${questionDoc.id}')">
-
-                    Delete
-
-                    </button>
-
-                </td>
-
-            </tr>
-
-            `;
-        });
-
-    }
-    catch(error){
-
-        console.error(error);
-    }
-}
-
-// ============================
-// EDIT QUESTION
-// ============================
-
-window.editQuestion =
-async function(id){
-
-    try {
-
-        const questionRef =
-            doc(
-                db,
-                "questions",
-                id
-            );
-
-        const snap =
-            await getDoc(
-                questionRef
-            );
-
-        if (
-            !snap.exists()
-        ) return;
-
-        const q =
-            snap.data();
-
-        document.getElementById(
-            "questionId"
-        ).value = id;
-
-        document.getElementById(
-            "examSelect"
-        ).value =
-            q.examId || "";
-
-        document.getElementById(
-            "questionType"
-        ).value =
-            q.questionType || "mcq";
-        updateQuestionType();
-        document.getElementById(
-            "question"
-        ).value =
-            q.question || "";
-
-        document.getElementById(
-            "marks"
-        ).value =
-            q.marks || "";
-
-        document.getElementById(
-            "optionA"
-        ).value =
-            q.optionA || "";
-
-        document.getElementById(
-            "optionB"
-        ).value =
-            q.optionB || "";
-
-        document.getElementById(
-            "optionC"
-        ).value =
-            q.optionC || "";
-
-        document.getElementById(
-            "optionD"
-        ).value =
-            q.optionD || "";
-
-        document.getElementById(
-            "answer"
-        ).value =
-            q.answer || "";
-        document.getElementById("ansA").checked = false;
-        document.getElementById("ansB").checked = false;
-        document.getElementById("ansC").checked = false;
-        document.getElementById("ansD").checked = false;
-        if (q.answers) {
-
-            document.getElementById(
-                "ansA"
-            ).checked =
-                q.answers.includes("A");
-
-            document.getElementById(
-                "ansB"
-            ).checked =
-                q.answers.includes("B");
-
-            document.getElementById(
-                "ansC"
-            ).checked =
-                q.answers.includes("C");
-
-            document.getElementById(
-                "ansD"
-            ).checked =
-                q.answers.includes("D");
-        }
-
-        document.getElementById(
-            "modelAnswer"
-        ).value =
-            q.modelAnswer || "";
-
-        window.scrollTo({
-            top:0,
-            behavior:"smooth"
-        });
-
-    }
-    catch(error){
-
-        console.error(error);
-    }
-};
-
-// ============================
-// DELETE QUESTION
-// ============================
-
-window.deleteQuestion =
-async function(id){
-
-    if (
-        !confirm(
-            "Delete Question?"
-        )
-    ) return;
-
-    try {
-
-        await deleteDoc(
-            doc(
-                db,
-                "questions",
-                id
-            )
-        );
-
-        loadQuestions();
-
-    }
-    catch(error){
-
-        console.error(error);
-
-        alert(
-            "Unable To Delete Question"
+            "Unable To Save Question\n\n" +
+            error.message
         );
     }
 };
@@ -598,63 +219,24 @@ async function(id){
 
 function clearForm(){
 
-    document.getElementById(
-        "questionId"
-    ).value = "";
+    document.getElementById("questionId").value = "";
+    document.getElementById("question").value = "";
+    document.getElementById("optionA").value = "";
+    document.getElementById("optionB").value = "";
+    document.getElementById("optionC").value = "";
+    document.getElementById("optionD").value = "";
+    document.getElementById("answer").value = "";
+    document.getElementById("marks").value = "";
+    document.getElementById("modelAnswer").value = "";
 
-    document.getElementById(
-        "question"
-    ).value = "";
+    document.getElementById("ansA").checked = false;
+    document.getElementById("ansB").checked = false;
+    document.getElementById("ansC").checked = false;
+    document.getElementById("ansD").checked = false;
 
-    document.getElementById(
-        "optionA"
-    ).value = "";
+    document.getElementById("questionType").value = "mcq";
 
-    document.getElementById(
-        "optionB"
-    ).value = "";
-
-    document.getElementById(
-        "optionC"
-    ).value = "";
-
-document.getElementById(
-    "optionD"
-).value = "";
-
-document.getElementById(
-    "answer"
-).value = "";
-
-document.getElementById(
-    "marks"
-).value = "";
-
-document.getElementById(
-    "modelAnswer"
-).value = "";
-
-document.getElementById(
-    "ansA"
-).checked = false;
-
-document.getElementById(
-    "ansB"
-).checked = false;
-
-document.getElementById(
-    "ansC"
-).checked = false;
-
-document.getElementById(
-    "ansD"
-).checked = false;
-
-document.getElementById(
-    "questionType"
-).value = "mcq";
-
-updateQuestionType();
+    updateQuestionType();
 }
 
 // ============================
@@ -662,5 +244,3 @@ updateQuestionType();
 // ============================
 
 loadExams();
-loadQuestions();
-
