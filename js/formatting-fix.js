@@ -11,15 +11,6 @@
         // Normalize line breaks.
         text = text.replace(/\r\n|\r|\n/g, "<br>");
 
-        // Convert explicit HTML formatting stored as text.
-        text = text.replace(/<\/?sup\b[^>]*>/gi, function (tag) {
-            return tag;
-        });
-
-        text = text.replace(/<\/?sub\b[^>]*>/gi, function (tag) {
-            return tag;
-        });
-
         // Convert ^{...} and ^2 / ^n notation to superscript.
         text = text.replace(/\^\{([^}]+)\}/g, "<sup>$1</sup>");
         text = text.replace(/\^([0-9]+|[A-Za-z]+)/g, "<sup>$1</sup>");
@@ -27,6 +18,21 @@
         // Convert _{...} and _2 / _n notation to subscript.
         text = text.replace(/_\{([^}]+)\}/g, "<sub>$1</sub>");
         text = text.replace(/_([0-9]+|[A-Za-z]+)/g, "<sub>$1</sub>");
+
+        return text;
+    }
+
+
+    function cleanOptionLabel(value) {
+
+        let text = String(value ?? "").trim();
+
+        // Remove an option label already stored in the database:
+        // A. / A) / a. / a)
+        text = text.replace(
+            /^\s*[A-Da-d]\s*[.)]\s*/,
+            ""
+        );
 
         return text;
     }
@@ -51,6 +57,11 @@
             return;
         }
 
+        const isOption =
+            element.matches(
+                "#options .option-btn, #reviewContainer .option"
+            );
+
         const allowed =
             element.matches(
                 "#questionText, #options .option-btn, " +
@@ -63,9 +74,15 @@
             return;
         }
 
-        const text = element.textContent || "";
+        let text = element.textContent || "";
 
-        if (!needsFormatting(text)) {
+        // The live exam/review already adds A./B./C./D. labels.
+        // Remove a duplicate label from database content.
+        if (isOption) {
+            text = cleanOptionLabel(text);
+        }
+
+        if (!needsFormatting(text) && !isOption) {
             return;
         }
 
