@@ -5,12 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Create Question | AHPS</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
-body{background:#f4f6f9;color:#102044}.header{background:#001f5b;color:#fff;padding:18px;text-align:center}.container{width:95%;max-width:900px;margin:25px auto;background:#fff;padding:25px;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.1)}
-.back-btn{display:inline-block;margin-bottom:20px;background:#001f5b;color:#fff;padding:10px 15px;text-decoration:none;border-radius:7px}
-.form-note{margin:0 0 20px;color:#667085;font-size:14px}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.type-card{background:#eef5ff;border:1px solid #c9dcff;border-radius:10px;padding:13px;margin:10px 0 16px}.type-card strong{display:block;color:#06245f;margin-bottom:5px}.type-card span{font-size:13px;color:#475467}
-label{display:block;font-weight:700;margin:12px 0 6px;color:#001f5b}input,select,textarea{width:100%;padding:11px;margin-bottom:10px;border:1px solid #ccd4e0;border-radius:7px;font-size:15px;background:#fff}textarea{min-height:130px;resize:vertical}.option-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.answer-box{background:#f8fafc;border:1px solid #e4e7ec;border-radius:10px;padding:14px;margin:8px 0 14px}.choice-row{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #d7deea;border-radius:8px;padding:12px;margin:8px 0;cursor:pointer}.choice-row input{width:auto;margin:0}.choice-row span{color:#344054;font-weight:600}.section-title{font-weight:800;color:#06245f;margin-bottom:8px}.hint{font-size:12px;color:#667085;margin:-3px 0 10px}.save-btn{background:#001f5b;color:#fff;border:0;padding:12px 20px;cursor:pointer;border-radius:7px;font-size:15px;margin-top:10px}.save-btn:hover{background:#003399}
-@media(max-width:650px){.field-grid,.option-grid{grid-template-columns:1fr}.container{padding:18px}}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}body{background:#f4f6f9;color:#102044}.header{background:#001f5b;color:#fff;padding:18px;text-align:center}.container{width:95%;max-width:900px;margin:25px auto;background:#fff;padding:25px;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.1)}.back-btn{display:inline-block;margin-bottom:20px;background:#001f5b;color:#fff;padding:10px 15px;text-decoration:none;border-radius:7px}.form-note{margin:0 0 20px;color:#667085;font-size:14px}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.type-card{background:#eef5ff;border:1px solid #c9dcff;border-radius:10px;padding:13px;margin:10px 0 16px}.type-card strong{display:block;color:#06245f;margin-bottom:5px}.type-card span{font-size:13px;color:#475467}label{display:block;font-weight:700;margin:12px 0 6px;color:#001f5b}input,select,textarea{width:100%;padding:11px;margin-bottom:10px;border:1px solid #ccd4e0;border-radius:7px;font-size:15px;background:#fff}textarea{min-height:130px;resize:vertical}.option-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.answer-box{background:#f8fafc;border:1px solid #e4e7ec;border-radius:10px;padding:14px;margin:8px 0 14px}.choice-row{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #d7deea;border-radius:8px;padding:12px;margin:8px 0;cursor:pointer}.choice-row input{width:auto;margin:0}.choice-row span{color:#344054;font-weight:600}.section-title{font-weight:800;color:#06245f;margin-bottom:8px}.hint{font-size:12px;color:#667085;margin:-3px 0 10px}.save-btn{background:#001f5b;color:#fff;border:0;padding:12px 20px;cursor:pointer;border-radius:7px;font-size:15px;margin-top:10px}.save-btn:hover{background:#003399}@media(max-width:650px){.field-grid,.option-grid{grid-template-columns:1fr}.container{padding:18px}}
 </style>
 </head>
 <body>
@@ -19,97 +14,21 @@ label{display:block;font-weight:700;margin:12px 0 6px;color:#001f5b}input,select
 <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
 <p class="form-note">Create a question and assign it to the correct <b>Class, Section and Assessment</b>.</p>
 <input type="hidden" id="questionId">
-
-<div class="field-grid">
-<div><label for="examClass">Class *</label><select id="examClass"><option value="">Select Class</option></select></div>
-<div><label for="questionSection">Section *</label><select id="questionSection"><option value="">Select Section</option></select></div>
-</div>
-
-<label for="examSelect">Assessment *</label>
-<select id="examSelect"><option value="">Select Assessment</option></select>
-
-<label for="questionType">Question Type *</label>
-<select id="questionType">
-<option value="mcq">MCQ — Single Correct Answer</option>
-<option value="multiple">MCQ — Multiple Correct Answers (Select All)</option>
-<option value="truefalse">True / False</option>
-<option value="fillblank">Fill in the Blanks</option>
-<option value="sentence">Descriptive / Long Answer</option>
-</select>
+<div class="field-grid"><div><label for="examClass">Class *</label><select id="examClass"><option value="">Select Class</option></select></div><div><label for="questionSection">Section *</label><select id="questionSection"><option value="">Select Section</option></select></div></div>
+<label for="examSelect">Assessment *</label><select id="examSelect"><option value="">Select Assessment</option></select>
+<label for="questionType">Question Type *</label><select id="questionType"><option value="mcq">MCQ — Single Correct Answer</option><option value="multiple">MCQ — Multiple Correct Answers (Select All)</option><option value="truefalse">True / False</option><option value="fillblank">Fill in the Blanks</option><option value="sentence">Descriptive / Long Answer</option></select>
 <div id="typeNote" class="type-card"><strong>MCQ — Single Correct Answer</strong><span>Students select ONE option only.</span></div>
-
-<label for="question">Question *</label>
-<textarea id="question" placeholder="Enter the question"></textarea>
-
-<div id="optionSection">
-<div class="section-title">Four Options</div>
-<div class="option-grid">
-<input type="text" id="optionA" placeholder="Option A">
-<input type="text" id="optionB" placeholder="Option B">
-<input type="text" id="optionC" placeholder="Option C">
-<input type="text" id="optionD" placeholder="Option D">
+<label for="question">Question *</label><textarea id="question" placeholder="Enter the question"></textarea>
+<div id="optionSection"><div class="section-title">Four Options</div><div class="option-grid"><input type="text" id="optionA" placeholder="Option A"><input type="text" id="optionB" placeholder="Option B"><input type="text" id="optionC" placeholder="Option C"><input type="text" id="optionD" placeholder="Option D"></div></div>
+<div id="mcqSection" class="answer-box"><div class="section-title">Correct Answer — Select ONE</div><select id="answer"><option value="">Select one correct option</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select></div>
+<div id="multipleSection" class="answer-box" style="display:none"><div class="section-title">Correct Answers — Select ALL that apply</div><div class="hint">This is the Multiple Correct Answers MCQ. You can select more than one checkbox.</div><label class="choice-row"><input type="checkbox" id="ansA"><span>Option A is correct</span></label><label class="choice-row"><input type="checkbox" id="ansB"><span>Option B is correct</span></label><label class="choice-row"><input type="checkbox" id="ansC"><span>Option C is correct</span></label><label class="choice-row"><input type="checkbox" id="ansD"><span>Option D is correct</span></label></div>
+<div id="trueFalseSection" class="answer-box" style="display:none"><div class="section-title">Correct Answer — Select ONE</div><label class="choice-row"><input type="radio" name="trueFalseAnswer" value="True"><span>True</span></label><label class="choice-row"><input type="radio" name="trueFalseAnswer" value="False"><span>False</span></label></div>
+<div id="fillBlankSection" class="answer-box" style="display:none"><div class="section-title">Fill in the Blanks</div><div class="hint">Put <b>_____</b> wherever the blank should appear. For multiple blanks, enter answers in the same order separated by <b>|</b>.</div><label for="blankAnswer">Expected Answer(s) *</label><input type="text" id="blankAnswer" placeholder="Example: Photosynthesis | Chlorophyll"></div>
+<div id="sentenceSection" class="answer-box" style="display:none"><div class="section-title">Descriptive Answer</div><label for="modelAnswer">Model Answer</label><textarea id="modelAnswer" placeholder="Enter the model/reference answer for teacher evaluation"></textarea></div>
+<label for="marks">Marks *</label><input type="number" id="marks" placeholder="Marks" min="0.5" step="0.5"><button type="button" class="save-btn" onclick="saveQuestion()">Save Question</button>
 </div>
-</div>
-
-<div id="mcqSection" class="answer-box">
-<div class="section-title">Correct Answer — Select ONE</div>
-<select id="answer"><option value="">Select one correct option</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select>
-</div>
-
-<div id="multipleSection" class="answer-box" style="display:none">
-<div class="section-title">Correct Answers — Select ALL that apply</div>
-<div class="hint">This is the Multiple Correct Answers MCQ. You can select more than one checkbox.</div>
-<label class="choice-row"><input type="checkbox" id="ansA"><span>Option A is correct</span></label>
-<label class="choice-row"><input type="checkbox" id="ansB"><span>Option B is correct</span></label>
-<label class="choice-row"><input type="checkbox" id="ansC"><span>Option C is correct</span></label>
-<label class="choice-row"><input type="checkbox" id="ansD"><span>Option D is correct</span></label>
-</div>
-
-<div id="trueFalseSection" class="answer-box" style="display:none">
-<div class="section-title">Correct Answer — Select ONE</div>
-<label class="choice-row"><input type="radio" name="trueFalseAnswer" value="True"><span>True</span></label>
-<label class="choice-row"><input type="radio" name="trueFalseAnswer" value="False"><span>False</span></label>
-</div>
-
-<div id="fillBlankSection" class="answer-box" style="display:none">
-<div class="section-title">Fill in the Blanks</div>
-<div class="hint">Put <b>_____</b> wherever the blank should appear. For multiple blanks, enter answers in the same order separated by <b>|</b>.</div>
-<label for="blankAnswer">Expected Answer(s) *</label>
-<input type="text" id="blankAnswer" placeholder="Example: Photosynthesis | Chlorophyll">
-</div>
-
-<div id="sentenceSection" class="answer-box" style="display:none">
-<div class="section-title">Descriptive Answer</div>
-<label for="modelAnswer">Model Answer</label>
-<textarea id="modelAnswer" placeholder="Enter the model/reference answer for teacher evaluation"></textarea>
-</div>
-
-<label for="marks">Marks *</label>
-<input type="number" id="marks" placeholder="Marks" min="0.5" step="0.5">
-<button type="button" class="save-btn" onclick="saveQuestion()">Save Question</button>
-</div>
-
 <script>
-const sectionMap={optionSection:'optionSection',mcqSection:'mcqSection',multipleSection:'multipleSection',truefalse:trueFalseSection,fillblank:fillBlankSection,sentence:sentenceSection};
-function updateQuestionType(){
- const type=document.getElementById('questionType').value;
- ['optionSection','mcqSection','multipleSection','trueFalseSection','fillBlankSection','sentenceSection'].forEach(id=>document.getElementById(id).style.display='none');
- const note=document.getElementById('typeNote');
- const notes={
- mcq:['MCQ — Single Correct Answer','Students select ONE option only.'],
- multiple:['MCQ — Multiple Correct Answers','Students can select MORE THAN ONE option. Use the checkboxes below.'],
- truefalse:['True / False','Students select either True or False.'],
- fillblank:['Fill in the Blanks','Students type the missing word(s) into the blank(s).'],
- sentence:['Descriptive / Long Answer','Students type a written answer for teacher evaluation.']};
- note.innerHTML='<strong>'+notes[type][0]+'</strong><span>'+notes[type][1]+'</span>';
- if(type==='mcq'){document.getElementById('optionSection').style.display='block';document.getElementById('mcqSection').style.display='block';}
- else if(type==='multiple'){document.getElementById('optionSection').style.display='block';document.getElementById('multipleSection').style.display='block';}
- else if(type==='truefalse'){document.getElementById('trueFalseSection').style.display='block';}
- else if(type==='fillblank'){document.getElementById('fillBlankSection').style.display='block';}
- else if(type==='sentence'){document.getElementById('sentenceSection').style.display='block';}
-}
+function updateQuestionType(){const type=document.getElementById('questionType').value;['optionSection','mcqSection','multipleSection','trueFalseSection','fillBlankSection','sentenceSection'].forEach(id=>document.getElementById(id).style.display='none');const note=document.getElementById('typeNote');const notes={mcq:['MCQ — Single Correct Answer','Students select ONE option only.'],multiple:['MCQ — Multiple Correct Answers','Students can select MORE THAN ONE option. Use the checkboxes below.'],truefalse:['True / False','Students select either True or False.'],fillblank:['Fill in the Blanks','Students type the missing word(s) into the blank(s).'],sentence:['Descriptive / Long Answer','Students type a written answer for teacher evaluation.']};note.innerHTML='<strong>'+notes[type][0]+'</strong><span>'+notes[type][1]+'</span>';if(type==='mcq'){document.getElementById('optionSection').style.display='block';document.getElementById('mcqSection').style.display='block'}else if(type==='multiple'){document.getElementById('optionSection').style.display='block';document.getElementById('multipleSection').style.display='block'}else if(type==='truefalse'){document.getElementById('trueFalseSection').style.display='block'}else if(type==='fillblank'){document.getElementById('fillBlankSection').style.display='block'}else if(type==='sentence'){document.getElementById('sentenceSection').style.display='block'}}
 document.getElementById('questionType').addEventListener('change',updateQuestionType);updateQuestionType();
-</script>
-<script type="module" src="../js/questions.js"></script>
-</body>
-</html>
+</script><script type="module" src="../js/questions.js"></script>
+</body></html>
