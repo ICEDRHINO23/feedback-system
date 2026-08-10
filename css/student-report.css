@@ -1,0 +1,35 @@
+.evaluation-pending-message {
+
+    background: #fff7ed;
+
+    border: 2px solid #f59e0b;
+
+    color: #92400e;
+
+    padding: 20px;
+
+    margin: 20px 0;
+
+    border-radius: 10px;
+
+    text-align: center;
+
+}
+
+.evaluation-pending-message strong {
+
+    display: block;
+
+    font-size: 20px;
+
+    margin-bottom: 10px;
+
+}
+
+.evaluation-pending-message p {
+
+    margin: 6px 0;
+
+    line-height: 1.5;
+
+}
