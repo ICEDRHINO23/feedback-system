@@ -62,7 +62,52 @@ async function loadStudentReport() {
             return;
 
         }
+        // ======================================
+// GET RESULT DATA
+// ======================================
 
+const result =
+    resultSnap.data();
+
+console.log(
+    "Student Report:",
+    result
+);
+
+
+// ======================================
+// LOAD EXAM DETAILS
+// ======================================
+
+let exam = {};
+
+if (result.examId) {
+
+    const examRef =
+        doc(
+            db,
+            "exams",
+            result.examId
+        );
+
+    const examSnap =
+        await getDoc(
+            examRef
+        );
+
+    if (examSnap.exists()) {
+
+        exam =
+            examSnap.data();
+
+    }
+
+}
+
+console.log(
+    "Exam Data:",
+    exam
+);
 
         const result =
             resultSnap.data();
@@ -138,20 +183,20 @@ async function loadStudentReport() {
 
 
         studentClass.textContent =
-            result.studentClass ||
-            result.examClass ||
-            "-";
+    result.studentClass ||
+    result.examClass ||
+    exam.examClass ||
+    "-";
 
+examName.textContent =
+    result.examName ||
+    exam.examName ||
+    "-";
 
-        examName.textContent =
-            result.examName ||
-            "-";
-
-
-        subject.textContent =
-            result.subject ||
-            "-";
-
+subject.textContent =
+    result.subject ||
+    exam.subject ||
+    "-";
 
         totalQuestions.textContent =
             result.totalQuestions ||
