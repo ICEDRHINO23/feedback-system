@@ -105,8 +105,18 @@ function filterResults() {
     renderResults(filtered); updateDashboard(filtered);
 }
 
+// Results page is /admin/results.html, while the individual report is /admin/student-.html.
+// Keep the path explicit so GitHub Pages does not resolve it against the repository root.
 window.openIndividualReport = function(id) {
-    window.open(`student-.html?id=${encodeURIComponent(id)}`, "_blank", "noopener,noreferrer");
+    if (!id) {
+        alert("Result ID not found.");
+        return;
+    }
+    const reportUrl = `student-.html?id=${encodeURIComponent(id)}`;
+    const reportWindow = window.open(reportUrl, "_blank");
+    if (!reportWindow) {
+        alert("The report could not be opened. Please allow pop-ups for this site.");
+    }
 };
 
 window.deleteResult = async function(id) {
