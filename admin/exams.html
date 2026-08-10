@@ -63,19 +63,32 @@ select{
     border-radius:5px;
 }
 
-.create-btn{
+.create-btn,
+.cancel-btn{
     width:100%;
     padding:12px;
     border:none;
     border-radius:5px;
-    background:#001f5b;
     color:white;
     cursor:pointer;
     font-size:16px;
+    margin-top:5px;
+}
+
+.create-btn{
+    background:#001f5b;
 }
 
 .create-btn:hover{
     background:#003399;
+}
+
+.cancel-btn{
+    background:#777;
+}
+
+.cancel-btn:hover{
+    background:#555;
 }
 
 table{
@@ -96,8 +109,15 @@ td{
     text-align:center;
 }
 
+.action-buttons{
+    display:flex;
+    gap:6px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+
+.edit-btn,
 .delete-btn{
-    background:red;
     color:white;
     border:none;
     padding:8px 12px;
@@ -105,8 +125,24 @@ td{
     cursor:pointer;
 }
 
+.edit-btn{
+    background:#0b5ed7;
+}
+
+.edit-btn:hover{
+    background:#084298;
+}
+
+.delete-btn{
+    background:red;
+}
+
 .delete-btn:hover{
     background:darkred;
+}
+
+.edit-mode{
+    border:2px solid #0b5ed7;
 }
 
 </style>
@@ -124,9 +160,11 @@ td{
         ← Back To Dashboard
     </a>
 
-    <div class="card">
+    <div class="card" id="assessmentFormCard">
 
-        <h2>Create Assessment</h2>
+        <h2 id="formTitle">Create Assessment</h2>
+
+        <input type="hidden" id="editingExamId" value="">
 
         <input
             type="text"
@@ -184,12 +222,24 @@ td{
             type="date"
             id="endDate">
 
+        <select id="status">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
+
         <button
             class="create-btn"
-            onclick="createExam()">
-
+            id="saveExamBtn"
+            onclick="saveExam()">
             Create Assessment
+        </button>
 
+        <button
+            class="cancel-btn"
+            id="cancelEditBtn"
+            onclick="cancelEdit()"
+            style="display:none;">
+            Cancel Edit
         </button>
 
     </div>
@@ -210,6 +260,7 @@ td{
                     <th>Class</th>
                     <th>Duration</th>
                     <th>Marks</th>
+                    <th>Status</th>
                     <th>Action</th>
 
                 </tr>
@@ -220,7 +271,7 @@ td{
 
                 <tr>
 
-                    <td colspan="7">
+                    <td colspan="8">
                         Loading Assessments...
                     </td>
 
@@ -240,4 +291,3 @@ td{
 
 </body>
 </html>
-```
