@@ -5,7 +5,9 @@ import {
     getDocs,
     addDoc,
     deleteDoc,
-    doc
+    doc,
+    updateDoc,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ===================================
@@ -66,10 +68,10 @@ async function loadClasses() {
 }
 
 // ===================================
-// CREATE EXAM
+// SAVE EXAM - CREATE OR EDIT
 // ===================================
 
-window.createExam = async function () {
+window.saveExam = async function () {
 
     try {
 
@@ -97,6 +99,12 @@ window.createExam = async function () {
         const endDate =
             document.getElementById("endDate").value;
 
+        const status =
+            document.getElementById("status").value;
+
+        const editingExamId =
+            document.getElementById("editingExamId").value;
+
         if (
             !examName ||
             !subject ||
@@ -115,56 +123,248 @@ window.createExam = async function () {
 
         }
 
-        await addDoc(
-            collection(db, "exams"),
-            {
-                examName,
-                subject,
-                targetType,
-                examClass:
-                    targetType === "student"
-                        ? examClass
-                        : "",
-                duration:
-                    Number(duration),
-                totalMarks:
-                    Number(totalMarks),
-                startDate,
-                endDate,
-                status: "active",
-                createdAt:
-                    new Date().toISOString()
-            }
-        );
+        const examData = {
+            examName,
+            subject,
+            targetType,
+            examClass:
+                targetType === "student"
+                    ? examClass
+                    : "",
+            duration:
+                Number(duration),
+            totalMarks:
+                Number(totalMarks),
+            startDate,
+            endDate,
+            status
+        };
 
-        alert(
-            "Assessment Created Successfully"
-        );
+        // ===================================
+        // EDIT EXISTING ASSESSMENT
+        // ===================================
 
-        document.getElementById("examName").value = "";
-        document.getElementById("subject").value = "";
-        document.getElementById("duration").value = "";
-        document.getElementById("totalMarks").value = "";
-        document.getElementById("startDate").value = "";
-        document.getElementById("endDate").value = "";
+        if (editingExamId) {
 
+            const confirmed = confirm(
+                "Save changes to this assessment?\n\nQuestions and existing results will not be changed."
+            );
+
+            if (!confirmed) return;
+
+            await updateDoc(
+                doc(db, "exams", editingExamId),
+                examData
+            );
+
+            alert(
+                "Assessment Updated Successfully"
+            );
+
+        }
+
+        // ===================================
+        // CREATE NEW ASSESSMENT
+        // ===================================
+
+        else {
+
+            await addDoc(
+                collection(db, "exams"),
+                {
+                    ...examData,
+                    createdAt:
+                        new Date().toISOString()
+                }
+            );
+
+            alert(
+                "Assessment Created Successfully"
+            );
+
+        }
+
+        resetForm();
         await loadExams();
 
     }
     catch (error) {
 
         console.error(
-            "Create Exam Error:",
+            "Save Exam Error:",
             error
         );
 
         alert(
-            "Failed To Create Assessment"
+            "Failed To Save Assessment\n\n" +
+            error.message
         );
 
     }
 
 };
+
+// ===================================
+// EDIT EXAM
+// ===================================
+
+window.editExam = async function (examId) {
+
+    try {
+
+        const examSnap =
+            await getDoc(
+                doc(db, "exams", examId)
+            );
+
+        if (!examSnap.exists()) {
+
+            alert(
+                "Assessment not found."
+            );
+
+            return;
+
+        }
+
+        const exam =
+            examSnap.data();
+
+        document.getElementById("editingExamId").value =
+            examId;
+
+        document.getElementById("examName").value =
+            exam.examName || "";
+
+        document.getElementById("subject").value =
+            exam.subject || "";
+
+        document.getElementById("targetType").value =
+            exam.targetType || "";
+
+        document.getElementById("examClass").value =
+            exam.examClass || "";
+
+        document.getElementById("duration").value =
+            exam.duration ?? "";
+
+        document.getElementById("totalMarks").value =
+            exam.totalMarks ?? "";
+
+        document.getElementById("startDate").value =
+            exam.startDate || "";
+
+        document.getElementById("endDate").value =
+            exam.endDate || "";
+
+        document.getElementById("status").value =
+            exam.status || "active";
+
+        document.getElementById("formTitle").innerText =
+            "Edit Assessment";
+
+        document.getElementById("saveExamBtn").innerText =
+            "Save Changes";
+
+        document.getElementById("cancelEditBtn").style.display =
+            "block";
+
+        document.getElementById("assessmentFormCard").classList.add(
+            "edit-mode"
+        );
+
+        updateClassState();
+
+        document.getElementById("assessmentFormCard").scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }
+    catch (error) {
+
+        console.error(
+            "Edit Exam Error:",
+            error
+        );
+
+        alert(
+            "Unable To Open Assessment For Editing\n\n" +
+            error.message
+        );
+
+    }
+
+};
+
+// ===================================
+// CANCEL EDIT
+// ===================================
+
+window.cancelEdit = function () {
+
+    resetForm();
+
+};
+
+// ===================================
+// RESET FORM
+// ===================================
+
+function resetForm() {
+
+    document.getElementById("editingExamId").value = "";
+
+    document.getElementById("examName").value = "";
+    document.getElementById("subject").value = "";
+    document.getElementById("targetType").value = "";
+    document.getElementById("examClass").value = "";
+    document.getElementById("duration").value = "";
+    document.getElementById("totalMarks").value = "";
+    document.getElementById("startDate").value = "";
+    document.getElementById("endDate").value = "";
+    document.getElementById("status").value = "active";
+
+    document.getElementById("formTitle").innerText =
+        "Create Assessment";
+
+    document.getElementById("saveExamBtn").innerText =
+        "Create Assessment";
+
+    document.getElementById("cancelEditBtn").style.display =
+        "none";
+
+    document.getElementById("assessmentFormCard").classList.remove(
+        "edit-mode"
+    );
+
+    updateClassState();
+
+}
+
+// ===================================
+// TARGET / CLASS CONTROL
+// ===================================
+
+function updateClassState() {
+
+    const targetType =
+        document.getElementById("targetType").value;
+
+    const classDropdown =
+        document.getElementById("examClass");
+
+    if (!classDropdown) return;
+
+    if (targetType === "student") {
+        classDropdown.disabled = false;
+    }
+    else {
+        classDropdown.disabled = true;
+        classDropdown.value = "";
+    }
+
+}
 
 // ===================================
 // LOAD EXAMS
@@ -181,7 +381,7 @@ async function loadExams() {
 
         table.innerHTML = `
             <tr>
-                <td colspan="7">
+                <td colspan="8">
                     Loading Assessments...
                 </td>
             </tr>
@@ -191,14 +391,19 @@ async function loadExams() {
             await getDocs(
                 collection(db, "exams")
             );
-console.log("Exam Count:", snapshot.size);
+
+        console.log(
+            "Exam Count:",
+            snapshot.size
+        );
+
         table.innerHTML = "";
 
         if (snapshot.empty) {
 
             table.innerHTML = `
                 <tr>
-                    <td colspan="7">
+                    <td colspan="8">
                         No Assessments Found
                     </td>
                 </tr>
@@ -212,6 +417,9 @@ console.log("Exam Count:", snapshot.size);
 
             const exam =
                 docSnap.data();
+
+            const statusText =
+                exam.status || "active";
 
             table.innerHTML += `
                 <tr>
@@ -228,15 +436,25 @@ console.log("Exam Count:", snapshot.size);
 
                     <td>${exam.totalMarks || 0}</td>
 
+                    <td>${statusText}</td>
+
                     <td>
 
-                        <button
-                            class="delete-btn"
-                            onclick="deleteExam('${docSnap.id}')">
+                        <div class="action-buttons">
 
-                            Delete
+                            <button
+                                class="edit-btn"
+                                onclick="editExam('${docSnap.id}')">
+                                Edit
+                            </button>
 
-                        </button>
+                            <button
+                                class="delete-btn"
+                                onclick="deleteExam('${docSnap.id}')">
+                                Delete
+                            </button>
+
+                        </div>
 
                     </td>
 
@@ -260,7 +478,7 @@ console.log("Exam Count:", snapshot.size);
 
             table.innerHTML = `
                 <tr>
-                    <td colspan="7">
+                    <td colspan="8">
                         Error Loading Assessments
                     </td>
                 </tr>
@@ -406,6 +624,13 @@ document.addEventListener(
 
         loadClasses();
         loadExams();
+
+        document.getElementById("targetType")?.addEventListener(
+            "change",
+            updateClassState
+        );
+
+        updateClassState();
 
     }
 );
