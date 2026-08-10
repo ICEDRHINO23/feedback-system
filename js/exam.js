@@ -1,4 +1,3 @@
-
 import { db } from "./firebase-config.js";
 
 import {
@@ -7,519 +6,270 @@ import {
     addDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const examId =
-    localStorage.getItem("currentExamId");
-console.log("===== EXAM PAGE =====");
-
-console.log(
-    "Exam ID:",
-    examId
-);
-
-console.log(
-    "All Local Storage:",
-    { ...localStorage }
-);
+const examId = localStorage.getItem("currentExamId");
 let questions = [];
 let totalDuration = 30;
-// Current assessment details
 let currentExam = null;
+
 // ==========================
 // LOAD QUESTIONS
 // ==========================
-
 async function loadQuestions() {
-
     try {
-
-        const container =
-            document.getElementById(
-                "questionContainer"
-            );
-
+        const container = document.getElementById("questionContainer");
         container.innerHTML = "";
 
-        // Load Exam Details
-
-        const examSnapshot =
-            await getDocs(
-                collection(db, "exams")
-            );
+        const examSnapshot = await getDocs(collection(db, "exams"));
 
         examSnapshot.forEach(docSnap => {
-
-        if (
-    docSnap.id === examId
-) {
-
-    const exam =
-        docSnap.data();
-
-    // Save current assessment details
-    currentExam = exam;
-
-    totalDuration =
-        Number(
-            exam.duration || 30
-        );
-
-    console.log("Current Exam:", currentExam);
-
-}
-
+            if (docSnap.id === examId) {
+                currentExam = docSnap.data();
+                totalDuration = Number(currentExam.duration || 30);
+            }
         });
 
-        startTimer();
-
-        // Load Questions
-
-        const questionSnapshot =
-            await getDocs(
-                collection(db, "questions")
-            );
-
+        const questionSnapshot = await getDocs(collection(db, "questions"));
         let count = 1;
 
         questionSnapshot.forEach(docSnap => {
+            const q = docSnap.data();
 
-            const q =
-                docSnap.data();
+            if (q.examId !== examId) return;
 
-            if (
-                q.examId === examId
-            ) {
+            questions.push({ id: docSnap.id, ...q });
 
-                questions.push({
-                    id: docSnap.id,
-                    ...q
-                });
-
-                // ==================
-                // MCQ
-                // ==================
-
-                if (
-                    !q.questionType ||
-                    q.questionType === "mcq"
-                ) {
-
-                    container.innerHTML += `
-
+            if (!q.questionType || q.questionType === "mcq") {
+                container.innerHTML += `
                     <div class="question-box">
-
-                        <h3>
-                            Q${count}. ${q.question}
-                        </h3>
-
-                        <label>
-                            <input type="radio"
-                            name="${docSnap.id}"
-                            value="A">
-                            ${q.optionA}
-                        </label>
-
-                        <label>
-                            <input type="radio"
-                            name="${docSnap.id}"
-                            value="B">
-                            ${q.optionB}
-                        </label>
-
-                        <label>
-                            <input type="radio"
-                            name="${docSnap.id}"
-                            value="C">
-                            ${q.optionC}
-                        </label>
-
-                        <label>
-                            <input type="radio"
-                            name="${docSnap.id}"
-                            value="D">
-                            ${q.optionD}
-                        </label>
-
-                    </div>
-
-                    `;
-                }
-
-                // ==================
-                // MULTIPLE ANSWER
-                // ==================
-
-                if (
-                    q.questionType === "multiple"
-                ) {
-
-                    container.innerHTML += `
-
-                    <div class="question-box">
-
-                        <h3>
-                            Q${count}. ${q.question}
-                        </h3>
-
-                        <label>
-                            <input type="checkbox"
-                            name="${docSnap.id}"
-                            value="A">
-                            ${q.optionA}
-                        </label>
-
-                        <label>
-                            <input type="checkbox"
-                            name="${docSnap.id}"
-                            value="B">
-                            ${q.optionB}
-                        </label>
-
-                        <label>
-                            <input type="checkbox"
-                            name="${docSnap.id}"
-                            value="C">
-                            ${q.optionC}
-                        </label>
-
-                        <label>
-                            <input type="checkbox"
-                            name="${docSnap.id}"
-                            value="D">
-                            ${q.optionD}
-                        </label>
-
-                    </div>
-
-                    `;
-                }
-
-                // ==================
-                // SENTENCE
-                // ==================
-
-                if (
-                    q.questionType === "sentence"
-                ) {
-
-                    container.innerHTML += `
-
-                    <div class="question-box">
-
-                        <h3>
-                            Q${count}. ${q.question}
-                        </h3>
-
-                        <textarea
-                        id="answer_${docSnap.id}"
-                        rows="5"
-                        placeholder="Write your answer here"></textarea>
-
-                    </div>
-
-                    `;
-                }
-
-                count++;
+                        <h3>Q${count}. ${q.question}</h3>
+                        <label><input type="radio" name="${docSnap.id}" value="A"> ${q.optionA}</label>
+                        <label><input type="radio" name="${docSnap.id}" value="B"> ${q.optionB}</label>
+                        <label><input type="radio" name="${docSnap.id}" value="C"> ${q.optionC}</label>
+                        <label><input type="radio" name="${docSnap.id}" value="D"> ${q.optionD}</label>
+                    </div>`;
             }
 
+            if (q.questionType === "multiple") {
+                container.innerHTML += `
+                    <div class="question-box">
+                        <h3>Q${count}. ${q.question}</h3>
+                        <label><input type="checkbox" name="${docSnap.id}" value="A"> ${q.optionA}</label>
+                        <label><input type="checkbox" name="${docSnap.id}" value="B"> ${q.optionB}</label>
+                        <label><input type="checkbox" name="${docSnap.id}" value="C"> ${q.optionC}</label>
+                        <label><input type="checkbox" name="${docSnap.id}" value="D"> ${q.optionD}</label>
+                    </div>`;
+            }
+
+            if (q.questionType === "sentence") {
+                container.innerHTML += `
+                    <div class="question-box">
+                        <h3>Q${count}. ${q.question}</h3>
+                        <textarea id="answer_${docSnap.id}" rows="5" placeholder="Write your answer here"></textarea>
+                    </div>`;
+            }
+
+            count++;
         });
 
-        if (
-            questions.length === 0
-        ) {
-
-            container.innerHTML =
-
-            `<h3>No Questions Found</h3>`;
+        if (questions.length === 0) {
+            container.innerHTML = "<h3>No Questions Found</h3>";
         }
 
+        startTimer();
+    } catch (error) {
+        console.error("Question Load Error:", error);
+        document.getElementById("questionContainer").innerHTML =
+            "<h3>Error Loading Questions</h3>";
     }
-    catch (error) {
-
-        console.error(error);
-
-        document.getElementById(
-            "questionContainer"
-        ).innerHTML =
-
-        "<h3>Error Loading Questions</h3>";
-    }
-
 }
 
 // ==========================
 // TIMER
 // ==========================
-
 function startTimer() {
+    let timeLeft = totalDuration * 60;
+    const timer = document.getElementById("timer");
 
-    let timeLeft =
-        totalDuration * 60;
+    const interval = setInterval(() => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
 
-    const timer =
-        document.getElementById(
-            "timer"
-        );
+        if (timer) {
+            timer.innerHTML = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+        }
 
-    const interval =
-        setInterval(() => {
+        timeLeft--;
 
-            const minutes =
-                Math.floor(
-                    timeLeft / 60
-                );
-
-            const seconds =
-                timeLeft % 60;
-
-            timer.innerHTML =
-
-                `${minutes}:${
-                    seconds < 10
-                    ? "0" + seconds
-                    : seconds
-                }`;
-
-            timeLeft--;
-
-            if (
-                timeLeft < 0
-            ) {
-
-                clearInterval(
-                    interval
-                );
-
-                alert(
-                    "Time Up! Assessment Submitted."
-                );
-
-                submitExam();
-            }
-
-        }, 1000);
-
+        if (timeLeft < 0) {
+            clearInterval(interval);
+            alert("Time Up! Assessment Submitted.");
+            submitExam();
+        }
+    }, 1000);
 }
 
 // ==========================
 // SUBMIT EXAM
 // ==========================
-
-window.submitExam =
-async function () {
-
+window.submitExam = async function () {
     try {
-
-       let score = 0;
-let totalMarks = 0;
-let correctAnswers = 0;
+        let automaticMarks = 0;
+        let totalMarks = 0;
+        let correctAnswers = 0;
         const subjectiveAnswers = [];
+        const review = [];
 
         questions.forEach(q => {
+            const marks = Number(q.marks || 1);
+            totalMarks += marks;
 
-            totalMarks +=
-                Number(
-                    q.marks || 1
-                );
-
+            // ==========================
             // MCQ
+            // ==========================
+            if (!q.questionType || q.questionType === "mcq") {
+                const selected = document.querySelector(`input[name="${q.id}"]:checked`);
+                const selectedAnswer = selected ? selected.value : "";
+                const earned = selectedAnswer === q.answer ? marks : 0;
 
-            if (
-                !q.questionType ||
-                q.questionType === "mcq"
-            ) {
+                automaticMarks += earned;
+                if (earned > 0) correctAnswers++;
 
-                const selected =
-                    document.querySelector(
-                        `input[name="${q.id}"]:checked`
-                    );
-
-                if (
-                    selected &&
-                    selected.value === q.answer
-                ) {
-                score += Number(q.marks || 1);
-                correctAnswers++;
-                
-                }
+                review.push({
+                    questionId: q.id,
+                    question: q.question || "",
+                    questionType: "mcq",
+                    selectedAnswer,
+                    correctAnswer: q.answer || "",
+                    marks: earned,
+                    totalMarks: marks
+                });
             }
 
+            // ==========================
             // MULTIPLE ANSWER
-
-            if (
-                q.questionType === "multiple"
-            ) {
-
+            // ==========================
+            if (q.questionType === "multiple") {
                 const selectedAnswers = [];
 
-                document
-                .querySelectorAll(
-                    `input[name="${q.id}"]:checked`
-                )
-                .forEach(box => {
-
-                    selectedAnswers.push(
-                        box.value
-                    );
-
+                document.querySelectorAll(`input[name="${q.id}"]:checked`).forEach(box => {
+                    selectedAnswers.push(box.value);
                 });
 
-               const correctOptions = q.answers || [];
-
+                const correctOptions = q.answers || [];
                 const isCorrect =
-    selectedAnswers.length === correctOptions.length &&
-    selectedAnswers.every(answer =>
-        correctOptions.includes(answer)
-    );
+                    selectedAnswers.length === correctOptions.length &&
+                    selectedAnswers.every(answer => correctOptions.includes(answer));
 
-               if (isCorrect) {
+                const earned = isCorrect ? marks : 0;
+                automaticMarks += earned;
+                if (isCorrect) correctAnswers++;
 
-    score += Number(q.marks || 1);
-
-    correctAnswers++;
-
-                }
+                review.push({
+                    questionId: q.id,
+                    question: q.question || "",
+                    questionType: "multiple",
+                    selectedAnswer: selectedAnswers.join(", "),
+                    correctAnswer: correctOptions.join(", "),
+                    marks: earned,
+                    totalMarks: marks
+                });
             }
 
-            // SENTENCE ANSWERS
-
-            if (
-                q.questionType === "sentence"
-            ) {
-
-                const answerBox =
-                    document.getElementById(
-                        `answer_${q.id}`
-                    );
+            // ==========================
+            // DESCRIPTIVE / SENTENCE
+            // ==========================
+            if (q.questionType === "sentence") {
+                const answerBox = document.getElementById(`answer_${q.id}`);
+                const studentAnswer = answerBox ? answerBox.value.trim() : "";
 
                 subjectiveAnswers.push({
+                    questionId: q.id,
+                    question: q.question || "",
+                    modelAnswer: q.modelAnswer || "",
+                    studentAnswer,
+                    maxMarks: marks,
+                    teacherMarks: null,
+                    teacherRemark: "",
+                    evaluationStatus: "pending"
+                });
 
-                    questionId:
-                        q.id,
-
-                    question:
-                        q.question,
-
-                    modelAnswer:
-                        q.modelAnswer || "",
-
-                    studentAnswer:
-                        answerBox
-                        ? answerBox.value
-                        : "",
-
-                    marks:
-                        q.marks
-
+                review.push({
+                    questionId: q.id,
+                    question: q.question || "",
+                    questionType: "sentence",
+                    selectedAnswer: studentAnswer,
+                    correctAnswer: q.modelAnswer || "",
+                    marks: 0,
+                    totalMarks: marks
                 });
             }
-
         });
 
-        const role =
-            localStorage.getItem(
-                "role"
-            );
-
+        const role = localStorage.getItem("role") || localStorage.getItem("participantRole");
         const participantName =
-
             role === "teacher"
-            ? localStorage.getItem(
-                "teacherName"
-              )
-            : localStorage.getItem(
-                "studentName"
-              );
+                ? localStorage.getItem("teacherName")
+                : localStorage.getItem("studentName");
 
-        const studentClass =
-            localStorage.getItem(
-                "studentClass"
-            ) || "";
+        const studentClass = localStorage.getItem("studentClass") || "";
+        const studentSection = localStorage.getItem("studentSection") || "";
+        const hasDescriptiveQuestions = subjectiveAnswers.length > 0;
 
-        const studentSection =
-            localStorage.getItem(
-                "studentSection"
-            ) || "";
-
-        const percentage =
-
-            totalMarks > 0
-            ? (
-                (score / totalMarks) * 100
-              ).toFixed(2)
+        // Descriptive marks are deliberately NOT included until the teacher evaluates them.
+        const initialScore = automaticMarks;
+        const initialPercentage = totalMarks > 0
+            ? Number(((initialScore / totalMarks) * 100).toFixed(2))
             : 0;
 
-  await addDoc(
-    collection(db, "results"),
-    {
+        await addDoc(collection(db, "results"), {
+            examId,
+            examName: currentExam?.examName || "",
+            subject: currentExam?.subject || "",
+            examClass: currentExam?.examClass || "",
+            studentName: participantName || "",
+            studentClass,
+            studentSection,
+            section: studentSection,
+            rollNo: localStorage.getItem("rollNo") || "",
 
-        examId: examId,
+            // Scoring
+            score: initialScore,
+            automaticMarks,
+            descriptiveMarks: 0,
+            totalMarks,
+            correctAnswers,
+            totalQuestions: questions.length,
+            percentage: initialPercentage,
 
-        examName: currentExam?.examName || "",
+            // Teacher evaluation pipeline
+            hasDescriptiveQuestions,
+            subjectiveAnswers,
+            review,
+            reviewStatus: hasDescriptiveQuestions ? "pending" : "completed",
+            resultPublished: !hasDescriptiveQuestions,
 
-        subject: currentExam?.subject || "",
+            submittedAt: new Date().toISOString()
+        });
 
-        examClass: currentExam?.examClass || "",
+        alert(
+            hasDescriptiveQuestions
+                ? "Assessment Submitted Successfully. Descriptive answers are pending teacher evaluation."
+                : "Assessment Submitted Successfully"
+        );
 
-        studentName:
-    participantName || "",
-
-studentClass:
-    studentClass,
-
-section:
-    studentSection,
-
-        rollNo:
-            localStorage.getItem("rollNo") || "",
-
-        score: score,
-
-        totalMarks: totalMarks,
-
-        correctAnswers: correctAnswers,
-
-        totalQuestions: questions.length,
-
-        percentage: percentage,
-
-        submittedAt: new Date().toISOString()
-
+        window.location.href = "dashboard.html";
+    } catch (error) {
+        console.error("Submit Error:", error);
+        alert("Failed To Submit Assessment\n\n" + error.message);
     }
-);
-
-alert("Assessment Submitted Successfully");
-
-window.location.href = "dashboard.html";
-}
-catch (error) {
-
-    console.error(error);
-
-    alert(
-        "Failed To Submit Assessment"
-    );
-
-}
-
 };
 
 // ==========================
 // START
 // ==========================
-
 if (!examId) {
-
-    alert(
-        "No Assessment Selected"
-    );
-
-    window.location.href =
-        "dashboard.html";
-
-}
-else {
-
+    alert("No Assessment Selected");
+    window.location.href = "dashboard.html";
+} else {
     loadQuestions();
-
 }
