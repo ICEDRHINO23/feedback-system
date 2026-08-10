@@ -10,132 +10,105 @@ import {
 
 let allQuestions = [];
 let currentQuestionId = "";
-
-// ======================================
-// HELPERS
-// ======================================
+let examMap = {};
 
 function normalize(value) {
-    return String(value ?? "")
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, " ");
+    return String(value ?? "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 function normalizeQuestionType(value) {
     const type = normalize(value);
-
-    if (!type || type === "mcq" || type === "multiple choice" || type === "multiple-choice") {
-        return "mcq";
-    }
-
-    if (type === "multiple" || type === "multiple answer" || type === "multiple-answer" || type === "multiple answers") {
-        return "multiple";
-    }
-
-    if (type === "sentence" || type === "subjective" || type === "descriptive" || type === "descriptive answer") {
-        return "sentence";
-    }
-
+    if (!type || ["mcq", "multiple choice", "multiple-choice"].includes(type)) return "mcq";
+    if (["multiple", "multiple answer", "multiple-answer", "multiple answers"].includes(type)) return "multiple";
+    if (["sentence", "subjective", "descriptive", "descriptive answer"].includes(type)) return "sentence";
     return type;
 }
 
-// ======================================
-// LOAD QUESTIONS
-// ======================================
-
-async function loadQuestions() {
-
-    const table = document.getElementById("questionTable");
-
+async function loadExamMap() {
     try {
-
-        table.innerHTML = `
-        <tr>
-            <td colspan="6">Loading Questions...</td>
-        </tr>`;
-
-        const snapshot = await getDocs(collection(db, "questions"));
-
-        allQuestions = [];
-
-        snapshot.forEach((docSnap) => {
-            allQuestions.push({
-                id: docSnap.id,
-                ...docSnap.data()
-            });
+        const snapshot = await getDocs(collection(db, "exams"));
+        examMap = {};
+        snapshot.forEach(docSnap => {
+            examMap[docSnap.id] = docSnap.data();
         });
-
-        allQuestions.sort((a, b) =>
-            (a.question || "").localeCompare(b.question || "")
-        );
-
-        loadFilters();
-        filterQuestions();
-
     } catch (error) {
-
-        console.error(error);
-
-        table.innerHTML = `
-        <tr>
-            <td colspan="6">Error Loading Questions</td>
-        </tr>`;
+        console.warn("Exam metadata could not be loaded:", error);
+        examMap = {};
     }
 }
 
-// ======================================
-// RENDER TABLE
-// ======================================
+function getQuestionClass(q) {
+    const direct = String(q.class ?? q.examClass ?? q.className ?? "").trim();
+    if (direct) return direct;
+    const exam = examMap[q.examId];
+    return exam ? String(exam.examClass ?? exam.class ?? exam.className ?? "").trim() : "";
+}
+
+function getQuestionSubject(q) {
+    const direct = String(q.subject ?? q.examSubject ?? "").trim();
+    if (direct) return direct;
+    const exam = examMap[q.examId];
+    return exam ? String(exam.subject ?? exam.examSubject ?? "").trim() : "";
+}
+
+async function loadQuestions() {
+    const table = document.getElementById("questionTable");
+    try {
+        table.innerHTML = `<tr><td colspan="6">Loading Questions...</td></tr>`;
+        await loadExamMap();
+        const snapshot = await getDocs(collection(db, "questions"));
+        allQuestions = [];
+
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            allQuestions.push({
+                id: docSnap.id,
+                ...data,
+                _class: getQuestionClass(data),
+                _subject: getQuestionSubject(data),
+                _type: normalizeQuestionType(data.questionType ?? data.type)
+            });
+        });
+
+        allQuestions.sort((a, b) => (a.question || "").localeCompare(b.question || ""));
+        loadFilters();
+        filterQuestions();
+    } catch (error) {
+        console.error(error);
+        table.innerHTML = `<tr><td colspan="6">Error Loading Questions</td></tr>`;
+    }
+}
 
 function renderQuestions(list) {
-
     const table = document.getElementById("questionTable");
-
     table.innerHTML = "";
 
-    if (list.length === 0) {
-        table.innerHTML = `
-        <tr>
-            <td colspan="6">No Questions Found</td>
-        </tr>`;
+    if (!list.length) {
+        table.innerHTML = `<tr><td colspan="6">No Questions Found</td></tr>`;
         return;
     }
 
     list.forEach(q => {
-
         table.innerHTML += `
         <tr>
             <td>${q.question || "-"}</td>
-            <td>${q.subject || "-"}</td>
-            <td>${q.class || "-"}</td>
-            <td>${normalizeQuestionType(q.questionType)}</td>
+            <td>${q._subject || q.subject || "-"}</td>
+            <td>${q._class || q.class || "-"}</td>
+            <td>${q._type}</td>
             <td>${q.marks || 1}</td>
             <td>
-                <button class="action-btn edit-btn" onclick="editQuestion('${q.id}')">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="action-btn preview-btn" onclick="previewQuestion('${q.id}')">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="action-btn delete-btn" onclick="deleteQuestion('${q.id}')">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <button class="action-btn edit-btn" onclick="editQuestion('${q.id}')"><i class="fas fa-edit"></i></button>
+                <button class="action-btn preview-btn" onclick="previewQuestion('${q.id}')"><i class="fas fa-eye"></i></button>
+                <button class="action-btn delete-btn" onclick="deleteQuestion('${q.id}')"><i class="fas fa-trash"></i></button>
             </td>
         </tr>`;
     });
 }
 
-// ======================================
-// LOAD FILTERS
-// ======================================
-
 function loadFilters() {
-
     const classFilter = document.getElementById("classFilter");
     const subjectFilter = document.getElementById("subjectFilter");
     const typeFilter = document.getElementById("typeFilter");
-
     if (!classFilter || !subjectFilter || !typeFilter) return;
 
     const previousClass = classFilter.value;
@@ -148,127 +121,73 @@ function loadFilters() {
         <option value="">Question Type</option>
         <option value="mcq">MCQ</option>
         <option value="multiple">Multiple Answer</option>
-        <option value="sentence">Subjective</option>
-    `;
+        <option value="sentence">Subjective</option>`;
 
-    const classes = [...new Set(
-        allQuestions
-            .map(q => String(q.class ?? "").trim())
-            .filter(Boolean)
-    )].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    const classes = [...new Set(allQuestions.map(q => q._class).filter(Boolean))]
+        .sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }));
 
-    const subjects = [...new Set(
-        allQuestions
-            .map(q => String(q.subject ?? "").trim())
-            .filter(Boolean)
-    )].sort((a, b) => a.localeCompare(b));
+    const subjects = [...new Set(allQuestions.map(q => q._subject).filter(Boolean))]
+        .sort((a, b) => String(a).localeCompare(String(b)));
 
     classes.forEach(cls => {
-        classFilter.innerHTML += `<option value="${cls}">${cls}</option>`;
+        const option = document.createElement("option");
+        option.value = cls;
+        option.textContent = `Class ${cls}`;
+        classFilter.appendChild(option);
     });
 
     subjects.forEach(subject => {
-        subjectFilter.innerHTML += `<option value="${subject}">${subject}</option>`;
+        const option = document.createElement("option");
+        option.value = subject;
+        option.textContent = subject;
+        subjectFilter.appendChild(option);
     });
 
-    // Preserve the user's selected filters after the list is rebuilt.
-    if ([...classFilter.options].some(o => o.value === previousClass)) {
-        classFilter.value = previousClass;
-    }
-
-    if ([...subjectFilter.options].some(o => o.value === previousSubject)) {
-        subjectFilter.value = previousSubject;
-    }
-
-    if ([...typeFilter.options].some(o => o.value === previousType)) {
-        typeFilter.value = previousType;
-    }
+    if ([...classFilter.options].some(o => o.value === previousClass)) classFilter.value = previousClass;
+    if ([...subjectFilter.options].some(o => o.value === previousSubject)) subjectFilter.value = previousSubject;
+    if ([...typeFilter.options].some(o => o.value === previousType)) typeFilter.value = previousType;
 }
 
-// ======================================
-// FILTER QUESTIONS
-// ======================================
-
 function filterQuestions() {
-
-    const searchBox = document.getElementById("searchBox");
-    const classFilter = document.getElementById("classFilter");
-    const subjectFilter = document.getElementById("subjectFilter");
-    const typeFilter = document.getElementById("typeFilter");
-
-    if (!searchBox || !classFilter || !subjectFilter || !typeFilter) return;
-
-    const search = normalize(searchBox.value);
-    const classValue = normalize(classFilter.value);
-    const subjectValue = normalize(subjectFilter.value);
-    const typeValue = normalizeQuestionType(typeFilter.value);
-    const typeSelected = normalize(typeFilter.value) !== "";
+    const search = normalize(document.getElementById("searchBox")?.value);
+    const classValue = normalize(document.getElementById("classFilter")?.value);
+    const subjectValue = normalize(document.getElementById("subjectFilter")?.value);
+    const typeRaw = normalize(document.getElementById("typeFilter")?.value);
+    const typeSelected = typeRaw !== "";
+    const typeValue = normalizeQuestionType(typeRaw);
 
     const filtered = allQuestions.filter(q => {
-
         const searchMatch = normalize(q.question).includes(search);
-
-        const classMatch =
-            classValue === "" ||
-            normalize(q.class) === classValue;
-
-        const subjectMatch =
-            subjectValue === "" ||
-            normalize(q.subject) === subjectValue;
-
-        const typeMatch =
-            !typeSelected ||
-            normalizeQuestionType(q.questionType) === typeValue;
-
+        const classMatch = !classValue || normalize(q._class) === classValue;
+        const subjectMatch = !subjectValue || normalize(q._subject) === subjectValue;
+        const typeMatch = !typeSelected || q._type === typeValue;
         return searchMatch && classMatch && subjectMatch && typeMatch;
     });
 
     renderQuestions(filtered);
 }
 
-// ======================================
-// PREVIEW QUESTION
-// ======================================
-
 window.previewQuestion = function (id) {
-
     const question = allQuestions.find(q => q.id === id);
     if (!question) return;
-
     document.getElementById("previewQuestion").innerHTML = question.question || "";
-
     let optionsHTML = "";
-
     if (question.optionA) optionsHTML += `<p>A. ${question.optionA}</p>`;
     if (question.optionB) optionsHTML += `<p>B. ${question.optionB}</p>`;
     if (question.optionC) optionsHTML += `<p>C. ${question.optionC}</p>`;
     if (question.optionD) optionsHTML += `<p>D. ${question.optionD}</p>`;
-
     document.getElementById("previewOptions").innerHTML = optionsHTML;
     document.getElementById("previewAnswer").innerHTML = question.answer || "-";
     document.getElementById("previewMarks").innerHTML = question.marks || 1;
     document.getElementById("previewModal").style.display = "block";
 };
 
-// ======================================
-// CLOSE PREVIEW
-// ======================================
-
-window.closePreview = function () {
-    document.getElementById("previewModal").style.display = "none";
-};
-
-// ======================================
-// EDIT QUESTION
-// ======================================
+window.closePreview = function () { document.getElementById("previewModal").style.display = "none"; };
 
 window.editQuestion = function (id) {
-
     const question = allQuestions.find(q => q.id === id);
     if (!question) return;
-
     currentQuestionId = id;
-
     document.getElementById("editQuestion").value = question.question || "";
     document.getElementById("editOptionA").value = question.optionA || "";
     document.getElementById("editOptionB").value = question.optionB || "";
@@ -279,125 +198,61 @@ window.editQuestion = function (id) {
     document.getElementById("editModal").style.display = "block";
 };
 
-// ======================================
-// CLOSE EDIT
-// ======================================
-
-window.closeEdit = function () {
-    document.getElementById("editModal").style.display = "none";
-};
-
-// ======================================
-// UPDATE QUESTION
-// ======================================
+window.closeEdit = function () { document.getElementById("editModal").style.display = "none"; };
 
 async function updateQuestion() {
-
-    if (currentQuestionId === "") {
-        alert("No Question Selected");
-        return;
-    }
-
+    if (!currentQuestionId) { alert("No Question Selected"); return; }
     try {
-
-        await updateDoc(
-            doc(db, "questions", currentQuestionId),
-            {
-                question: document.getElementById("editQuestion").value,
-                optionA: document.getElementById("editOptionA").value,
-                optionB: document.getElementById("editOptionB").value,
-                optionC: document.getElementById("editOptionC").value,
-                optionD: document.getElementById("editOptionD").value,
-                answer: document.getElementById("editAnswer").value,
-                marks: Number(document.getElementById("editMarks").value)
-            }
-        );
-
+        await updateDoc(doc(db, "questions", currentQuestionId), {
+            question: document.getElementById("editQuestion").value,
+            optionA: document.getElementById("editOptionA").value,
+            optionB: document.getElementById("editOptionB").value,
+            optionC: document.getElementById("editOptionC").value,
+            optionD: document.getElementById("editOptionD").value,
+            answer: document.getElementById("editAnswer").value,
+            marks: Number(document.getElementById("editMarks").value)
+        });
         closeEdit();
         await loadQuestions();
         alert("Question Updated Successfully");
-
     } catch (error) {
         console.error(error);
         alert("Unable To Update Question");
     }
 }
 
-// ======================================
-// DELETE QUESTION
-// ======================================
-
 window.deleteQuestion = async function (id) {
-
     const question = allQuestions.find(q => q.id === id);
     if (!question) return;
-
-    const confirmDelete = confirm(
-        "Delete this question?\n\n" +
-        question.question +
-        "\n\nThis action cannot be undone."
-    );
-
-    if (!confirmDelete) return;
-
+    if (!confirm("Delete this question?\n\n" + question.question + "\n\nThis action cannot be undone.")) return;
     try {
-
         await deleteDoc(doc(db, "questions", id));
-
         allQuestions = allQuestions.filter(q => q.id !== id);
-
         loadFilters();
         filterQuestions();
-
         alert("Question Deleted Successfully.");
-
     } catch (error) {
         console.error(error);
         alert("Unable To Delete Question.");
     }
 };
 
-// ======================================
-// CLOSE MODALS WHEN CLICKING OUTSIDE
-// ======================================
-
 document.addEventListener("click", function (event) {
-
     const preview = document.getElementById("previewModal");
     const edit = document.getElementById("editModal");
-
     if (event.target === preview) closePreview();
     if (event.target === edit) closeEdit();
 });
 
-// ======================================
-// EVENTS
-// ======================================
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    const searchBox = document.getElementById("searchBox");
-    const classFilter = document.getElementById("classFilter");
-    const subjectFilter = document.getElementById("subjectFilter");
-    const typeFilter = document.getElementById("typeFilter");
-    const updateBtn = document.getElementById("updateBtn");
-
-    if (searchBox) searchBox.addEventListener("input", filterQuestions);
-    if (classFilter) classFilter.addEventListener("change", filterQuestions);
-    if (subjectFilter) subjectFilter.addEventListener("change", filterQuestions);
-    if (typeFilter) typeFilter.addEventListener("change", filterQuestions);
-    if (updateBtn) updateBtn.addEventListener("click", updateQuestion);
-
-    loadQuestions();
+document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") { closePreview(); closeEdit(); }
 });
 
-// ======================================
-// ESC KEY
-// ======================================
-
-document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") {
-        closePreview();
-        closeEdit();
-    }
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("searchBox")?.addEventListener("input", filterQuestions);
+    document.getElementById("classFilter")?.addEventListener("change", filterQuestions);
+    document.getElementById("subjectFilter")?.addEventListener("change", filterQuestions);
+    document.getElementById("typeFilter")?.addEventListener("change", filterQuestions);
+    document.getElementById("updateBtn")?.addEventListener("click", updateQuestion);
+    loadQuestions();
 });
