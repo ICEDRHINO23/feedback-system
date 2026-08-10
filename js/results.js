@@ -50,6 +50,7 @@ function renderResults(results) {
         const total = Number(result.totalMarks || 0);
         const pct = Number(result.percentage || 0).toFixed(2);
         const date = result.submittedAt ? new Date(result.submittedAt).toLocaleString("en-IN") : "-";
+        const reportUrl = `student-.html?id=${encodeURIComponent(result.id)}`;
         return `<tr>
             <td>${index+1}</td>
             <td>${escapeHtml(getStudent(result))}</td>
@@ -59,7 +60,7 @@ function renderResults(results) {
             <td>${escapeHtml(getSection(result))}</td>
             <td>${score}</td><td>${total}</td><td>${pct}%</td><td>${escapeHtml(date)}</td>
             <td class="result-actions">
-                <button type="button" class="action-btn preview-btn report-action" onclick="openIndividualReport('${result.id}')"><i class="fas fa-file-lines"></i><span>Report</span></button>
+                <a class="action-btn preview-btn report-action" href="${reportUrl}" target="_blank" rel="noopener noreferrer" aria-label="Open individual report for ${escapeHtml(getStudent(result))}"><i class="fas fa-file-lines"></i><span>Report</span></a>
                 <button type="button" class="delete-btn" onclick="deleteResult('${result.id}')"><i class="fas fa-trash"></i> Delete</button>
             </td>
         </tr>`;
@@ -104,20 +105,6 @@ function filterResults() {
     });
     renderResults(filtered); updateDashboard(filtered);
 }
-
-// Results page is /admin/results.html, while the individual report is /admin/student-.html.
-// Keep the path explicit so GitHub Pages does not resolve it against the repository root.
-window.openIndividualReport = function(id) {
-    if (!id) {
-        alert("Result ID not found.");
-        return;
-    }
-    const reportUrl = `student-.html?id=${encodeURIComponent(id)}`;
-    const reportWindow = window.open(reportUrl, "_blank");
-    if (!reportWindow) {
-        alert("The report could not be opened. Please allow pop-ups for this site.");
-    }
-};
 
 window.deleteResult = async function(id) {
     if(!confirm("Delete this result?")) return;
