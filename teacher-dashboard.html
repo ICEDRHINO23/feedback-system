@@ -1,30 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teacher Dashboard</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{background:#f4f6f9}.header{background:#001f5b;color:white;padding:20px;text-align:center}.container{width:95%;max-width:1200px;margin:20px auto}.welcome-card,.card,.assessment-card{background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.1)}.welcome-card{padding:20px;margin-bottom:20px}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:20px}.card{padding:25px;text-align:center}.card i{font-size:40px;color:#001f5b;margin-bottom:10px}.card h2{font-size:32px;color:#001f5b}.card p{color:#666}.section-title{font-size:24px;margin:20px 0 15px;color:#001f5b}#assessmentList,#pendingEvaluationList{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}.assessment-card{padding:20px}.assessment-card h3{color:#001f5b;margin-bottom:10px}.assessment-card p{margin:5px 0}.start-btn{margin-top:10px;background:#001f5b;color:white;border:none;padding:10px 15px;border-radius:5px;cursor:pointer}.logout-btn{margin-top:20px;background:red;color:white;border:none;padding:12px 20px;border-radius:5px;cursor:pointer}.footer{text-align:center;margin-top:30px;color:#666}
-</style>
-</head>
-<body>
-<div class="header"><h1>AHPS Assessment Management System</h1><p>Teacher Dashboard</p></div>
-<div class="container">
-<div class="welcome-card"><h2 id="teacherName">Welcome Teacher</h2><p>Subject: <span id="teacherSubject"></span></p></div>
-<div class="stats"><div class="card"><i class="fas fa-file-alt"></i><h2 id="examCount">0</h2><p>Available Assessments</p></div><div class="card"><i class="fas fa-chart-line"></i><h2 id="resultCount">0</h2><p>Completed Assessments</p></div></div>
-<div class="section-title">Teacher Assessments</div><div id="assessmentList">Loading Assessments...</div>
-<div class="section-title">Pending Evaluations</div><div id="pendingEvaluationList">Loading Pending Evaluations...</div>
-<button class="logout-btn" onclick="logout()">Logout</button>
-</div>
-<div class="footer">© 2026 Academic Heights Public School</div>
-<script src="js/route-guard.js"></script>
-<script>
-document.getElementById("teacherName").innerHTML="Welcome "+(localStorage.getItem("teacherName")||"Teacher");
-document.getElementById("teacherSubject").innerHTML=localStorage.getItem("teacherSubject")||"";
-function logout(){localStorage.clear();window.location.href="teacher-login.html";}
-</script>
-<script type="module" src="js/teacher-dashboard.js"></script>
-</body>
-</html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Teacher Dashboard | AHPS</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"><style>
+:root{--navy:#06245f;--navy2:#031b4d;--blue:#155eef;--gold:#f5bd35;--green:#159447;--orange:#d97706;--bg:#f3f6fb;--text:#102044;--muted:#667085;--line:#e4e9f2}. *{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#eef3fb,#f9fbfd);color:var(--text);min-height:100vh}.header{background:linear-gradient(115deg,var(--navy2),var(--navy));color:#fff;padding:15px 5%;box-shadow:0 8px 25px rgba(3,27,77,.16)}.header-inner{max-width:1250px;margin:auto;display:flex;align-items:center;gap:18px}.header-logo{width:62px;height:62px;object-fit:contain;background:#fff;border-radius:15px;padding:4px}.ras-logo{width:62px;height:62px;object-fit:contain;margin-left:auto}.header-title{flex:1}.header h1{font-size:25px}.header p{font-size:12px;color:#d9e5ff;margin-top:4px}.container{max-width:1250px;margin:28px auto;padding:0 4% 35px}.welcome-card{background:linear-gradient(120deg,#fff,#f8fbff);border:1px solid var(--line);border-radius:22px;padding:25px 28px;box-shadow:0 12px 35px rgba(16,32,68,.08);position:relative;overflow:hidden}.welcome-card:after{content:"";position:absolute;right:-75px;top:-75px;width:180px;height:180px;border-radius:50%;background:rgba(245,189,53,.12)}.welcome-card h2{font-size:28px;color:var(--navy);position:relative;z-index:1}.teacher-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;position:relative;z-index:1}.meta-pill{background:#edf4ff;color:#315b9f;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:800}.stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 9px 25px rgba(16,32,68,.07);display:flex;align-items:center;gap:16px}.card-icon{width:50px;height:50px;border-radius:14px;background:#edf4ff;color:var(--blue);display:grid;place-items:center;font-size:21px}.card:nth-child(2) .card-icon{background:#eefaf3;color:var(--green)}.card h2{font-size:29px;color:var(--navy)}.card p{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;font-weight:800;margin-top:3px}.section-title{font-size:18px;font-weight:850;color:var(--navy);margin:28px 0 14px}#assessmentList,#pendingEvaluationList{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px}.assessment-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 9px 25px rgba(16,32,68,.07)}.assessment-card h3{font-size:17px;color:var(--navy);margin-bottom:12px}.assessment-card p{font-size:13px;color:#667085;margin:7px 0}.assessment-card p strong{color:#344054}.start-btn{margin-top:12px;width:100%;border:0;background:var(--navy);color:#fff;padding:11px 15px;border-radius:10px;cursor:pointer;font-weight:800}.start-btn:hover{background:#0a3179}.logout-btn{display:block;margin:28px auto 0;background:#d92d20;color:#fff;border:0;padding:11px 24px;border-radius:10px;cursor:pointer;font-weight:800}.footer{text-align:center;color:#7b8498;font-size:11px;padding-bottom:22px}@media(max-width:650px){.header{padding:12px 14px}.header-logo,.ras-logo{width:48px;height:48px}.header h1{font-size:18px}.header p{font-size:10px}.container{padding:0 14px 25px}.stats{grid-template-columns:1fr}.header-inner{gap:9px}}
+</style></head><body>
+<header class="header"><div class="header-inner"><img class="header-logo" src="assets/ahps-logo.png" alt="Academic Heights Public School"><div class="header-title"><h1>AHPS Assessment Management System</h1><p>Teacher Dashboard</p></div><img class="ras-logo" src="assets/ras-logo.jpeg" alt="RAS Systems"></div></header>
+<main class="container"><section class="welcome-card"><h2>Welcome, <span id="teacherName">Teacher</span></h2><div class="teacher-meta"><span class="meta-pill"><i class="fas fa-book"></i> Subject: <span id="teacherSubject"></span></span><span class="meta-pill"><i class="fas fa-shield-halved"></i> Teacher Portal</span></div></section>
+<section class="stats"><div class="card"><div class="card-icon"><i class="fas fa-file-circle-check"></i></div><div><h2 id="examCount">0</h2><p>Available Assessments</p></div></div><div class="card"><div class="card-icon"><i class="fas fa-chart-line"></i></div><div><h2 id="resultCount">0</h2><p>Completed Assessments</p></div></div></section>
+<div class="section-title"><i class="fas fa-clipboard-list"></i> Teacher Assessments</div><section id="assessmentList">Loading Assessments...</section>
+<div class="section-title"><i class="fas fa-user-check"></i> Pending Evaluations</div><section id="pendingEvaluationList">Loading Pending Evaluations...</section>
+<button class="logout-btn" onclick="logout()"><i class="fas fa-right-from-bracket"></i> Logout</button></main><div class="footer">Academic Heights Public School, Chikhali, Pune, Maharashtra<br>© 2026 AHPS • Powered by RAS SYSTEMS</div>
+<script src="js/route-guard.js"></script><script>document.getElementById("teacherName").textContent=localStorage.getItem("teacherName")||"Teacher";document.getElementById("teacherSubject").textContent=localStorage.getItem("teacherSubject")||"";function logout(){localStorage.clear();window.location.href="teacher-login.html";}</script><script type="module" src="js/teacher-dashboard.js"></script>
+</body></html>
