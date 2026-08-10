@@ -6,7 +6,7 @@
 <title>Student Management</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#f4f6f9}.header{background:#001f5b;color:white;padding:15px;text-align:center}.container{width:95%;margin:20px auto}.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}input,select{padding:10px;border:1px solid #ccc;border-radius:5px}table{width:100%;border-collapse:collapse;background:white}table th{background:#001f5b;color:white;padding:12px}table td{padding:10px;border:1px solid #ddd;text-align:center}.action-btn{padding:6px 10px;border:none;border-radius:4px;cursor:pointer;color:white;margin:2px}.edit{background:#1565c0}.reset{background:#6f42c1}.disable{background:#ff9800}.delete{background:#dc3545}.back-btn{display:inline-block;margin-bottom:15px;background:#001f5b;color:white;padding:10px 15px;text-decoration:none;border-radius:5px}.modal{display:none;position:fixed;z-index:1000;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:20px}.modal-box{background:white;width:min(520px,100%);border-radius:12px;padding:25px;box-shadow:0 10px 30px rgba(0,0,0,.25)}.modal-box h2{color:#001f5b;margin-bottom:18px}.form-group{margin-bottom:12px}.form-group label{display:block;font-weight:bold;margin-bottom:5px}.form-group input,.form-group select{width:100%;padding:11px}.modal-actions{display:flex;gap:10px;margin-top:18px}.save-btn,.cancel-btn{border:none;padding:11px 18px;border-radius:5px;color:white;cursor:pointer}.save-btn{background:#198754}.cancel-btn{background:#6c757d}.password-note{font-size:13px;color:#666;margin-top:8px}
+body{background:#f4f6f9}.header{background:#001f5b;color:white;padding:15px;text-align:center}.container{width:95%;margin:20px auto}.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}input,select{padding:10px;border:1px solid #ccc;border-radius:5px}#searchBox{min-width:260px}table{width:100%;border-collapse:collapse;background:white}table th{background:#001f5b;color:white;padding:12px}table td{padding:10px;border:1px solid #ddd;text-align:center}.action-btn{padding:6px 10px;border:none;border-radius:4px;cursor:pointer;color:white;margin:2px}.edit{background:#1565c0}.reset{background:#6f42c1}.disable{background:#ff9800}.delete{background:#dc3545}.clear-btn{background:#495057;color:white;border:none;border-radius:5px;padding:10px 14px;cursor:pointer}.back-btn{display:inline-block;margin-bottom:15px;background:#001f5b;color:white;padding:10px 15px;text-decoration:none;border-radius:5px}.modal{display:none;position:fixed;z-index:1000;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:20px}.modal-box{background:white;width:min(520px,100%);border-radius:12px;padding:25px;box-shadow:0 10px 30px rgba(0,0,0,.25)}.modal-box h2{color:#001f5b;margin-bottom:18px}.form-group{margin-bottom:12px}.form-group label{display:block;font-weight:bold;margin-bottom:5px}.form-group input,.form-group select{width:100%;padding:11px}.modal-actions{display:flex;gap:10px;margin-top:18px}.save-btn,.cancel-btn{border:none;padding:11px 18px;border-radius:5px;color:white;cursor:pointer}.save-btn{background:#198754}.cancel-btn{background:#6c757d}.password-note{font-size:13px;color:#666;margin-top:8px}
 </style>
 </head>
 <body>
@@ -14,9 +14,10 @@ body{background:#f4f6f9}.header{background:#001f5b;color:white;padding:15px;text
 <div class="container">
 <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
 <div class="controls">
-<input type="text" id="searchBox" placeholder="Search Student">
+<input type="search" id="searchBox" name="student-search" placeholder="Search Student" autocomplete="off" autocapitalize="off" spellcheck="false">
 <select id="classFilter"><option value="">All Classes</option></select>
 <select id="sectionFilter"><option value="">All Sections</option></select>
+<button type="button" id="clearFilters" class="clear-btn">Clear Filters</button>
 </div>
 <table>
 <thead><tr><th>Name</th><th>Class</th><th>Section</th><th>Roll No</th><th>Status</th><th>Last Login</th><th>Action</th></tr></thead>
@@ -45,8 +46,8 @@ body{background:#f4f6f9}.header{background:#001f5b;color:white;padding:15px;text
 <h2>Reset Student Password</h2>
 <input type="hidden" id="resetStudentId">
 <div class="form-group"><label>Student</label><input id="resetStudentName" type="text" readonly></div>
-<div class="form-group"><label>New Password</label><input id="resetPassword" type="password" placeholder="Enter new password"></div>
-<div class="form-group"><label>Confirm New Password</label><input id="resetPasswordConfirm" type="password" placeholder="Confirm new password"></div>
+<div class="form-group"><label>New Password</label><input id="resetPassword" type="password" placeholder="Enter new password" autocomplete="new-password"></div>
+<div class="form-group"><label>Confirm New Password</label><input id="resetPasswordConfirm" type="password" placeholder="Confirm new password" autocomplete="new-password"></div>
 <div class="password-note">The new password will be used immediately for the student's next login.</div>
 <div class="modal-actions"><button class="save-btn" onclick="savePasswordReset()">Reset Password</button><button class="cancel-btn" onclick="closePasswordModal()">Cancel</button></div>
 </div>
