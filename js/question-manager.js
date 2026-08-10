@@ -37,17 +37,33 @@ async function loadExamMap() {
     }
 }
 
+function getQuestionExamId(q) {
+    return String(q.examId ?? q.examID ?? q.assessmentId ?? q.assessmentID ?? "").trim();
+}
+
+function getAssessmentName(exam, id) {
+    if (!exam) return id || "Unknown Assessment";
+    return String(
+        exam.examName ??
+        exam.assessmentName ??
+        exam.name ??
+        exam.title ??
+        id ??
+        "Unknown Assessment"
+    ).trim();
+}
+
 function getQuestionClass(q) {
     const direct = String(q.class ?? q.examClass ?? q.className ?? "").trim();
     if (direct) return direct;
-    const exam = examMap[q.examId];
+    const exam = examMap[getQuestionExamId(q)];
     return exam ? String(exam.examClass ?? exam.class ?? exam.className ?? "").trim() : "";
 }
 
 function getQuestionSubject(q) {
     const direct = String(q.subject ?? q.examSubject ?? "").trim();
     if (direct) return direct;
-    const exam = examMap[q.examId];
+    const exam = examMap[getQuestionExamId(q)];
     return exam ? String(exam.subject ?? exam.examSubject ?? "").trim() : "";
 }
 
@@ -61,9 +77,12 @@ async function loadQuestions() {
 
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
+            const examId = getQuestionExamId(data);
             allQuestions.push({
                 id: docSnap.id,
                 ...data,
+                _examId: examId,
+                _assessment: getAssessmentName(examMap[examId], examId),
                 _class: getQuestionClass(data),
                 _subject: getQuestionSubject(data),
                 _type: normalizeQuestionType(data.questionType ?? data.type)
@@ -108,15 +127,18 @@ function renderQuestions(list) {
 function loadFilters() {
     const classFilter = document.getElementById("classFilter");
     const subjectFilter = document.getElementById("subjectFilter");
+    const assessmentFilter = document.getElementById("assessmentFilter");
     const typeFilter = document.getElementById("typeFilter");
-    if (!classFilter || !subjectFilter || !typeFilter) return;
+    if (!classFilter || !subjectFilter || !assessmentFilter || !typeFilter) return;
 
     const previousClass = classFilter.value;
     const previousSubject = subjectFilter.value;
+    const previousAssessment = assessmentFilter.value;
     const previousType = typeFilter.value;
 
     classFilter.innerHTML = `<option value="">All Classes</option>`;
     subjectFilter.innerHTML = `<option value="">All Subjects</option>`;
+    assessmentFilter.innerHTML = `<option value="">All Assessments</option>`;
     typeFilter.innerHTML = `
         <option value="">Question Type</option>
         <option value="mcq">MCQ</option>
@@ -128,6 +150,13 @@ function loadFilters() {
 
     const subjects = [...new Set(allQuestions.map(q => q._subject).filter(Boolean))]
         .sort((a, b) => String(a).localeCompare(String(b)));
+
+    const assessments = [...new Map(
+        allQuestions
+            .filter(q => q._examId)
+            .map(q => [q._examId, q._assessment])
+    ).entries()]
+        .sort((a, b) => String(a[1]).localeCompare(String(b[1])));
 
     classes.forEach(cls => {
         const option = document.createElement("option");
@@ -143,8 +172,16 @@ function loadFilters() {
         subjectFilter.appendChild(option);
     });
 
+    assessments.forEach(([examId, assessmentName]) => {
+        const option = document.createElement("option");
+        option.value = examId;
+        option.textContent = assessmentName || examId;
+        assessmentFilter.appendChild(option);
+    });
+
     if ([...classFilter.options].some(o => o.value === previousClass)) classFilter.value = previousClass;
     if ([...subjectFilter.options].some(o => o.value === previousSubject)) subjectFilter.value = previousSubject;
+    if ([...assessmentFilter.options].some(o => o.value === previousAssessment)) assessmentFilter.value = previousAssessment;
     if ([...typeFilter.options].some(o => o.value === previousType)) typeFilter.value = previousType;
 }
 
@@ -152,6 +189,7 @@ function filterQuestions() {
     const search = normalize(document.getElementById("searchBox")?.value);
     const classValue = normalize(document.getElementById("classFilter")?.value);
     const subjectValue = normalize(document.getElementById("subjectFilter")?.value);
+    const assessmentValue = String(document.getElementById("assessmentFilter")?.value ?? "").trim();
     const typeRaw = normalize(document.getElementById("typeFilter")?.value);
     const typeSelected = typeRaw !== "";
     const typeValue = normalizeQuestionType(typeRaw);
@@ -160,8 +198,9 @@ function filterQuestions() {
         const searchMatch = normalize(q.question).includes(search);
         const classMatch = !classValue || normalize(q._class) === classValue;
         const subjectMatch = !subjectValue || normalize(q._subject) === subjectValue;
+        const assessmentMatch = !assessmentValue || q._examId === assessmentValue;
         const typeMatch = !typeSelected || q._type === typeValue;
-        return searchMatch && classMatch && subjectMatch && typeMatch;
+        return searchMatch && classMatch && subjectMatch && assessmentMatch && typeMatch;
     });
 
     renderQuestions(filtered);
@@ -252,6 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("searchBox")?.addEventListener("input", filterQuestions);
     document.getElementById("classFilter")?.addEventListener("change", filterQuestions);
     document.getElementById("subjectFilter")?.addEventListener("change", filterQuestions);
+    document.getElementById("assessmentFilter")?.addEventListener("change", filterQuestions);
     document.getElementById("typeFilter")?.addEventListener("change", filterQuestions);
     document.getElementById("updateBtn")?.addEventListener("click", updateQuestion);
     loadQuestions();
