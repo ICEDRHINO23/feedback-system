@@ -4,33 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Student Dashboard | AHPS</title>
-<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--navy:#06245f;--navy2:#031b4d;--blue:#155eef;--gold:#f5bd35;--green:#159447;--red:#d92d20;--bg:#f3f6fb;--text:#102044;--muted:#667085;--line:#e4e9f2;--card:#fff}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#eef3fb,#f9fbfd);color:var(--text);min-height:100vh}.brand-header{background:linear-gradient(115deg,var(--navy2),var(--navy));color:#fff;min-height:92px;padding:14px 5%;display:flex;align-items:center;gap:20px;box-shadow:0 8px 25px rgba(3,27,77,.16)}.brand-left,.brand-right{width:82px;display:flex;align-items:center;justify-content:center}.ahps-logo{width:68px;height:68px;object-fit:contain;background:#fff;border-radius:16px;padding:4px}.ras-logo{width:68px;height:68px;object-fit:contain}.brand-title{flex:1;text-align:center}.brand-title h1{font-size:25px;letter-spacing:.2px}.brand-title p{margin-top:5px;color:#d9e5ff;font-size:13px}.container{max-width:1250px;margin:28px auto;padding:0 4% 35px}.welcome{background:linear-gradient(120deg,#fff,#f8fbff);border:1px solid var(--line);border-radius:22px;padding:25px 28px;box-shadow:0 12px 35px rgba(16,32,68,.08);position:relative;overflow:hidden}.welcome:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-80px;top:-80px;background:rgba(245,189,53,.12)}.welcome h2{font-size:27px;color:var(--navy)}.welcome p{display:inline-flex;background:#edf4ff;color:#315b9f;border-radius:999px;padding:7px 11px;margin:12px 6px 0 0;font-size:12px;font-weight:700}.exam-title{font-size:18px;font-weight:850;color:var(--navy);margin:28px 0 14px}.performance-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}.performance-card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:18px;box-shadow:0 9px 25px rgba(16,32,68,.07)}.performance-icon{width:40px;height:40px;border-radius:12px;background:#edf4ff;display:grid;place-items:center;font-size:19px;margin-bottom:10px}.performance-card:nth-child(3) .performance-icon{background:#fff7e5}.performance-card:nth-child(4) .performance-icon{background:#eefaf3}.performance-card:nth-child(5) .performance-icon{background:#fff0ef}.performance-value{font-size:25px;font-weight:900;color:var(--navy)}.performance-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-top:4px;font-weight:800}#examList,#completedExamList{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px}.exam-card,.completed-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 9px 25px rgba(16,32,68,.07)}.exam-card h3,.completed-card h3{color:var(--navy);font-size:17px;margin-bottom:9px}.exam-card p,.completed-card p{font-size:13px;color:#667085;margin:6px 0}.start-btn,.result-btn,.review-btn{border:0;border-radius:10px;padding:10px 14px;color:#fff;font-weight:800;cursor:pointer;margin-top:12px}.start-btn{background:var(--navy)}.start-btn:hover{background:#0a3179}.completed-title{margin-top:32px}.completed-header{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.completed-subject{margin-top:3px}.percentage-badge{border-radius:12px;padding:9px 11px;font-weight:900;background:#eefaf3;color:var(--green)}.fail-badge{background:#fff0ef;color:var(--red)}.completed-info{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.info-item{background:#f7f9fc;border-radius:11px;padding:11px}.info-label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:800}.info-value{display:block;margin-top:4px;font-weight:850;font-size:13px}.pass-text{color:var(--green)}.fail-text{color:var(--red)}.completed-actions{display:flex;gap:8px}.result-btn{background:var(--blue)}.review-btn{background:#475467}.logout{display:block;margin:28px auto 0;border:0;background:var(--red);color:#fff;padding:11px 24px;border-radius:10px;font-weight:800;cursor:pointer}.footer{text-align:center;color:#7b8498;font-size:11px;padding:0 20px 22px}@media(max-width:1000px){.performance-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:650px){.brand-header{padding:12px 14px;gap:8px}.brand-left,.brand-right{width:52px}.ahps-logo,.ras-logo{width:48px;height:48px}.brand-title h1{font-size:17px}.brand-title p{font-size:10px}.container{padding:0 14px 25px}.performance-grid{grid-template-columns:repeat(2,1fr)}.completed-info{grid-template-columns:1fr}.completed-header{flex-direction:column}.completed-actions{flex-direction:column}.result-btn,.review-btn{width:100%}}
+</style>
 <script src="js/route-guard.js"></script>
 <script src="js/auth-check.js"></script>
 </head>
 <body>
-<header class="brand-header">
-<div class="brand-left"><img src="assets/ahps-logo.png" alt="Academic Heights Public School" class="ahps-logo"></div>
-<div class="brand-title"><h1>AHPS Online Examination System</h1><p>Student Dashboard</p></div>
-<div class="brand-right"><img src="assets/ras-logo.jpeg" alt="RAS Systems" class="ras-logo"></div>
-</header>
-<div class="container">
-<div class="welcome"><div class="welcome"><h2>Welcome, <span id="studentName">Student</span></h2><p>Roll No: <span id="studentRollNo">-</span></p><p>Class: <span id="studentClass">-</span> - <span id="studentSection">-</span></p></div>
+<header class="brand-header"><div class="brand-left"><img src="assets/ahps-logo.png" alt="Academic Heights Public School" class="ahps-logo"></div><div class="brand-title"><h1>AHPS Online Examination System</h1><p>Student Dashboard</p></div><div class="brand-right"><img src="assets/ras-logo.jpeg" alt="RAS Systems" class="ras-logo"></div></header>
+<main class="container">
+<section class="welcome"><h2>Welcome, <span id="studentName">Student</span></h2><p><i class="fas fa-id-card"></i>&nbsp; Roll No: <span id="studentRollNo">-</span></p><p><i class="fas fa-graduation-cap"></i>&nbsp; Class: <span id="studentClass">-</span> - <span id="studentSection">-</span></p></section>
 <div class="exam-title">My Performance</div>
-<div class="performance-grid">
-<div class="performance-card"><div class="performance-icon">📋</div><div class="performance-value" id="completedCount">0</div><div class="performance-label">Completed</div></div>
-<div class="performance-card"><div class="performance-icon">📊</div><div class="performance-value" id="averagePercentage">0%</div><div class="performance-label">Average</div></div>
-<div class="performance-card"><div class="performance-icon">🏆</div><div class="performance-value" id="bestPercentage">0%</div><div class="performance-label">Best Score</div></div>
-<div class="performance-card"><div class="performance-icon">✅</div><div class="performance-value" id="passedCount">0</div><div class="performance-label">Passed</div></div>
-<div class="performance-card"><div class="performance-icon">❌</div><div class="performance-value" id="failedCount">0</div><div class="performance-label">Failed</div></div>
-</div>
-<div class="exam-title">Available Exams</div>
-<div id="examList">Loading Exams...</div>
-<div class="exam-title completed-title">Completed Assessments</div>
-<div id="completedExamList">Loading Results...</div>
-<button class="logout" onclick="logout()">Logout</button>
-</div>
-<div class="footer">© RAS 2026 for Academic Heights Public School</div>
+<section class="performance-grid"><div class="performance-card"><div class="performance-icon">📋</div><div class="performance-value" id="completedCount">0</div><div class="performance-label">Completed</div></div><div class="performance-card"><div class="performance-icon">📊</div><div class="performance-value" id="averagePercentage">0%</div><div class="performance-label">Average</div></div><div class="performance-card"><div class="performance-icon">🏆</div><div class="performance-value" id="bestPercentage">0%</div><div class="performance-label">Best Score</div></div><div class="performance-card"><div class="performance-icon">✅</div><div class="performance-value" id="passedCount">0</div><div class="performance-label">Passed</div></div><div class="performance-card"><div class="performance-icon">❌</div><div class="performance-value" id="failedCount">0</div><div class="performance-label">Failed</div></div></section>
+<div class="exam-title">Available Assessments</div><section id="examList">Loading Exams...</section>
+<div class="exam-title completed-title">Completed Assessments</div><section id="completedExamList">Loading Results...</section>
+<button class="logout" onclick="logout()"><i class="fas fa-right-from-bracket"></i> Logout</button>
+</main><div class="footer">Academic Heights Public School, Chikhali, Pune, Maharashtra<br>© 2026 AHPS • Powered by RAS SYSTEMS</div>
 <script type="module" src="js/student-dashboard.js"></script>
-</body>
-</html>
+</body></html>
