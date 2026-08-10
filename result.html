@@ -1,412 +1,57 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1">
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Exam Result</title>
-
 <style>
-
-body{
-    font-family:Arial;
-    background:#f4f6f9;
-    margin:0;
-    padding:40px 20px;
-}
-
-.card{
-    max-width:600px;
-    margin:auto;
-    padding:30px;
-    background:white;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,.15);
-}
-
-h1{
-    color:#001f5b;
-    text-align:center;
-}
-
-.result-box{
-    text-align:center;
-    margin:30px 0;
-}
-
-.score{
-    font-size:32px;
-    font-weight:bold;
-    color:#001f5b;
-}
-
-.details{
-    margin-top:20px;
-    line-height:1.8;
-}
-
-button{
-    padding:12px 25px;
-    background:#001f5b;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-    margin-top:20px;
-}
-
-button:hover{
-    background:#00358f;
-}
-
-.error{
-    color:red;
-    text-align:center;
-}
-
+body{font-family:Arial;background:#f4f6f9;margin:0;padding:40px 20px}.card{max-width:600px;margin:auto;padding:30px;background:white;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,.15)}h1{color:#001f5b;text-align:center}.result-box{text-align:center;margin:30px 0}.score{font-size:32px;font-weight:bold;color:#001f5b}.details{margin-top:20px;line-height:1.8}button{padding:12px 25px;background:#001f5b;color:white;border:none;border-radius:5px;cursor:pointer;margin-top:20px}button:hover{background:#00358f}.error{color:red;text-align:center}
 </style>
-
 </head>
-
 <body>
-
 <div class="card">
-
-<h1>
-    Assessment Result
-</h1>
-
-<div id="loading">
-    Loading Result...
+<h1>Assessment Result</h1>
+<div id="loading">Loading Result...</div>
+<div id="resultContent" style="display:none;">
+<div class="result-box"><div class="score" id="scoreText"></div></div>
+<div class="details">
+<p><b>Student:</b> <span id="studentName">-</span></p>
+<p><b>Class:</b> <span id="studentClass">-</span></p>
+<p><b>Exam:</b> <span id="examName">-</span></p>
+<p><b>Subject:</b> <span id="subject">-</span></p>
+<p><b>Correct Answers:</b> <span id="correctAnswers">0</span></p>
+<p><b>Total Questions:</b> <span id="totalQuestions">0</span></p>
+<p><b>Percentage:</b> <span id="percentage">0%</span></p>
+</div></div>
+<div id="error" class="error"></div>
+<button onclick="goDashboard()">Dashboard</button>
 </div>
-
-<div id="resultContent"
-     style="display:none;">
-
-    <div class="result-box">
-
-        <div class="score"
-             id="scoreText">
-        </div>
-
-    </div>
-
-    <div class="details">
-
-        <p>
-            <b>Student:</b>
-            <span id="studentName">-</span>
-        </p>
-
-        <p>
-            <b>Class:</b>
-            <span id="studentClass">-</span>
-        </p>
-
-        <p>
-            <b>Exam:</b>
-            <span id="examName">-</span>
-        </p>
-
-        <p>
-            <b>Subject:</b>
-            <span id="subject">-</span>
-        </p>
-
-        <p>
-            <b>Correct Answers:</b>
-            <span id="correctAnswers">0</span>
-        </p>
-
-        <p>
-            <b>Total Questions:</b>
-            <span id="totalQuestions">0</span>
-        </p>
-
-        <p>
-            <b>Percentage:</b>
-            <span id="percentage">0%</span>
-        </p>
-
-    </div>
-
-</div>
-
-<div id="error"
-     class="error">
-</div>
-
-<button onclick="goDashboard()">
-    Dashboard
-</button>
-
-</div>
-
-
+<script src="./js/route-guard.js"></script>
+<script src="./js/auth-check.js"></script>
 <script type="module">
-
 import { db } from "./js/firebase-config.js";
-
-import {
-    doc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
-// ======================================
-// GET RESULT ID
-// ======================================
-
-const params =
-    new URLSearchParams(
-        window.location.search
-    );
-
-const resultId =
-    params.get("id");
-
-
-// ======================================
-// LOAD RESULT
-// ======================================
-
+import { doc,getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const params=new URLSearchParams(window.location.search);
+const resultId=params.get("id");
 async function loadResult(){
-
-    if(!resultId){
-
-        document.getElementById(
-            "loading"
-        ).style.display = "none";
-
-        document.getElementById(
-            "error"
-        ).innerText =
-            "Result ID not found.";
-
-        return;
-    }
-
-
-    try{
-
-        console.log(
-            "Loading Result:",
-            resultId
-        );
-
-
-        const resultRef =
-            doc(
-                db,
-                "results",
-                resultId
-            );
-
-
-        const resultSnap =
-            await getDoc(
-                resultRef
-            );
-
-
-        if(!resultSnap.exists()){
-
-            document.getElementById(
-                "loading"
-            ).style.display = "none";
-
-            document.getElementById(
-                "error"
-            ).innerText =
-                "Result not found.";
-
-            return;
-        }
-
-
-        const result =
-            resultSnap.data();
-
-
-        console.log(
-            "Result Data:",
-            result
-        );
-
-
-        // ==================================
-        // STUDENT
-        // ==================================
-
-        document.getElementById(
-            "studentName"
-        ).innerText =
-            result.studentName || "-";
-
-
-        document.getElementById(
-            "studentClass"
-        ).innerText =
-            result.studentClass || "-";
-
-
-        // ==================================
-        // EXAM
-        // ==================================
-
-        document.getElementById(
-            "examName"
-        ).innerText =
-            result.examName || "-";
-
-
-        document.getElementById(
-            "subject"
-        ).innerText =
-            result.subject || "-";
-
-
-        // ==================================
-        // RESULT
-        // ==================================
-
-        const score =
-            Number(
-                result.score || 0
-            );
-
-
-        const totalMarks =
-            Number(
-                result.totalMarks || 0
-            );
-
-
-        const correctAnswers =
-            Number(
-                result.correctAnswers || 0
-            );
-
-
-        const totalQuestions =
-            Number(
-                result.totalQuestions || 0
-            );
-
-
-        const percentage =
-            Number(
-                result.percentage || 0
-            );
-
-
-        document.getElementById(
-            "scoreText"
-        ).innerText =
-            `Your Score: ${score}/${totalMarks}`;
-
-
-        document.getElementById(
-            "correctAnswers"
-        ).innerText =
-            correctAnswers;
-
-
-        document.getElementById(
-            "totalQuestions"
-        ).innerText =
-            totalQuestions;
-
-
-        document.getElementById(
-            "percentage"
-        ).innerText =
-            percentage.toFixed(2) + "%";
-
-
-        // ==================================
-        // SHOW RESULT
-        // ==================================
-
-        document.getElementById(
-            "loading"
-        ).style.display =
-            "none";
-
-
-        document.getElementById(
-            "resultContent"
-        ).style.display =
-            "block";
-
-
-    }
-    catch(error){
-
-        console.error(
-            "RESULT LOAD ERROR:",
-            error
-        );
-
-
-        document.getElementById(
-            "loading"
-        ).style.display =
-            "none";
-
-
-        document.getElementById(
-            "error"
-        ).innerText =
-            "Unable to load result: " +
-            error.message;
-
-    }
-
-}
-
-
-// ======================================
-// DASHBOARD
-// ======================================
-
-window.goDashboard =
-function(){
-
-    const role =
-        localStorage.getItem(
-            "role"
-        );
-
-
-    if(role === "teacher"){
-
-        window.location.href =
-            "teacher-dashboard.html";
-
-    }
-    else{
-
-        window.location.href =
-            "dashboard.html";
-
-    }
-
-};
-
-
-// ======================================
-// START
-// ======================================
-
+if(!resultId){document.getElementById("loading").style.display="none";document.getElementById("error").innerText="Result ID not found.";return;}
+try{
+const resultRef=doc(db,"results",resultId);const resultSnap=await getDoc(resultRef);
+if(!resultSnap.exists()){document.getElementById("loading").style.display="none";document.getElementById("error").innerText="Result not found.";return;}
+const result=resultSnap.data();
+document.getElementById("studentName").innerText=result.studentName||"-";
+document.getElementById("studentClass").innerText=result.studentClass||"-";
+document.getElementById("examName").innerText=result.examName||"-";
+document.getElementById("subject").innerText=result.subject||"-";
+const score=Number(result.score||0);const totalMarks=Number(result.totalMarks||0);const correctAnswers=Number(result.correctAnswers||0);const totalQuestions=Number(result.totalQuestions||0);const percentage=Number(result.percentage||0);
+document.getElementById("scoreText").innerText=`Your Score: ${score}/${totalMarks}`;
+document.getElementById("correctAnswers").innerText=correctAnswers;
+document.getElementById("totalQuestions").innerText=totalQuestions;
+document.getElementById("percentage").innerText=percentage.toFixed(2)+"%";
+document.getElementById("loading").style.display="none";document.getElementById("resultContent").style.display="block";
+}catch(error){console.error("RESULT LOAD ERROR:",error);document.getElementById("loading").style.display="none";document.getElementById("error").innerText="Unable to load result: "+error.message;}}
+window.goDashboard=function(){const role=localStorage.getItem("role");window.location.href=role==="teacher"?"teacher-dashboard.html":"dashboard.html";};
 loadResult();
-
 </script>
-
 </body>
-
 </html>
