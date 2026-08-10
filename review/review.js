@@ -20,6 +20,25 @@ const resultId =
 
 
 // ======================================
+// CLEAN OPTION TEXT
+// ======================================
+
+function cleanOptionText(value){
+
+    let text = String(value ?? "").trim();
+
+    // Remove an already-stored option label such as:
+    // A. / A) / a. / a)
+    text = text.replace(
+        /^\s*[A-Da-d]\s*[.)]\s*/,
+        ""
+    );
+
+    return text;
+}
+
+
+// ======================================
 // LOAD REVIEW
 // ======================================
 
@@ -180,45 +199,43 @@ async function loadReview(){
         // REVIEW ARRAY
         // ==================================
 
-       const review =
-    Array.isArray(result.review)
-        ? result.review
-        : [];
+        const review =
+            Array.isArray(result.review)
+                ? result.review
+                : [];
 
 
-if(review.length === 0){
+        if(review.length === 0){
 
-    container.innerHTML = `
+            container.innerHTML = `
 
-        <div class="question-card">
+                <div class="question-card">
 
-            <h3>
-                📋 Detailed Review Not Available
-            </h3>
+                    <h3>
+                        📋 Detailed Review Not Available
+                    </h3>
 
-            <p>
-                This assessment was completed
-                before detailed answer review
-                was enabled.
-            </p>
+                    <p>
+                        This assessment was completed
+                        before detailed answer review
+                        was enabled.
+                    </p>
 
-            <p>
-                Your result has been saved
-                successfully, but the answers
-                selected during the assessment
-                were not stored.
-            </p>
+                    <p>
+                        Your result has been saved
+                        successfully, but the answers
+                        selected during the assessment
+                        were not stored.
+                    </p>
 
-           
+                </div>
 
-            </div>
+            `;
 
-        </div>
+            return;
+        }
 
-    `;
 
-    return;
-}
         // ==================================
         // BUILD REVIEW
         // ==================================
@@ -248,22 +265,22 @@ if(review.length === 0){
 
                     {
                         key:"A",
-                        text:q.optionA || ""
+                        text:cleanOptionText(q.optionA)
                     },
 
                     {
                         key:"B",
-                        text:q.optionB || ""
+                        text:cleanOptionText(q.optionB)
                     },
 
                     {
                         key:"C",
-                        text:q.optionC || ""
+                        text:cleanOptionText(q.optionC)
                     },
 
                     {
                         key:"D",
-                        text:q.optionD || ""
+                        text:cleanOptionText(q.optionD)
                     }
 
                 ];
