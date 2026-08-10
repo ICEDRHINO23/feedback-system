@@ -1,125 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Assessment Review</title>
-
-<link rel="stylesheet"
-      href="review.css">
-
+<link rel="stylesheet" href="review.css?v=3">
 </head>
-
 <body>
-
 <div class="header">
-
-    <h1>
-        AHPS Online Examination System
-    </h1>
-
-    <p>
-        Assessment Review
-    </p>
-
+    <h1>AHPS Online Examination System</h1>
+    <p>Assessment Review</p>
 </div>
-
-
 <div class="container">
-
-
-    <!-- SUMMARY -->
-
     <div class="summary-card">
-
-        <h2 id="examName">
-            Loading Assessment...
-        </h2>
-
-        <p id="subject">
-            Subject: -
-        </p>
-
+        <h2 id="examName">Loading Assessment...</h2>
+        <p id="subject">Subject: -</p>
         <div class="summary-grid">
-
-            <div>
-                <span>Score</span>
-                <strong id="score">
-                    0/0
-                </strong>
-            </div>
-
-            <div>
-                <span>Percentage</span>
-                <strong id="percentage">
-                    0%
-                </strong>
-            </div>
-
-            <div>
-                <span>Correct</span>
-                <strong id="correct">
-                    0
-                </strong>
-            </div>
-
-            <div>
-                <span>Wrong</span>
-                <strong id="wrong">
-                    0
-                </strong>
-            </div>
-
+            <div><span>Score</span><strong id="score">0/0</strong></div>
+            <div><span>Percentage</span><strong id="percentage">0%</strong></div>
+            <div><span>Correct</span><strong id="correct">0</strong></div>
+            <div><span>Wrong</span><strong id="wrong">0</strong></div>
         </div>
-
     </div>
-
-
-    <!-- REVIEW -->
-
     <div id="reviewContainer">
-
-        <p class="loading">
-            Loading Questions...
-        </p>
-
+        <p class="loading">Loading Questions...</p>
     </div>
-
-
-    <!-- BUTTONS -->
-
     <div class="bottom-buttons">
-
-        <button
-            onclick="window.location.href='../dashboard.html'">
-
-            ← Back to Dashboard
-
-        </button>
-
-        <button
-            onclick="window.print()">
-
-            🖨 Print Review
-
-        </button>
-
+        <button onclick="window.location.href='../dashboard.html'">← Back to Dashboard</button>
+        <button onclick="window.print()">🖨 Print Review</button>
     </div>
-
-
 </div>
-
-
-<script src="../js/formatting-fix.js"></script>
-<script type="module"
-        src="review.js">
-</script>
-
+<script src="../js/formatting-fix.js?v=3"></script>
+<script type="module" src="review.js?v=3"></script>
 </body>
-
 </html>
