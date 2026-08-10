@@ -2,303 +2,62 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Teacher Assessment Review
-    </title>
-
-    <link
-        rel="stylesheet"
-        href="css/teacher-review.css"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Assessment Review</title>
+    <link rel="stylesheet" href="css/teacher-review.css">
 </head>
 
-
 <body>
-
-
-    <!-- ======================================
-         HEADER
-    ======================================= -->
-
     <header class="header">
-
-        <h1>
-            AHPS Online Examination System
-        </h1>
-
-        <p>
-            Teacher Assessment Review
-        </p>
-
+        <h1>AHPS Online Examination System</h1>
+        <p>Teacher Assessment Review</p>
     </header>
 
-
-    <!-- ======================================
-         MAIN CONTAINER
-    ======================================= -->
-
     <main class="container">
-
-
-        <!-- ==================================
-             STUDENT DETAILS
-        =================================== -->
-
         <div class="student-card">
-
-            <h2>
-                Student Details
-            </h2>
-
-
+            <h2>Student Details</h2>
             <div class="details-grid">
-
-                <div>
-
-                    <strong>
-                        Student Name
-                    </strong>
-
-                    <span id="studentName">
-                        -
-                    </span>
-
-                </div>
-
-
-                <div>
-
-                    <strong>
-                        Roll No
-                    </strong>
-
-                    <span id="rollNo">
-                        -
-                    </span>
-
-                </div>
-
-
-                <div>
-
-                    <strong>
-                        Class
-                    </strong>
-
-                    <span id="studentClass">
-                        -
-                    </span>
-
-                </div>
-
-
-                <div>
-
-                    <strong>
-                        Section
-                    </strong>
-
-                    <span id="studentSection">
-                        -
-                    </span>
-
-                </div>
-
+                <div><strong>Student Name</strong><span id="studentName">-</span></div>
+                <div><strong>Roll No</strong><span id="rollNo">-</span></div>
+                <div><strong>Class</strong><span id="studentClass">-</span></div>
+                <div><strong>Section</strong><span id="studentSection">-</span></div>
             </div>
-
         </div>
-
-
-        <!-- ==================================
-             ASSESSMENT DETAILS
-        =================================== -->
 
         <div class="assessment-card">
-
-            <h2 id="examName">
-                Assessment
-            </h2>
-
-            <p>
-
-                Subject:
-                <span id="subject">
-                    -
-                </span>
-
-            </p>
-
-
-            <p>
-
-                Total Marks:
-                <span id="totalMarks">
-                    0
-                </span>
-
-            </p>
-
+            <h2 id="examName">Assessment</h2>
+            <p>Subject: <span id="subject">-</span></p>
+            <p>Total Marks: <span id="totalMarks">0</span></p>
         </div>
 
-
-        <!-- ==================================
-             QUESTIONS
-        =================================== -->
-
-        <div class="section-title">
-
-            Questions & Evaluation
-
-        </div>
-
-
-        <div id="questionList">
-
-            Loading Questions...
-
-        </div>
-
-
-        <!-- ==================================
-             SCORE SUMMARY
-        =================================== -->
+        <div class="section-title">Questions & Evaluation</div>
+        <div id="questionList">Loading Questions...</div>
 
         <div class="score-card">
-
-            <h2>
-                Evaluation Summary
-            </h2>
-
-
+            <h2>Evaluation Summary</h2>
             <div class="score-grid">
-
-                <div>
-
-                    <strong>
-                        Automatic Marks
-                    </strong>
-
-                    <span id="automaticMarks">
-                        0
-                    </span>
-
-                </div>
-
-
-                <div>
-
-                    <strong>
-                        Teacher Marks
-                    </strong>
-
-                    <span id="teacherMarks">
-                        0
-                    </span>
-
-                </div>
-
-
-                <div>
-
-                    <strong>
-                        Final Marks
-                    </strong>
-
-                    <span id="finalMarks">
-                        0
-                    </span>
-
-                </div>
-
-
-                <div>
-
-                    <strong>
-                        Percentage
-                    </strong>
-
-                    <span id="percentage">
-                        0%
-                    </span>
-
-                </div>
-
+                <div><strong>Automatic Marks</strong><span id="automaticMarks">0</span></div>
+                <div><strong>Teacher Marks</strong><span id="teacherMarks">0</span></div>
+                <div><strong>Final Marks</strong><span id="finalMarks">0</span></div>
+                <div><strong>Percentage</strong><span id="percentage">0%</span></div>
             </div>
-
         </div>
-
-
-        <!-- ==================================
-             PUBLISH
-        =================================== -->
 
         <div class="publish-card">
-
-            <p id="evaluationMessage">
-
-                Descriptive questions are pending
-                teacher evaluation.
-
-            </p>
-
-
-            <button
-                id="publishBtn"
-                class="publish-btn">
-
-                Save Evaluation & Publish Result
-
-            </button>
-
+            <p id="evaluationMessage">Descriptive questions are pending teacher evaluation.</p>
+            <button id="publishBtn" class="publish-btn">Save Evaluation & Publish Result</button>
         </div>
 
-
-        <!-- ==================================
-             BACK
-        =================================== -->
-
-        <button
-            class="back-btn"
-            onclick="history.back()">
-
-            Back
-
-        </button>
-
-
+        <button class="back-btn" onclick="history.back()">Back</button>
     </main>
 
-
-    <!-- ======================================
-         FOOTER
-    ======================================= -->
-
     <footer class="footer">
-
-        AHPS Online Examination System
-
-        <br>
-
+        AHPS Online Examination System<br>
         © RAS 2026 for Academic Heights Public School
-
     </footer>
 
-
-    <script
-        type="module"
-        src="js/teacher-review.js">
-    </script>
-
-
+    <script src="js/marks-validation.js"></script>
+    <script type="module" src="js/teacher-review.js"></script>
 </body>
-
 </html>
