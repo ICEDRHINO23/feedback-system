@@ -157,8 +157,8 @@ function renderResults(results) {
                 <td>
                     <button
                         class="action-btn preview-btn"
-                        onclick="window.open('student-report.html?id=${result.id}','_blank')">
-                        Report
+                        onclick="window.open('student-.html?id=${result.id}','_blank')">
+                        
                     </button>
 
                     <button
@@ -488,7 +488,7 @@ async function exportPDF() {
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(10);
         pdf.text(
-            "ASSESSMENT PERFORMANCE REPORT",
+            "ASSESSMENT PERFORMANCE ",
             pageWidth / 2,
             24,
             { align: "center" }
@@ -628,7 +628,7 @@ async function exportPDF() {
         });
 
         pdf.save(
-            `AHPS_Assessment_Report_${new Date().toISOString().slice(0, 10)}.pdf`
+            `AHPS_Assessment__${new Date().toISOString().slice(0, 10)}.pdf`
         );
 
     } catch (error) {
