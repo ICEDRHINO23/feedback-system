@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Individual Assessment Report | AHPS</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--navy:#06245f;--navy2:#031b4d;--gold:#f5bd35;--blue:#155eef;--green:#159447;--red:#d92d20;--bg:#eef2f8;--text:#102044;--muted:#667085;--line:#e4e9f2}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#eef3fb,#f8fafc);color:var(--text);min-height:100vh;padding:28px}
+.page{max-width:980px;margin:auto}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px}
+.toolbar a,.toolbar button{border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer;text-decoration:none;font-size:14px}
+.back{background:#fff;color:var(--navy);border:1px solid var(--line)!important}.print{background:var(--navy);color:#fff}
+.report{background:#fff;border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 20px 55px rgba(16,32,68,.12)}
+.report-head{position:relative;background:linear-gradient(115deg,var(--navy2),var(--navy));color:#fff;padding:28px 38px 25px;display:flex;align-items:center;gap:22px}
+.report-head:after{content:"";position:absolute;right:-90px;top:-90px;width:240px;height:240px;border-radius:50%;background:rgba(245,189,53,.12)}
+.logo{width:76px;height:76px;object-fit:contain;background:#fff;border-radius:18px;padding:5px;flex:none;position:relative;z-index:1}.ras{width:70px;height:70px;object-fit:contain;background:#fff;border-radius:50%;padding:6px;position:relative;z-index:1}
+.school{flex:1;position:relative;z-index:1}.school h1{font-size:27px;letter-spacing:.2px}.school p{margin-top:5px;color:#d9e5ff;font-size:13px}.school .place{margin-top:3px;color:#fff;font-size:12px;font-weight:600}.report-title{margin-top:12px;display:inline-block;color:#ffe08a;font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase}
+.content{padding:30px 38px}.student-card{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px 24px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,#f8fbff,#fff);margin-bottom:22px}.student-card .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.1px;font-weight:800}.student-card h2{font-size:27px;margin-top:5px}.student-meta{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}.pill{background:#edf4ff;color:#1d4ed8;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700}.result-badge{min-width:115px;text-align:center;border-radius:16px;padding:15px 18px;font-weight:800}.result-badge.pass{background:#e8f8ef;color:var(--green)}.result-badge.fail{background:#fff0ef;color:var(--red)}.result-badge i{display:block;font-size:25px;margin-bottom:5px}
+.score-grid{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:15px;margin-bottom:24px}.score{border:1px solid var(--line);border-radius:16px;padding:20px;background:#fff}.score.primary{background:linear-gradient(135deg,#06245f,#155eef);color:#fff;border:0}.score .small{font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:800;opacity:.75}.score strong{display:block;font-size:31px;margin-top:8px}.score span{font-size:12px;color:var(--muted)}.score.primary span{color:#dbe7ff}.section-title{font-size:14px;text-transform:uppercase;letter-spacing:1.1px;color:var(--navy);font-weight:900;margin:22px 0 12px}.details{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden}.detail{padding:15px 18px;border-bottom:1px solid var(--line)}.detail:nth-child(odd){border-right:1px solid var(--line)}.detail:nth-last-child(-n+2){border-bottom:0}.detail label{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}.detail strong{font-size:14px}.footer{border-top:1px solid var(--line);padding:18px 38px;text-align:center;color:#7b8498;font-size:11px;line-height:1.7}.footer strong{color:var(--navy)}
+.loading{text-align:center;padding:80px 20px;color:var(--muted)}.loading i{font-size:32px;color:var(--blue);margin-bottom:12px}.error{text-align:center;padding:80px 20px}.error h2{color:var(--red);margin-bottom:8px}
+@media(max-width:700px){body{padding:12px}.report-head{padding:22px 18px;gap:12px}.logo{width:58px;height:58px}.ras{width:54px;height:54px}.school h1{font-size:18px}.school p{font-size:11px}.content{padding:20px 16px}.student-card{align-items:flex-start;flex-direction:column}.score-grid{grid-template-columns:1fr}.details{grid-template-columns:1fr}.detail:nth-child(odd){border-right:0}.detail:nth-last-child(2){border-bottom:1px solid var(--line)}.footer{padding:16px}.toolbar{flex-direction:column;align-items:stretch}}
+@media print{body{background:#fff;padding:0}.toolbar{display:none}.report{box-shadow:none;border:0;border-radius:0}.report-head{border-radius:0}.page{max-width:none}.content{padding:24px 30px}.footer{padding:14px 30px} @page{size:A4;margin:10mm}}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="toolbar"><a class="back" href="results.html"><i class="fas fa-arrow-left"></i> Back to Results</a><button class="print" onclick="window.print()"><i class="fas fa-print"></i> Print Report</button></div>
+<div class="report" id="report">
+<div class="loading"><i class="fas fa-spinner fa-spin"></i><div>Preparing individual report...</div></div>
+</div>
+</div>
+<script type="module">
+import { db } from "../js/firebase-config.js";
+import { doc,getDoc,collection,getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const report=document.getElementById("report");
+const id=new URLSearchParams(location.search).get("id");
+const esc=value=>String(value??"-").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]));
+const val=(v,f="-")=>(v===undefined||v===null||v==="")?f:v;
+
+async function load(){
+ try{
+  if(!id) throw new Error("No result ID was supplied.");
+  const snap=await getDoc(doc(db,"results",id));
+  if(!snap.exists()) throw new Error("The selected result could not be found.");
+  const result={id:snap.id,...snap.data()};
+  let exam={};
+  if(result.examId){const e=await getDoc(doc(db,"exams",result.examId));if(e.exists())exam=e.data()||{};}
+  const student=val(result.studentName||result.participantName);
+  const assessment=val(exam.examName||result.examName);
+  const subject=val(exam.subject||result.subject);
+  const cls=val(exam.examClass||result.examClass||result.studentClass);
+  const section=val(result.section||result.studentSection);
+  const score=Number(result.score||0), total=Number(result.totalMarks||0);
+  const percentage=Number(result.percentage ?? (total?score/total*100:0));
+  const passed=percentage>=35;
+  let rank="-";
+  try{
+   const all=await getDocs(collection(db,"results"));
+   const comparable=[];
+   all.forEach(s=>{const r={id:s.id,...s.data()};const sameExam=!result.examId||r.examId===result.examId;const pct=Number(r.percentage||0);if(sameExam)comparable.push(pct);});
+   comparable.sort((a,b)=>b-a);const idx=comparable.findIndex(p=>p<=percentage);rank=idx>=0?idx+1:"-";
+  }catch(e){console.warn("Rank unavailable",e)}
+  const date=result.submittedAt?new Date(result.submittedAt).toLocaleString("en-IN"):"-";
+  report.innerHTML=`
+   <header class="report-head">
+    <img class="logo" src="../assets/ahps-logo.png" alt="Academic Heights Public School logo">
+    <div class="school"><h1>Academic Heights Public School</h1><p>CBSE Affiliated • Assessment Management System</p><div class="place">Chikhali, Pune, Maharashtra</div><span class="report-title">Individual Assessment Report</span></div>
+    <img class="ras" src="../assets/ras-logo.jpeg" alt="RAS logo">
+   </header>
+   <main class="content">
+    <section class="student-card"><div><div class="label">Student</div><h2>${esc(student)}</h2><div class="student-meta"><span class="pill"><i class="fas fa-school"></i> Class ${esc(cls)}</span><span class="pill"><i class="fas fa-users"></i> Section ${esc(section)}</span><span class="pill"><i class="fas fa-calendar-check"></i> ${esc(date)}</span></div></div><div class="result-badge ${passed?'pass':'fail'}"><i class="fas ${passed?'fa-circle-check':'fa-circle-xmark'}"></i>${passed?'PASSED':'NEEDS IMPROVEMENT'}</div></section>
+    <div class="score-grid"><div class="score primary"><div class="small">Percentage</div><strong>${percentage.toFixed(2)}%</strong><span>Overall performance</span></div><div class="score"><div class="small">Score</div><strong>${score}</strong><span>out of ${total}</span></div><div class="score"><div class="small">Rank</div><strong>${esc(rank)}</strong><span>Assessment rank</span></div></div>
+    <div class="section-title">Assessment Details</div><section class="details"><div class="detail"><label>Assessment</label><strong>${esc(assessment)}</strong></div><div class="detail"><label>Subject</label><strong>${esc(subject)}</strong></div><div class="detail"><label>Class</label><strong>${esc(cls)}</strong></div><div class="detail"><label>Section</label><strong>${esc(section)}</strong></div><div class="detail"><label>Marks Obtained</label><strong>${score}</strong></div><div class="detail"><label>Total Marks</label><strong>${total}</strong></div><div class="detail"><label>Percentage</label><strong>${percentage.toFixed(2)}%</strong></div><div class="detail"><label>Result Date</label><strong>${esc(date)}</strong></div></section>
+   </main>
+   <footer class="footer"><strong>Academic Heights Public School, Chikhali, Pune, Maharashtra</strong><br>AHPS Assessment Management System • Powered by RAS SYSTEMS<br>© 2026 Academic Heights Public School. All Rights Reserved.</footer>`;
+ }catch(error){console.error(error);report.innerHTML=`<div class="error"><h2><i class="fas fa-circle-exclamation"></i> Unable to load report</h2><p>${esc(error.message)}</p></div>`;}
+}
+load();
+</script>
+</body>
+</html>
