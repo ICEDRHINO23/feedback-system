@@ -24,35 +24,11 @@ body{background:#f4f6f9}.header{background:#001f5b;color:white;padding:15px;text
 <tbody id="studentTable"><tr><td colspan="7">Loading Students...</td></tr></tbody>
 </table>
 </div>
-
-<!-- Edit Student Modal -->
-<div id="editModal" class="modal">
-<div class="modal-box">
-<h2>Edit Student</h2>
-<input type="hidden" id="editStudentId">
-<div class="form-group"><label>Student Name</label><input id="editName" type="text"></div>
-<div class="form-group"><label>Class</label><select id="editClass"></select></div>
-<div class="form-group"><label>Section</label><select id="editSection"></select></div>
-<div class="form-group"><label>Roll Number</label><input id="editRollNo" type="text"></div>
-<div class="form-group"><label>Academic Year</label><input id="editAcademicYear" type="text"></div>
-<div class="form-group"><label>Account Expiry</label><input id="editAccountExpiry" type="date"></div>
-<div class="modal-actions"><button class="save-btn" onclick="saveStudentEdit()">Save Changes</button><button class="cancel-btn" onclick="closeEditModal()">Cancel</button></div>
-</div>
-</div>
-
-<!-- Reset Password Modal -->
-<div id="passwordModal" class="modal">
-<div class="modal-box">
-<h2>Reset Student Password</h2>
-<input type="hidden" id="resetStudentId">
-<div class="form-group"><label>Student</label><input id="resetStudentName" type="text" readonly></div>
-<div class="form-group"><label>New Password</label><input id="resetPassword" type="password" placeholder="Enter new password" autocomplete="new-password"></div>
-<div class="form-group"><label>Confirm New Password</label><input id="resetPasswordConfirm" type="password" placeholder="Confirm new password" autocomplete="new-password"></div>
-<div class="password-note">The new password will be used immediately for the student's next login.</div>
-<div class="modal-actions"><button class="save-btn" onclick="savePasswordReset()">Reset Password</button><button class="cancel-btn" onclick="closePasswordModal()">Cancel</button></div>
-</div>
-</div>
-
+<div id="editModal" class="modal"><div class="modal-box"><h2>Edit Student</h2><input type="hidden" id="editStudentId"><div class="form-group"><label>Student Name</label><input id="editName" type="text"></div><div class="form-group"><label>Class</label><select id="editClass"></select></div><div class="form-group"><label>Section</label><select id="editSection"></select></div><div class="form-group"><label>Roll Number</label><input id="editRollNo" type="text"></div><div class="form-group"><label>Academic Year</label><input id="editAcademicYear" type="text"></div><div class="form-group"><label>Account Expiry</label><input id="editAccountExpiry" type="date"></div><div class="modal-actions"><button class="save-btn" onclick="saveStudentEdit()">Save Changes</button><button class="cancel-btn" onclick="closeEditModal()">Cancel</button></div></div></div>
+<div id="passwordModal" class="modal"><div class="modal-box"><h2>Reset Student Password</h2><input type="hidden" id="resetStudentId"><div class="form-group"><label>Student</label><input id="resetStudentName" type="text" readonly></div><div class="form-group"><label>New Password</label><input id="resetPassword" type="password" placeholder="Enter new password" autocomplete="new-password"></div><div class="form-group"><label>Confirm New Password</label><input id="resetPasswordConfirm" type="password" placeholder="Confirm new password" autocomplete="new-password"></div><div class="password-note">The new password will be used immediately for the student's next login.</div><div class="modal-actions"><button class="save-btn" onclick="savePasswordReset()">Reset Password</button><button class="cancel-btn" onclick="closePasswordModal()">Cancel</button></div></div></div>
+<script src="../js/route-guard.js"></script>
+<script src="../js/auth-check.js"></script>
+<script src="../js/admin-guard.js"></script>
 <script type="module" src="../js/students.js"></script>
 </body>
 </html>
