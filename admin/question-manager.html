@@ -1,261 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Question Manager</title>
-
-<link rel="stylesheet"
-href="../css/admin.css">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
+<link rel="stylesheet" href="../css/admin.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
-
 <body>
-
-<div class="header">
-
-    <h1>
-        Question Manager
-    </h1>
-
-    <p>
-        Search, Edit & Manage Questions
-    </p>
-
-</div>
-
+<div class="header"><h1>Question Manager</h1><p>Search, Edit & Manage Questions</p></div>
 <div class="container">
-
-    <a
-        href="dashboard.html"
-        class="back-btn">
-
-        ← Back to Dashboard
-
-    </a>
-
-    <div class="card">
-
-        <div class="filters">
-
-            <input
-                type="text"
-                id="searchBox"
-                placeholder="Search Question">
-
-            <select id="classFilter">
-
-                <option value="">
-                    All Classes
-                </option>
-
-            </select>
-
-            <select id="subjectFilter">
-
-                <option value="">
-                    All Subjects
-                </option>
-
-            </select>
-
-            <select id="typeFilter">
-
-                <option value="">
-                    Question Type
-                </option>
-
-                <option value="mcq">
-                    MCQ
-                </option>
-
-                <option value="multiple">
-                    Multiple Answer
-                </option>
-
-                <option value="sentence">
-                    Subjective
-                </option>
-
-            </select>
-
-        </div>
-
-    </div>
-
-    <div class="card">
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>Question</th>
-                    <th>Subject</th>
-                    <th>Class</th>
-                    <th>Type</th>
-                    <th>Marks</th>
-                    <th>Actions</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody id="questionTable">
-
-                <tr>
-
-                    <td
-                        colspan="6"
-                        class="no-data">
-
-                        Loading Questions...
-
-                    </td>
-
-                </tr>
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-<!-- ========================= -->
-<!-- PREVIEW MODAL -->
-<!-- ========================= -->
-
-<div id="previewModal" class="modal">
-
-<div class="modal-content">
-
-<span class="close"
-onclick="closePreview()">
-
-&times;
-
-</span>
-
-<h2>Question Preview</h2>
-
-<hr><br>
-
-<p><b>Question</b></p>
-
-<p id="previewQuestion"></p>
-
-<br>
-
-<p><b>Options</b></p>
-
-<div id="previewOptions"></div>
-
-<br>
-
-<p>
-
-<b>Correct Answer :</b>
-
-<span id="previewAnswer"></span>
-
-</p>
-
-<p>
-
-<b>Marks :</b>
-
-<span id="previewMarks"></span>
-
-</p>
-
-</div>
-
-</div>
-    <!-- ========================= -->
-<!-- EDIT MODAL -->
-<!-- ========================= -->
-
-<div id="editModal" class="modal">
-
-<div class="modal-content">
-
-<span class="close"
-onclick="closeEdit()">
-
-&times;
-
-</span>
-
-<h2>Edit Question</h2>
-
-<hr><br>
-
-<input
-type="text"
-id="editQuestion"
-placeholder="Question">
-
-<input
-type="text"
-id="editOptionA"
-placeholder="Option A">
-
-<input
-type="text"
-id="editOptionB"
-placeholder="Option B">
-
-<input
-type="text"
-id="editOptionC"
-placeholder="Option C">
-
-<input
-type="text"
-id="editOptionD"
-placeholder="Option D">
-
-<select id="editAnswer">
-
-<option value="A">A</option>
-
-<option value="B">B</option>
-
-<option value="C">C</option>
-
-<option value="D">D</option>
-
+<a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+<div class="card">
+<div class="filters">
+<input type="text" id="searchBox" placeholder="Search Question">
+<select id="classFilter"><option value="">All Classes</option></select>
+<select id="subjectFilter"><option value="">All Subjects</option></select>
+<select id="assessmentFilter"><option value="">All Assessments</option></select>
+<select id="typeFilter">
+<option value="">Question Type</option>
+<option value="mcq">MCQ</option>
+<option value="multiple">Multiple Answer</option>
+<option value="sentence">Subjective</option>
 </select>
-
-<input
-type="number"
-id="editMarks"
-placeholder="Marks">
-
-<br><br>
-
-<button
-id="updateBtn"
-class="action-btn edit-btn">
-
-Update Question
-
-</button>
-
 </div>
-
 </div>
+<div class="card">
+<table>
+<thead><tr><th>Question</th><th>Subject</th><th>Class</th><th>Type</th><th>Marks</th><th>Actions</th></tr></thead>
+<tbody id="questionTable"><tr><td colspan="6" class="no-data">Loading Questions...</td></tr></tbody>
+</table>
+</div>
+</div>
+<div id="previewModal" class="modal"><div class="modal-content"><span class="close" onclick="closePreview()">&times;</span><h2>Question Preview</h2><hr><br><p><b>Question</b></p><p id="previewQuestion"></p><br><p><b>Options</b></p><div id="previewOptions"></div><br><p><b>Correct Answer :</b> <span id="previewAnswer"></span></p><p><b>Marks :</b> <span id="previewMarks"></span></p></div></div>
+<div id="editModal" class="modal"><div class="modal-content"><span class="close" onclick="closeEdit()">&times;</span><h2>Edit Question</h2><hr><br><input type="text" id="editQuestion" placeholder="Question"><input type="text" id="editOptionA" placeholder="Option A"><input type="text" id="editOptionB" placeholder="Option B"><input type="text" id="editOptionC" placeholder="Option C"><input type="text" id="editOptionD" placeholder="Option D"><select id="editAnswer"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select><input type="number" id="editMarks" placeholder="Marks"><br><br><button id="updateBtn" class="action-btn edit-btn">Update Question</button></div></div>
 <script src="../js/auth-check.js"></script>
 <script src="../js/admin-guard.js"></script>
 <script type="module" src="../js/question-manager.js"></script>
-
 </body>
 </html>
