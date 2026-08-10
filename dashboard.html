@@ -1,296 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Student Dashboard | AHPS
-    </title>
-
-    <link
-        rel="stylesheet"
-        href="css/dashboard.css"
-    >
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard | AHPS</title>
+<link rel="stylesheet" href="css/dashboard.css">
+<script src="js/route-guard.js"></script>
+<script src="js/auth-check.js"></script>
 </head>
-
 <body>
-
-
-<!-- ======================================
-     HEADER
-====================================== -->
-
 <header class="brand-header">
-
-    <div class="brand-left">
-        <img
-            src="assets/ahps-logo.png"
-            alt="Academic Heights Public School"
-            class="ahps-logo">
-    </div>
-
-    <div class="brand-title">
-        <h1>AHPS Online Examination System</h1>
-        <p>Student Dashboard</p>
-    </div>
-
-    <div class="brand-right">
-        <img
-            src="assets/ras-logo.jpeg"
-            alt="RAS Systems"
-            class="ras-logo">
-    </div>
-
+<div class="brand-left"><img src="assets/ahps-logo.png" alt="Academic Heights Public School" class="ahps-logo"></div>
+<div class="brand-title"><h1>AHPS Online Examination System</h1><p>Student Dashboard</p></div>
+<div class="brand-right"><img src="assets/ras-logo.jpeg" alt="RAS Systems" class="ras-logo"></div>
 </header>
-<!-- ======================================
-     MAIN CONTAINER
-====================================== -->
-
 <div class="container">
-
-
-    <!-- ==================================
-         WELCOME
-    =================================== -->
-
-    <div class="welcome">
-
-       <div class="welcome">
-
-    <h2>
-        Welcome,
-        <span id="studentName">
-            Student
-        </span>
-    </h2>
-
-    <p>
-        Roll No:
-        <span id="studentRollNo">-</span>
-    </p>
-
-    <p>
-        Class:
-        <span id="studentClass">-</span>
-        -
-        <span id="studentSection">-</span>
-    </p>
-
+<div class="welcome"><div class="welcome"><h2>Welcome, <span id="studentName">Student</span></h2><p>Roll No: <span id="studentRollNo">-</span></p><p>Class: <span id="studentClass">-</span> - <span id="studentSection">-</span></p></div>
+<div class="exam-title">My Performance</div>
+<div class="performance-grid">
+<div class="performance-card"><div class="performance-icon">📋</div><div class="performance-value" id="completedCount">0</div><div class="performance-label">Completed</div></div>
+<div class="performance-card"><div class="performance-icon">📊</div><div class="performance-value" id="averagePercentage">0%</div><div class="performance-label">Average</div></div>
+<div class="performance-card"><div class="performance-icon">🏆</div><div class="performance-value" id="bestPercentage">0%</div><div class="performance-label">Best Score</div></div>
+<div class="performance-card"><div class="performance-icon">✅</div><div class="performance-value" id="passedCount">0</div><div class="performance-label">Passed</div></div>
+<div class="performance-card"><div class="performance-icon">❌</div><div class="performance-value" id="failedCount">0</div><div class="performance-label">Failed</div></div>
 </div>
-
-    <!-- ==================================
-         MY PERFORMANCE
-    =================================== -->
-
-    <div class="exam-title">
-
-        My Performance
-
-    </div>
-
-
-    <div class="performance-grid">
-
-
-        <div class="performance-card">
-
-            <div class="performance-icon">
-                📋
-            </div>
-
-            <div
-                class="performance-value"
-                id="completedCount">
-
-                0
-
-            </div>
-
-            <div class="performance-label">
-
-                Completed
-
-            </div>
-
-        </div>
-
-
-        <div class="performance-card">
-
-            <div class="performance-icon">
-                📊
-            </div>
-
-            <div
-                class="performance-value"
-                id="averagePercentage">
-
-                0%
-
-            </div>
-
-            <div class="performance-label">
-
-                Average
-
-            </div>
-
-        </div>
-
-
-        <div class="performance-card">
-
-            <div class="performance-icon">
-                🏆
-            </div>
-
-            <div
-                class="performance-value"
-                id="bestPercentage">
-
-                0%
-
-            </div>
-
-            <div class="performance-label">
-
-                Best Score
-
-            </div>
-
-        </div>
-
-
-        <div class="performance-card">
-
-            <div class="performance-icon">
-                ✅
-            </div>
-
-            <div
-                class="performance-value"
-                id="passedCount">
-
-                0
-
-            </div>
-
-            <div class="performance-label">
-
-                Passed
-
-            </div>
-
-        </div>
-
-
-        <div class="performance-card">
-
-            <div class="performance-icon">
-                ❌
-            </div>
-
-            <div
-                class="performance-value"
-                id="failedCount">
-
-                0
-
-            </div>
-
-            <div class="performance-label">
-
-                Failed
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ==================================
-         AVAILABLE EXAMS
-    =================================== -->
-
-    <div class="exam-title">
-
-        Available Exams
-
-    </div>
-
-
-    <div id="examList">
-
-        Loading Exams...
-
-    </div>
-
-
-    <!-- ==================================
-         COMPLETED ASSESSMENTS
-    =================================== -->
-
-    <div class="exam-title completed-title">
-
-        Completed Assessments
-
-    </div>
-
-
-    <div id="completedExamList">
-
-        Loading Results...
-
-    </div>
-
-
-    <!-- ==================================
-         LOGOUT
-    =================================== -->
-
-    <button
-        class="logout"
-        onclick="logout()"
-    >
-
-        Logout
-
-    </button>
-
-
+<div class="exam-title">Available Exams</div>
+<div id="examList">Loading Exams...</div>
+<div class="exam-title completed-title">Completed Assessments</div>
+<div id="completedExamList">Loading Results...</div>
+<button class="logout" onclick="logout()">Logout</button>
 </div>
-
-
-<!-- ======================================
-     FOOTER
-====================================== -->
-
-<div class="footer">
-
-    © RAS 2026 for Academic Heights Public School
-
-</div>
-
-
-<!-- ======================================
-     JAVASCRIPT
-====================================== -->
-
-<script
-    type="module"
-    src="js/student-dashboard.js"
-></script>
-
-
+<div class="footer">© RAS 2026 for Academic Heights Public School</div>
+<script type="module" src="js/student-dashboard.js"></script>
 </body>
-
 </html>
