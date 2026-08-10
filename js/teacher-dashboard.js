@@ -54,16 +54,13 @@ async function loadAssessments() {
             if (exam.targetType !== "teacher" || exam.status !== "active") return;
             const windowState = getExamWindow(exam);
             if (windowState === "ended") return;
-
             totalAssessments++;
             const start = parseExamDate(exam.startDate, false);
             if (windowState === "upcoming" || windowState === "live") notifications.push({ exam, state: windowState, start });
-
             const isUpcoming = windowState === "upcoming";
             const badge = isUpcoming ? "upcoming" : "live";
             const badgeText = isUpcoming ? `Starts ${formatDate(exam.startDate)}` : `Ends ${formatDate(exam.endDate, true)}`;
             const buttonText = isUpcoming ? "Assessment Not Started" : "Start Assessment";
-
             assessmentList.innerHTML += `<div class="assessment-card"><h3>${exam.examName || "Assessment"}</h3><p>Subject: ${exam.subject || "-"}</p><p>Duration: ${exam.duration || 0} Minutes</p><p><strong>Total Marks: ${exam.totalMarks || 0}</strong></p><p>Start Date: ${formatDate(exam.startDate)}</p><p>End Date: ${formatDate(exam.endDate, true)}</p><span class="exam-window ${badge}"><i class="fas fa-clock"></i> ${badgeText}</span><button class="start-btn" ${isUpcoming ? "disabled" : ""} onclick="startAssessment('${docSnap.id}')">${buttonText}</button></div>`;
         });
 
@@ -75,7 +72,7 @@ async function loadAssessments() {
                 notificationList.innerHTML = `<h3><i class="fas fa-bell"></i> Upcoming & Active Assessments</h3><div class="notification-empty">No upcoming or active assessments at the moment.</div>`;
             } else {
                 notifications.sort((a,b) => (a.start?.getTime() || now.getTime()) - (b.start?.getTime() || now.getTime()));
-                notificationList.innerHTML = `<h3><i class="fas fa-bell"></i> Upcoming & Active Assessments</h3>` + notifications.map(({exam,state}) => `<div class="notification-item"><div><strong>${exam.examName || "Assessment"}</strong><div class="notification-meta">${state === "upcoming" ? `Starts: ${formatDate(exam.startDate)}` : `Ends: ${formatDate(exam.endDate, true)`} • Subject: ${exam.subject || "-"}</div></div><div class="notification-marks">Marks: ${exam.totalMarks || 0}</div></div>`).join("");
+                notificationList.innerHTML = `<h3><i class="fas fa-bell"></i> Upcoming & Active Assessments</h3>` + notifications.map(({exam,state}) => `<div class="notification-item"><div><strong>${exam.examName || "Assessment"}</strong><div class="notification-meta">${state === "upcoming" ? `Starts: ${formatDate(exam.startDate)}` : `Ends: ${formatDate(exam.endDate, true)}`} • Subject: ${exam.subject || "-"}</div></div><div class="notification-marks">Marks: ${exam.totalMarks || 0}</div></div>`).join("");
             }
         }
     } catch (error) {
