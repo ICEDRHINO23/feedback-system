@@ -1,6 +1,6 @@
 /*
  * AHPS Rich Text / Mathematical Notation Fix
- * Supports HTML superscript/subscript and caret notation.
+ * Superscript, subscript and duplicate option-label cleanup.
  */
 (function () {
 
@@ -8,14 +8,11 @@
 
         let text = String(value ?? "");
 
-        // Normalize line breaks.
         text = text.replace(/\r\n|\r|\n/g, "<br>");
 
-        // Convert ^{...} and ^2 / ^n notation to superscript.
         text = text.replace(/\^\{([^}]+)\}/g, "<sup>$1</sup>");
         text = text.replace(/\^([0-9]+|[A-Za-z]+)/g, "<sup>$1</sup>");
 
-        // Convert _{...} and _2 / _n notation to subscript.
         text = text.replace(/_\{([^}]+)\}/g, "<sub>$1</sub>");
         text = text.replace(/_([0-9]+|[A-Za-z]+)/g, "<sub>$1</sub>");
 
@@ -25,10 +22,10 @@
 
     function cleanOptionLabel(value) {
 
-        let text = String(value ?? "").trim();
+        let text = String(value ?? "");
 
-        // Remove an option label already stored in the database:
-        // A. / A) / a. / a)
+        // Remove labels stored together with the option text:
+        // A. text / A) text / a. text / a) text
         text = text.replace(
             /^\s*[A-Da-d]\s*[.)]\s*/,
             ""
@@ -57,36 +54,34 @@
             return;
         }
 
-        const isOption =
-            element.matches(
-                "#options .option-btn, #reviewContainer .option"
-            );
+        const isOption = element.matches(
+            "#options .option-btn, #reviewContainer .option"
+        );
 
-        const allowed =
-            element.matches(
-                "#questionText, #options .option-btn, " +
-                "#reviewContainer .question-text, " +
-                "#reviewContainer .option, " +
-                "#reviewContainer .explanation"
-            );
+        const isAllowed = element.matches(
+            "#questionText, #options .option-btn, " +
+            "#reviewContainer .question-text, " +
+            "#reviewContainer .option, #reviewContainer .explanation"
+        );
 
-        if (!allowed) {
+        if (!isAllowed) {
             return;
         }
 
         let text = element.textContent || "";
+        const cleanedText = isOption
+            ? cleanOptionLabel(text)
+            : text;
 
-        // The live exam/review already adds A./B./C./D. labels.
-        // Remove a duplicate label from database content.
-        if (isOption) {
-            text = cleanOptionLabel(text);
-        }
+        const changedLabel = isOption && cleanedText !== text;
+        const changedFormatting = needsFormatting(cleanedText);
 
-        if (!needsFormatting(text) && !isOption) {
+        // Do nothing when the element is already clean.
+        if (!changedLabel && !changedFormatting) {
             return;
         }
 
-        element.innerHTML = formatText(text);
+        element.innerHTML = formatText(cleanedText);
     }
 
 
@@ -105,8 +100,7 @@
             root.querySelectorAll(
                 "#questionText, #options .option-btn, " +
                 "#reviewContainer .question-text, " +
-                "#reviewContainer .option, " +
-                "#reviewContainer .explanation"
+                "#reviewContainer .option, #reviewContainer .explanation"
             ).forEach(formatElement);
 
         }
@@ -117,49 +111,34 @@
 
         scan(document);
 
-        const observer =
-            new MutationObserver(function (mutations) {
+        const observer = new MutationObserver(function (mutations) {
 
-                mutations.forEach(function (mutation) {
+            mutations.forEach(function (mutation) {
 
-                    mutation.addedNodes.forEach(function (node) {
+                mutation.addedNodes.forEach(function (node) {
 
-                        if (node.nodeType === 1) {
-                            scan(node);
-                        }
-
-                    });
-
-                    if (mutation.type === "characterData") {
-
-                        const parent =
-                            mutation.target.parentElement;
-
-                        if (parent) {
-                            formatElement(parent);
-                        }
-
+                    if (node.nodeType === 1) {
+                        scan(node);
                     }
 
                 });
 
             });
 
+        });
+
         observer.observe(document.body, {
             childList: true,
-            subtree: true,
-            characterData: true
+            subtree: true
         });
 
         window.AHPSFormatText = formatText;
-
     }
 
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", start);
-    }
-    else {
+    } else {
         start();
     }
 
