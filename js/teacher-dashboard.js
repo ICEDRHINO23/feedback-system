@@ -1,5 +1,5 @@
-import { db } from "./firebase-config.js";
-import { collection, getDocs, getCountFromServer, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { db } from "./supabase-config.js";
+import { collection, getDocs, getCountFromServer, query, where } from "./supabase-firestore.js";
 
 function parseExamDate(value, endOfDay = false) {
     if (!value) return null;

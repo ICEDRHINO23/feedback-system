@@ -1,10 +1,10 @@
-import { db } from "./firebase-config.js";
+import { db } from "./supabase-config.js";
 
 import {
     collection,
     getDocs,
     addDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "./supabase-firestore.js";
 
 const examId = localStorage.getItem("currentExamId");
 let questions = [];

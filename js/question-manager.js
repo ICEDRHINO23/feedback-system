@@ -1,5 +1,5 @@
-import { db } from "./firebase-config.js";
-import { collection,getDocs,deleteDoc,updateDoc,doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { db } from "./supabase-config.js";
+import { collection,getDocs,deleteDoc,updateDoc,doc } from "./supabase-firestore.js";
 let allQuestions=[],currentQuestionId="",examMap={};
 function normalize(v){return String(v??"").trim().toLowerCase().replace(/\s+/g," ");}
 function escapeHTML(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]));}

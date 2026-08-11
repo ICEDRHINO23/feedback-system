@@ -1,5 +1,5 @@
-import { db } from "./firebase-config.js";
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { db } from "./supabase-config.js";
+import { collection, getDocs } from "./supabase-firestore.js";
 function studentIdentity(){return{name:String(localStorage.getItem("studentName")||"").trim(),roll:String(localStorage.getItem("rollNo")||localStorage.getItem("studentRollNo")||"").trim(),admission:String(localStorage.getItem("admissionNo")||"").trim()};}
 function belongs(r,s){const roll=String(r.rollNo||r.studentRollNo||r.rollNumber||"").trim(),name=String(r.studentName||r.participantName||r.name||"").trim(),admission=String(r.admissionNo||r.studentAdmissionNo||"").trim();if(s.roll&&roll)return roll===s.roll;if(s.admission&&admission)return admission===s.admission;return!!s.name&&name.toLowerCase()===s.name.toLowerCase();}
 function timeValue(v){if(!v)return 0;if(typeof v?.toDate==="function")return v.toDate().getTime();if(typeof v==="object"&&v.seconds)return Number(v.seconds)*1000;const n=Number(v);if(Number.isFinite(n)&&n>0)return n;const d=new Date(v).getTime();return Number.isFinite(d)?d:0;}

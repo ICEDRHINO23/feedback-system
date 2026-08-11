@@ -1,5 +1,5 @@
-import {db} from "./firebase-config.js";
-import {collection,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {db} from "./supabase-config.js";
+import {collection,getDocs} from "./supabase-firestore.js";
 const student={name:String(localStorage.getItem("studentName")||localStorage.getItem("name")||"").trim(),rollNo:String(localStorage.getItem("rollNo")||localStorage.getItem("studentRollNo")||"").trim(),studentClass:String(localStorage.getItem("studentClass")||localStorage.getItem("class")||"").trim(),section:String(localStorage.getItem("studentSection")||localStorage.getItem("section")||"").trim()};
 function belongs(r){const rr=String(r.rollNo||r.studentRollNo||"").trim(),n=String(r.studentName||r.participantName||"").trim();return student.rollNo&&rr?rr===student.rollNo:!!student.name&&n.toLowerCase()===student.name.toLowerCase()}
 function esc(v){return String(v??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]))}

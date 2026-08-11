@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AHPS Firebase → Supabase Migration</title>
+<style>body{font-family:Arial,sans-serif;background:#f4f7fb;margin:0;padding:30px;color:#102044}.card{max-width:900px;margin:auto;background:#fff;border-radius:16px;padding:28px;box-shadow:0 10px 35px rgba(0,0,0,.08)}button{background:#06245f;color:#fff;border:0;border-radius:9px;padding:12px 18px;font-weight:700;cursor:pointer}button:disabled{opacity:.5}.log{margin-top:20px;background:#0b1736;color:#dce7ff;border-radius:10px;padding:16px;min-height:220px;white-space:pre-wrap;font-family:Consolas,monospace;font-size:13px}</style>
+</head>
+<body>
+<div class="card">
+<h1>AHPS Firebase → Supabase Migration</h1>
+<p>Run this once after the Supabase schema has been created and <code>js/supabase-config.js</code> contains valid Supabase credentials.</p>
+<p><strong>Do not run this while students are submitting exams.</strong></p>
+<button id="start">Start Data Migration</button>
+<div id="log" class="log">Ready.</div>
+</div>
+<script type="module" src="./firebase-to-supabase.js"></script>
+</body>
+</html>

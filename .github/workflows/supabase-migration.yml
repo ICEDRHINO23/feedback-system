@@ -1,0 +1,316 @@
+name: AHPS Supabase Migration
+
+on:
+  push:
+    branches:
+      - supabase-migration
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: ${{ !contains(github.event.head_commit.message, '[supabase-migrated]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout migration branch
+        uses: actions/checkout@v4
+        with:
+          ref: supabase-migration
+          fetch-depth: 0
+
+      - name: Migrate Firebase imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          files = list(Path('js').glob('*.js')) + [Path('review/review.js')]
+          for path in files:
+              text = path.read_text(encoding='utf-8')
+              if path.as_posix() == 'review/review.js':
+                  text = text.replace('from "../js/firebase-config.js";', 'from "../js/supabase-config.js";')
+                  text = text.replace('from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";', 'from "../js/supabase-firestore.js";')
+              else:
+                  text = text.replace('from "./firebase-config.js";', 'from "./supabase-config.js";')
+                  text = text.replace('from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";', 'from "./supabase-firestore.js";')
+              path.write_text(text, encoding='utf-8')
+          Path('js/firebase-config.js').write_text('export { supabase, db } from "./supabase-config.js";\n', encoding='utf-8')
+          PY
+
+      - name: Create Supabase client
+        shell: bash
+        run: |
+          cat > js/supabase-config.js <<'EOF'
+          import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+          // Replace these two values with Project Settings -> API values.
+          const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+          const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
+
+          export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+              auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+          });
+          export const db = supabase;
+          EOF
+
+      - name: Create Firestore compatibility layer
+        shell: bash
+        run: |
+          cat > js/supabase-firestore.js <<'EOF'
+          function collection(db, name) { return { __kind: "collection", db, name }; }
+          function doc(db, collection, id) { return { __kind: "doc", db, collection, id: String(id) }; }
+          function where(field, operator, value) { return { __kind: "where", field, operator, value }; }
+          function query(ref, ...constraints) { return { __kind: "query", db: ref.db, collection: ref.name, constraints }; }
+
+          function applyConstraints(builder, constraints = []) {
+              for (const c of constraints) {
+                  if (c.operator === "==") builder = builder.eq(c.field, c.value);
+                  else if (c.operator === "!=") builder = builder.neq(c.field, c.value);
+                  else if (c.operator === ">") builder = builder.gt(c.field, c.value);
+                  else if (c.operator === ">=") builder = builder.gte(c.field, c.value);
+                  else if (c.operator === "<") builder = builder.lt(c.field, c.value);
+                  else if (c.operator === "<=") builder = builder.lte(c.field, c.value);
+                  else if (c.operator === "in") builder = builder.in(c.field, c.value);
+              }
+              return builder;
+          }
+
+          function info(target) {
+              if (target.__kind === "query") return { db: target.db, table: target.collection, constraints: target.constraints };
+              if (target.__kind === "collection") return { db: target.db, table: target.name, constraints: [] };
+              throw new Error("Invalid Supabase target");
+          }
+
+          function wrapDoc(row) {
+              return { id: row?.id == null ? "" : String(row.id), exists: () => !!row, data: () => row ? { ...row } : undefined };
+          }
+          function wrapSnapshot(rows) {
+              const docs = (rows || []).map(wrapDoc);
+              return { docs, empty: docs.length === 0, size: docs.length, forEach: cb => docs.forEach(cb) };
+          }
+
+          async function getDocs(target) {
+              const { db, table, constraints } = info(target);
+              let request = applyConstraints(db.from(table).select("*"), constraints);
+              const { data, error } = await request;
+              if (error) throw error;
+              return wrapSnapshot(data);
+          }
+          async function getDoc(ref) {
+              const { data, error } = await ref.db.from(ref.collection).select("*").eq("id", ref.id).maybeSingle();
+              if (error) throw error;
+              return wrapDoc(data);
+          }
+          async function addDoc(ref, payload) {
+              const { data, error } = await ref.db.from(ref.name).insert(payload).select("*").single();
+              if (error) throw error;
+              return { id: String(data.id), ...wrapDoc(data) };
+          }
+          async function setDoc(ref, payload) {
+              const { data, error } = await ref.db.from(ref.collection).upsert({ id: ref.id, ...payload }, { onConflict: "id" }).select("*").single();
+              if (error) throw error;
+              return wrapDoc(data);
+          }
+          async function updateDoc(ref, payload) {
+              const { data, error } = await ref.db.from(ref.collection).update(payload).eq("id", ref.id).select("*").single();
+              if (error) throw error;
+              return wrapDoc(data);
+          }
+          async function deleteDoc(ref) {
+              const { error } = await ref.db.from(ref.collection).delete().eq("id", ref.id);
+              if (error) throw error;
+          }
+          async function getCountFromServer(target) {
+              const { db, table, constraints } = info(target);
+              let request = applyConstraints(db.from(table).select("id", { count: "exact", head: true }), constraints);
+              const { count, error } = await request;
+              if (error) throw error;
+              return { data: () => ({ count: count || 0 }) };
+          }
+          async function runTransaction(db, callback) {
+              const pending = [];
+              const tx = { get: getDoc, set: (ref, payload) => pending.push([ref, payload]) };
+              const result = await callback(tx);
+              for (const [ref, payload] of pending) await setDoc(ref, payload);
+              return result;
+          }
+
+          export { collection, doc, where, query, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc, getCountFromServer, runTransaction };
+          EOF
+
+      - name: Create Supabase schema
+        shell: bash
+        run: |
+          mkdir -p supabase
+          cat > supabase/schema.sql <<'EOF'
+          create extension if not exists pgcrypto;
+
+          create table if not exists public.admins (
+            id text primary key default gen_random_uuid()::text,
+            username text not null unique,
+            password text not null,
+            "createdAt" timestamptz default now()
+          );
+
+          create table if not exists public.students (
+            id text primary key default gen_random_uuid()::text,
+            name text not null,
+            "class" text not null,
+            section text not null,
+            "rollNo" text not null,
+            password text not null,
+            academicyear text,
+            "accountExpiry" text,
+            status text default 'active',
+            lastlogin text,
+            "admissionNo" text
+          );
+
+          create table if not exists public.teachers (
+            id text primary key default gen_random_uuid()::text,
+            "teacherName" text not null,
+            "employeeId" text not null unique,
+            subject text not null,
+            status text default 'active',
+            role text default 'teacher',
+            password text not null,
+            "createdAt" timestamptz default now(),
+            "updatedAt" timestamptz
+          );
+
+          create table if not exists public.settings (
+            id text primary key,
+            academicyear text,
+            "accountExpiry" text,
+            classes jsonb default '[]'::jsonb,
+            sections jsonb default '[]'::jsonb
+          );
+
+          create table if not exists public.exams (
+            id text primary key default gen_random_uuid()::text,
+            "examName" text not null,
+            subject text,
+            "targetType" text,
+            "examClass" text,
+            duration numeric default 30,
+            "totalMarks" numeric default 0,
+            "startDate" text,
+            "endDate" text,
+            status text default 'active',
+            "createdAt" timestamptz default now()
+          );
+
+          create table if not exists public.questions (
+            id text primary key default gen_random_uuid()::text,
+            "examId" text not null,
+            "class" text,
+            section text,
+            "questionType" text default 'mcq',
+            question text not null,
+            "optionA" text,
+            "optionB" text,
+            "optionC" text,
+            "optionD" text,
+            answer text,
+            answers jsonb default '[]'::jsonb,
+            "blankAnswers" jsonb default '[]'::jsonb,
+            "modelAnswer" text,
+            explanation text,
+            marks numeric default 1
+          );
+
+          create table if not exists public.results (
+            id text primary key default gen_random_uuid()::text,
+            "studentName" text,
+            "participantName" text,
+            "studentClass" text,
+            "studentSection" text,
+            section text,
+            "rollNo" text,
+            "admissionNo" text,
+            "examId" text,
+            "examName" text,
+            subject text,
+            "examClass" text,
+            score numeric default 0,
+            "automaticMarks" numeric default 0,
+            "descriptiveMarks" numeric default 0,
+            "totalMarks" numeric default 0,
+            "correctAnswers" integer default 0,
+            "totalQuestions" integer default 0,
+            percentage numeric default 0,
+            "hasDescriptiveQuestions" boolean default false,
+            "subjectiveAnswers" jsonb default '[]'::jsonb,
+            review jsonb default '[]'::jsonb,
+            "reviewStatus" text default 'not_required',
+            "resultPublished" boolean default false,
+            "reviewedBy" text,
+            "reviewedAt" timestamptz,
+            "submittedAt" timestamptz default now(),
+            "questionOrder" jsonb default '[]'::jsonb,
+            "teacherName" text
+          );
+
+          create index if not exists idx_students_login on public.students ("class", section, "rollNo");
+          create index if not exists idx_exams_class on public.exams ("examClass");
+          create index if not exists idx_questions_exam on public.questions ("examId");
+          create index if not exists idx_results_exam on public.results ("examId");
+          create index if not exists idx_results_roll on public.results ("rollNo");
+          create index if not exists idx_results_status on public.results ("reviewStatus");
+
+          insert into public.settings (id, classes, sections)
+          values ('config', '["1","2","3","4","5","6","7","8","9","10"]'::jsonb, '[]'::jsonb)
+          on conflict (id) do nothing;
+
+          alter table public.admins enable row level security;
+          alter table public.students enable row level security;
+          alter table public.teachers enable row level security;
+          alter table public.settings enable row level security;
+          alter table public.exams enable row level security;
+          alter table public.questions enable row level security;
+          alter table public.results enable row level security;
+
+          grant usage on schema public to anon, authenticated;
+          grant select, insert, update, delete on public.admins, public.students, public.teachers, public.settings, public.exams, public.questions, public.results to anon, authenticated;
+
+          drop policy if exists ahps_admins_all on public.admins;
+          create policy ahps_admins_all on public.admins for all to anon, authenticated using (true) with check (true);
+          drop policy if exists ahps_students_all on public.students;
+          create policy ahps_students_all on public.students for all to anon, authenticated using (true) with check (true);
+          drop policy if exists ahps_teachers_all on public.teachers;
+          create policy ahps_teachers_all on public.teachers for all to anon, authenticated using (true) with check (true);
+          drop policy if exists ahps_settings_all on public.settings;
+          create policy ahps_settings_all on public.settings for all to anon, authenticated using (true) with check (true);
+          drop policy if exists ahps_exams_all on public.exams;
+          create policy ahps_exams_all on public.exams for all to anon, authenticated using (true) with check (true);
+          drop policy if exists ahps_questions_all on public.questions;
+          create policy ahps_questions_all on public.questions for all to anon, authenticated using (true) with check (true);
+          drop policy if exists ahps_results_all on public.results;
+          create policy ahps_results_all on public.results for all to anon, authenticated using (true) with check (true);
+          EOF
+
+          cat > supabase/README.md <<'EOF'
+          # AHPS Supabase Migration
+
+          Run `supabase/schema.sql` in the Supabase SQL Editor. Then copy the project URL and publishable/anon key from Project Settings -> API into `js/supabase-config.js`.
+
+          Do not place a Supabase secret/service-role key in browser code.
+          Existing Firebase data must be imported into the matching tables before production cutover.
+          EOF
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('admin/dashboard.html')
+          p.write_text(p.read_text(encoding='utf-8').replace('<strong>Firestore</strong>', '<strong>Supabase</strong>'), encoding='utf-8')
+          PY
+
+      - name: Commit migrated files
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Migrate AHPS examination data layer to Supabase [supabase-migrated]"
+          git push origin supabase-migration
