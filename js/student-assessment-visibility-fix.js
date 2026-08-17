@@ -81,7 +81,7 @@ async function repairAssessmentVisibility() {
         if (notifications) {
             const empty = notifications.querySelector(".notification-empty");
             if (empty) notifications.innerHTML = `<h3><i class="fas fa-bell"></i> Upcoming & Active Assessments</h3>`;
-            const notificationHtml = missing.map(({ exam, state }) => `<div class="notification-item"><div><strong>${exam.examName || "Assessment"}</strong><div class="notification-meta">${state === "upcoming" ? `Starts: ${formatDate(exam.startDate)}` : `Ends: ${formatDate(exam.endDate, true)`} • Subject: ${exam.subject || "-"}</div></div><div class="notification-marks">Marks: ${exam.totalMarks || 0}</div></div>`).join("");
+            const notificationHtml = missing.map(({ exam, state }) => `<div class="notification-item"><div><strong>${exam.examName || "Assessment"}</strong><div class="notification-meta">${state === "upcoming" ? `Starts: ${formatDate(exam.startDate)}` : `Ends: ${formatDate(exam.endDate, true)}`} • Subject: ${exam.subject || "-"}</div></div><div class="notification-marks">Marks: ${exam.totalMarks || 0}</div></div>`).join("");
             notifications.insertAdjacentHTML("beforeend", notificationHtml);
         }
 
