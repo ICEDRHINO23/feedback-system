@@ -44,9 +44,7 @@ async function repairAssessmentVisibility() {
         ]);
 
         const rows = new Map();
-        [...classSnapshot.docs, ...allSnapshot.docs].forEach(docSnap => {
-            rows.set(docSnap.id, docSnap);
-        });
+        [...classSnapshot.docs, ...allSnapshot.docs].forEach(docSnap => rows.set(docSnap.id, docSnap));
 
         const available = [];
         rows.forEach(docSnap => {
@@ -58,13 +56,15 @@ async function repairAssessmentVisibility() {
             available.push({ id: docSnap.id, exam, state });
         });
 
-        // The normal dashboard already handles class-specific student assessments.
-        // Only take over when this repair finds an assessment that the normal query cannot see.
-        const currentText = examList.textContent || "";
-        const hasVisibleAssessment = [...examList.querySelectorAll(".exam-card h3")].some(h => h.textContent && h.textContent !== "No Assessments Available" && h.textContent !== "Loading Exams...");
-        if (hasVisibleAssessment || !available.length) return;
+        const visibleNames = new Set(
+            [...examList.querySelectorAll(".exam-card h3")]
+                .map(h => h.textContent?.trim())
+                .filter(Boolean)
+        );
+        const missing = available.filter(({ exam }) => !visibleNames.has(String(exam.examName || "Assessment").trim()));
+        if (!missing.length) return;
 
-        examList.innerHTML = available.map(({ id, exam, state }) => {
+        examList.innerHTML += missing.map(({ id, exam, state }) => {
             const upcoming = state === "upcoming";
             return `<div class="exam-card">
                 <h3>${exam.examName || "Assessment"}</h3>
@@ -79,10 +79,13 @@ async function repairAssessmentVisibility() {
         }).join("");
 
         if (notifications) {
-            notifications.innerHTML = `<h3><i class="fas fa-bell"></i> Upcoming & Active Assessments</h3>${available.map(({ exam, state }) => `<div class="notification-item"><div><strong>${exam.examName || "Assessment"}</strong><div class="notification-meta">${state === "upcoming" ? `Starts: ${formatDate(exam.startDate)}` : `Ends: ${formatDate(exam.endDate, true)}`} • Subject: ${exam.subject || "-"}</div></div><div class="notification-marks">Marks: ${exam.totalMarks || 0}</div></div>`).join("")}`;
+            const empty = notifications.querySelector(".notification-empty");
+            if (empty) notifications.innerHTML = `<h3><i class="fas fa-bell"></i> Upcoming & Active Assessments</h3>`;
+            const notificationHtml = missing.map(({ exam, state }) => `<div class="notification-item"><div><strong>${exam.examName || "Assessment"}</strong><div class="notification-meta">${state === "upcoming" ? `Starts: ${formatDate(exam.startDate)}` : `Ends: ${formatDate(exam.endDate, true)`} • Subject: ${exam.subject || "-"}</div></div><div class="notification-marks">Marks: ${exam.totalMarks || 0}</div></div>`).join("");
+            notifications.insertAdjacentHTML("beforeend", notificationHtml);
         }
 
-        console.log("Assessment visibility repair: found assessments hidden by the normal class-only query.");
+        console.log("Assessment visibility repair: appended hidden assessments.");
     } catch (error) {
         console.error("Assessment Visibility Repair Error:", error);
     }
