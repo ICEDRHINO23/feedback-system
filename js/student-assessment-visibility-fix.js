@@ -92,6 +92,26 @@ async function repairAssessmentVisibility() {
 }
 
 window.addEventListener("load", () => {
-    // Let the normal dashboard finish first; this is a narrowly scoped fallback.
-    setTimeout(repairAssessmentVisibility, 500);
+    // The normal dashboard loader is asynchronous. A single 500ms fallback can race
+    // with it and be overwritten by its final "No Assessments" render. Keep the
+    // repair narrowly scoped, but retry after dashboard DOM changes so the fallback
+    // is applied after the normal loader finishes as well.
+    let scheduled = false;
+    const scheduleRepair = () => {
+        if (scheduled) return;
+        scheduled = true;
+        setTimeout(async () => {
+            scheduled = false;
+            await repairAssessmentVisibility();
+        }, 500);
+    };
+
+    scheduleRepair();
+
+    const examList = document.getElementById("examList");
+    if (examList) {
+        const observer = new MutationObserver(() => scheduleRepair());
+        observer.observe(examList, { childList: true, subtree: true });
+        setTimeout(() => observer.disconnect(), 15000);
+    }
 });
