@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+server/license.db
+server/*.db
+server/.keys/
+.env
+.env.*
